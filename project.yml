@@ -1,0 +1,56 @@
+name: hYYaFootprintInspector
+options:
+  bundleIdPrefix: com.hyya
+  # iOS 26 floor: owner's decision 2026-10-17. Same floor and reasoning (real Liquid Glass APIs)
+  # as hYYa Encrypted Notes; see that project's project.yml.
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+configs:
+  Debug: debug
+  Release: release
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    # Apple silicon only: same convention as the sibling hYYa apps.
+    ARCHS: arm64
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: "8PYFWUL3ND"
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_EMIT_LOC_STRINGS: YES
+
+targets:
+  hYYaFootprintInspectorIOS:
+    type: application
+    platform: iOS
+    sources:
+      - path: App/Sources
+      - path: App/Resources
+    settings:
+      base:
+        PRODUCT_NAME: "hYYa Footprint Inspector"
+        PRODUCT_MODULE_NAME: "FootprintInspector"
+        PRODUCT_BUNDLE_IDENTIFIER: com.hyya.footprintinspector
+        # Phase 1 skeleton: generated Info.plist. It moves to an explicit App/Info.plist in
+        # Phase 2, when the usage-description keys and LSApplicationQueriesSchemes arrive.
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: "Footprint Inspector"
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        TARGETED_DEVICE_FAMILY: "1,2"
+
+schemes:
+  hYYa Footprint Inspector:
+    build:
+      targets:
+        hYYaFootprintInspectorIOS: all
+    run:
+      config: Debug
+    archive:
+      config: Release
