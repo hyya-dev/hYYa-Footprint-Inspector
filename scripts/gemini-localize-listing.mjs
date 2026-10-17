@@ -17,6 +17,7 @@ const argv = process.argv.slice(2);
 const opt = (name, fallback) => { const i = argv.indexOf(name); return i >= 0 ? argv.splice(i, 2)[1] : fallback; };
 const MODEL = opt("--model", "gemini-3.7-flash");
 const FORCE = argv.includes("--force");
+if (FORCE) argv.splice(argv.indexOf("--force"), 1);
 const envFile = new URL("../.env", import.meta.url);
 const KEY = process.env.GEMINI_API_KEY || (existsSync(envFile) ? (readFileSync(envFile, "utf8").split("\n")
   .find((l) => l.startsWith("GEMINI_API_KEY=")) ?? "").slice(15).trim() : "");
@@ -48,6 +49,7 @@ function check(l) {
   if (!l.subtitle || len(l.subtitle) > 30) issues.push(`subtitle is ${len(l.subtitle ?? "")} characters (max 30)`);
   if (!l.promotionalText || len(l.promotionalText) > 170) issues.push(`promotional text is ${len(l.promotionalText ?? "")} characters (max 170)`);
   if (!l.description || len(l.description) > 4000) issues.push(`description is ${len(l.description ?? "")} characters (max 4000)`);
+  if (/iphone|ipad|\bmac\b|android/i.test(l.promotionalText ?? "")) issues.push("promotional text must not name a device or platform");
   if (!l.description?.includes(BRAND)) issues.push(`description must keep the name "${BRAND}" untranslated`);
   const kw = l.keywords ?? "";
   if (!kw || Buffer.byteLength(kw) > 100) issues.push(`keywords are ${Buffer.byteLength(kw)} UTF-8 bytes (max 100)`);
@@ -68,7 +70,7 @@ Rules:
 - Natural, native wording; calm and plain, never alarmist or hyped. Not a word-for-word translation.
 - subtitle: at most 30 characters. Lead with the local everyday term people search for a "privacy check/checkup". No price, no "free", no superlatives.
 - keywords: comma-separated search terms people in this language really type, no spaces after commas, at most 100 UTF-8 bytes in total, every term longer than two characters where the script allows. Do not repeat any word from the name "${BRAND}" or from your subtitle. Cover ideas like: device fingerprint, app permissions, privacy scanner/audit/score/report, data leak, location, camera, digital footprint, tracking. English terms are fine only where locals commonly search in English.
-- promotionalText: at most 170 characters.
+- promotionalText: at most 170 characters. Keep it device-neutral like the English (phone, tablet or computer): never name iPhone, iPad, Mac or Android.
 - description: at most 4000 characters, plain text. Keep the structure: paragraphs, the UPPERCASE section headings (translated, still uppercase where the script has case) and the • bullets. Keep "${BRAND}", "hYYa", "iPhone", "iOS", "Settings" as the iPhone's own localised name for the Settings app, and "Mozilla Public License 2.0" unchanged.
 - Never mention other apps or companies, viruses, malware or spyware, and make no ranking claims.
 ${feedback ? `\nYour previous attempt had these problems; fix all of them:\n- ${feedback.join("\n- ")}\n` : ""}
