@@ -6,9 +6,9 @@
 
     python3 scripts/make-creative-assets.py <raw-iphone-dir> <out-dir>
 
-- Header, 21:9 at 3840 x 1646: one idea and no headline. The mascot studies the footprint while
-  the details any app can read float around him as clues. Everything important sits in the centre
-  so nothing is lost when the store crops it.
+- Header, 21:9 at 3840 x 1646: one idea and no headline. The mascot studies the footprint between
+  six things an app could learn about you, flagged like the app's findings. Laid out inside the
+  area that both the iPhone and the iPad crop keep (see header()).
 - Search results, 3:2 at 3840 x 2560: says what the app does at a glance and shows the real
   interface, as Apple advises. The headline, three iPhone screens (the mascot is on the centre one) are all centred.
 Quiet Noir palette, shared with the slides. No alpha channel (Apple rejects transparency).
@@ -23,15 +23,14 @@ slides = importlib.util.module_from_spec(spec); spec.loader.exec_module(slides)
 font, device, draw_headline = slides.font, slides.device, slides.draw_headline
 SAND, SAND_DEEP, INK, MUTED = slides.SAND, slides.SAND_DEEP, slides.INK, slides.MUTED
 
-# Illustrative values only: what any app can read without asking.
-CLUES = [
-    ("Set up", "12 Mar 2024, 09:41:07"), ("Last restart", "3 days, 4 h ago"),
-    ("Free space", "41,273,856,512 bytes"), ("Headphones", "“Alex’s Earbuds”"),
-    ("Keyboards", "English, Arabic, Emoji"), ("Time zone", "GMT+3"),
-    ("Text size", "Larger"), ("Carrier region", "SA"),
-    ("Screen", "120 Hz · 460 ppi"), ("Languages", "en-GB, ar"),
+# What an app can learn about you, each with its honest source. Shown as concerns (coral dot), the
+# same way the app flags findings that are worth a look.
+CONCERNS = [
+    ("Your first name", "from your headphones’ name"), ("The apps you use", "dating, health, VPN…"),
+    ("Where you’ve been", "with Photos access"), ("Who you know", "with Contacts access"),
+    ("A unique fingerprint", "links you across apps"), ("Your last restart", "to the second"),
 ]
-
+CORAL = (236, 127, 106)
 
 def glow(w, h, centre_y=0.5):
     bg = Image.new("RGB", (w, h), (0, 0, 0))
@@ -41,44 +40,46 @@ def glow(w, h, centre_y=0.5):
     return Image.blend(bg, layer.filter(ImageFilter.GaussianBlur(w * 0.09)), 1.0).convert("RGBA")
 
 
-def clue(canvas, x, y, label, value, size, alpha, anchor="centre"):
-    """A hairline pill: sand label, white value. Faded by distance from the centre."""
-    layer = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
-    d = ImageDraw.Draw(layer)
-    lf, vf = font(size, "Semibold"), font(size, "Regular")
-    pad_x, pad_y = size * 0.8, size * 0.5
-    lw, vw = d.textlength(label, font=lf), d.textlength(value, font=vf)
-    w, h = lw + vw + size * 0.7 + pad_x * 2, size + pad_y * 2
-    x0 = {"left": x, "right": x - w}.get(anchor, x - w / 2)
-    y0 = y - h / 2
-    d.rounded_rectangle((x0, y0, x0 + w, y0 + h), h / 2, fill=(20, 17, 14, 255), outline=SAND_DEEP + (255,), width=3)
-    d.text((x0 + pad_x, y0 + pad_y - size * 0.1), label, font=lf, fill=SAND + (255,))
-    d.text((x0 + pad_x + lw + size * 0.7, y0 + pad_y - size * 0.1), value, font=vf, fill=INK + (255,))
-    a = layer.getchannel("A").point(lambda v: int(v * alpha))
-    layer.putalpha(a)
-    canvas.alpha_composite(layer)
-
-
 def mascot(height):
     m = Image.open(slides.MASCOT).convert("RGBA")
     return m.resize((int(m.width * height / m.height), height), Image.LANCZOS)
 
 
+def concern_width(label, value):
+    d = ImageDraw.Draw(Image.new("RGB", (8, 8)))
+    return max(d.textlength(label, font=font(72, "Semibold")), d.textlength(value, font=font(54, "Regular"))) + 46 * 2 + 22 + 26
+
+
+def concern(canvas, x, y, label, value, anchor, w):
+    """A two-line hairline card: coral dot and white label, muted source underneath."""
+    d = ImageDraw.Draw(canvas)
+    lf, vf = font(72, "Semibold"), font(54, "Regular")
+    pad_x, pad_y, dot = 46, 30, 22
+    h = 72 + 54 + 18 + pad_y * 2
+    x0 = x - w if anchor == "right" else x
+    y0 = y - h / 2
+    d.rounded_rectangle((x0, y0, x0 + w, y0 + h), 40, fill=(20, 17, 14), outline=SAND_DEEP, width=3)
+    tx = x0 + pad_x + dot + 26
+    d.ellipse((x0 + pad_x, y0 + pad_y + 30, x0 + pad_x + dot, y0 + pad_y + 30 + dot), fill=CORAL)
+    d.text((tx, y0 + pad_y - 6), label, font=lf, fill=INK)
+    d.text((tx, y0 + pad_y + 72 + 12), value, font=vf, fill=MUTED)
+
+
 def header(out):
+    """Everything sits in the area both crops keep: iPhone shows the full height but only the middle
+    ~84% of the width, with buttons over the top corners; iPad shows the full width but loses ~15%
+    top and bottom, with the tab bar over the top centre. Safe: x 0.10–0.90, y 0.30–0.85."""
     w, h = 3840, 1646
-    c = glow(w, h, 0.55)
-    # Clues in two columns either side of the mascot, aligned to its edges and fading outwards.
-    rows = [0.18, 0.38, 0.58, 0.78]
-    left = [(0.335, rows[0], 0.0), (0.335, rows[1], 0.07), (0.335, rows[2], 0.0), (0.335, rows[3], 0.07)]
-    right = [(0.665, rows[0], 0.07), (0.665, rows[1], 0.0), (0.665, rows[2], 0.07), (0.665, rows[3], 0.0)]
-    for i, (fx, fy, step) in enumerate(left):
-        label, value = CLUES[i]
-        clue(c, w * (fx - step), h * fy, label, value, 58, 1.0 - step * 4, anchor="right")
-    for i, (fx, fy, step) in enumerate(right):
-        label, value = CLUES[4 + i]
-        clue(c, w * (fx + step), h * fy, label, value, 58, 1.0 - step * 4, anchor="left")
-    m = mascot(1240)
-    c.alpha_composite(m, ((w - m.width) // 2, h - m.height - 40))
+    c = glow(w, h, 0.57)
+    m = mascot(int(h * 0.55))
+    c.alpha_composite(m, ((w - m.width) // 2, int(h * 0.85) - m.height))
+    gap = 70
+    left_edge, right_edge = (w - m.width) / 2 - gap, (w + m.width) / 2 + gap
+    lw = max(concern_width(*x) for x in CONCERNS[:3])
+    rw = max(concern_width(*x) for x in CONCERNS[3:])
+    for i, fy in enumerate((0.445, 0.60, 0.755)):
+        concern(c, left_edge, h * fy, *CONCERNS[i], anchor="right", w=lw)
+        concern(c, right_edge, h * fy, *CONCERNS[3 + i], anchor="left", w=rw)
     c.convert("RGB").save(out / "header-3840x1646.png", optimize=True)
 
 
