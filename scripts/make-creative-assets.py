@@ -27,7 +27,7 @@ SAND, SAND_DEEP, INK, MUTED = slides.SAND, slides.SAND_DEEP, slides.INK, slides.
 # categories the app really checks (App/Sources/Sensitive/SensitiveCatalogue.swift), so the header
 # never promises more than the app shows. Coral dot, like the app's "worth a look" findings.
 CONCERNS = [
-    ("Your dating life", "dating and LGBTQ+ apps"), ("Your first name", "from your headphones’ name"),
+    ("Your dating life", "from your dating apps"), ("Your first name", "from your headphones’ name"),
     ("Your health", "period, fertility, therapy apps"), ("A unique fingerprint", "links you across apps"),
     ("Your money", "crypto and betting apps"), ("Where you’ve been", "with Photos access"),
 ]
