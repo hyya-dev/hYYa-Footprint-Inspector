@@ -26,7 +26,7 @@ struct ShareCardView: View {
                         .foregroundStyle(.white.opacity(0.85))
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Text("\(score.value)")
-                            .font(.system(size: 52, weight: .heavy, design: .rounded))
+                            .font(.system(size: 52, weight: .heavy))
                         Text("/ 100").font(.title3.weight(.semibold)).opacity(0.7)
                     }
                     .foregroundStyle(.white)

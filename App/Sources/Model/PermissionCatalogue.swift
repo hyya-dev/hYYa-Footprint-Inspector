@@ -88,10 +88,12 @@ extension SignalCatalogue {
               reveals: "How many people you have saved, and how many phone numbers, emails and addresses. With full access an app can also read every name, number, address and photo.",
               why: "So messaging and calling apps can show you who you already know.",
               persistence: .changesOften, severity: .medium, fix: contactsFix),
-        .init(id: "contact-labels", section: .contacts, title: "Relationship labels",
-              reveals: "The labels on numbers and emails. Standard ones like Mobile or Work are common, but your own labels, such as family roles, can hint at who matters to you.",
+        .init(id: "contact-labels", section: .contacts, title: "Labels on numbers",
+              reveals: "The labels on numbers and emails. Standard ones like Mobile or Home say little, but labels you typed yourself, such as family roles, can hint at who matters to you.",
               why: "Labels come along with each number so apps can show them.",
-              persistence: .untilYouChangeIt, severity: .medium, fix: contactsFix),
+              // Low by default: standard labels say little. The reader raises it when it finds
+              // labels the user typed.
+              persistence: .untilYouChangeIt, severity: .low, fix: contactsFix),
         .init(id: "contact-accounts", section: .contacts, title: "Contact accounts",
               reveals: "Where your contacts come from, such as iCloud, Google or a work Exchange account. A work account suggests where you're employed.",
               why: "So apps can save new contacts to the right place.",

@@ -1,0 +1,66 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+import StoreKit
+import SwiftUI
+
+/// "Rate hYYa Footprint Inspector". Opens the App Store's write-review page once the app has an
+/// App Store id (a button the user tapped must always do something visible). Until then it falls
+/// back to Apple's in-app rating prompt.
+struct ReviewCard: View {
+    /// When set, the card offers "Not now" and calls this to hide itself.
+    var onDismiss: (() -> Void)? = nil
+
+    @Environment(\.openURL) private var openURL
+    @Environment(\.requestReview) private var requestReview
+    @AppStorage("reviewCardTapped") private var tapped = false
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
+        HStack(alignment: .center, spacing: 14) {
+            LivingMascot(mood: .happy, size: 76)
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 3) {
+                    ForEach(0..<5, id: \.self) { _ in
+                        Image(systemName: "star.fill").font(.caption).foregroundStyle(Brand.sand)
+                    }
+                }
+                Text(tapped ? "Thank you for rating" : "Enjoying hYYa Footprint Inspector?")
+                    .font(.headline)
+                    .foregroundStyle(Brand.ink)
+                Text("Your reviews keep us smiling while coding, and help others find a privacy app they can trust.")
+                    .font(.footnote)
+                    .foregroundStyle(Brand.textMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 10) {
+                    Button("Rate the App") { rate() }
+                        .buttonStyle(PrimaryCTAButtonStyle(fullWidth: false))
+                    if let onDismiss {
+                        Button("Not now") { onDismiss() }
+                            .font(.footnote)
+                            .foregroundStyle(Brand.textSubtle)
+                    }
+                }
+                .padding(.top, 2)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            shape.fill(Brand.surface)
+                .overlay(shape.fill(LinearGradient(colors: [Brand.sand.opacity(0.10), .clear], startPoint: .topLeading, endPoint: .bottomTrailing)))
+        )
+        .overlay(shape.strokeBorder(LinearGradient(colors: [Brand.sand.opacity(0.8), Brand.sandDeep.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 0.75))
+    }
+
+    private func rate() {
+        Haptics.selection()
+        tapped = true
+        if let url = hYYaLinks.appStoreReview {
+            openURL(url)
+        } else {
+            requestReview()
+        }
+    }
+}

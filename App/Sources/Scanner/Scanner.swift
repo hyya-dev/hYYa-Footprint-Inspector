@@ -27,6 +27,8 @@ final class Scanner {
     private(set) var permissionStates: [PermissionKind: PermissionState] = [:]
     private(set) var loadingPermissions: Set<PermissionKind> = []
     private(set) var lastScan: Date?
+    /// 0…1 while scanning, for the progress ring and haptic ticks.
+    private(set) var progress: Double = 0
     /// What changed since the scan before this one. `nil` on the first scan.
     private(set) var comparison: ScanComparison?
 
@@ -46,9 +48,11 @@ final class Scanner {
     /// Reads every passive and advanced signal, plus any permission category already granted.
     func scan() async {
         phase = .scanning
+        progress = 0
         var fresh: [String: SignalReading] = [:]
-        for source in passiveSources {
+        for (i, source) in passiveSources.enumerated() {
             for reading in await source.read() { fresh[reading.id] = reading }
+            progress = Double(i + 1) / Double(passiveSources.count)
         }
         readings.merge(fresh) { $1 }
         refreshPermissionStates()

@@ -34,9 +34,6 @@ struct RootView: View {
             Tab("Sensitive apps", systemImage: "eye.slash") { SensitiveView() }
             Tab("Check-up", systemImage: "checklist") { CheckUpView() }
             Tab("Settings", systemImage: "gearshape") { SettingsView() }
-            #if DEBUG
-            Tab("Lab", systemImage: "hammer") { NavigationStack { SettingsLinkLab() } }
-            #endif
         }
     }
 }

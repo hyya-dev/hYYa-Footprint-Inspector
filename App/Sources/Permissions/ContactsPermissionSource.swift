@@ -114,7 +114,9 @@ private struct ContactSummary: Sendable {
                     // Built-in labels look like "_$!<Mobile>!$_"; anything else was typed by hand.
                     let readable = CNLabeledValue<NSString>.localizedString(forLabel: label)
                     summary.labels[readable, default: 0] += 1
-                    if !label.hasPrefix("_$!<") { seenCustom.insert(readable) }
+                    if !label.hasPrefix("_$!<"), !Self.standardPlainLabels.contains(readable.lowercased()) {
+                        seenCustom.insert(readable)
+                    }
                 }
             }
         } catch {
@@ -123,4 +125,14 @@ private struct ContactSummary: Sendable {
         summary.customLabels = seenCustom.count
         return summary
     }
+
+    /// Labels that aren't wrapped like "_$!<Mobile>!$_" but still aren't typed by the user:
+    /// Apple's own plain constants (iPhone, AppleWatch, iCloud) and the generic labels contacts
+    /// imported from Google, Outlook or a SIM carry. On the 2026-10-17 device test, "mobile",
+    /// "home" and "other" were flagged as typed by hand without this list.
+    static let standardPlainLabels: Set<String> = [
+        "iphone", "applewatch", "apple watch", "icloud", "mobile", "cell", "home", "work", "other",
+        "main", "phone", "fax", "home fax", "work fax", "pager", "personal", "business", "email",
+        "school", "voice", "telephone",
+    ]
 }

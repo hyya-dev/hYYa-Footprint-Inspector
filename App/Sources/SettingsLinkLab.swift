@@ -22,7 +22,6 @@ struct SettingsLinkLab: View {
 
     static let candidates: [Candidate] = [
         .init(id: UIApplication.openSettingsURLString, label: "Official: this app's Settings page"),
-        .init(id: UIApplication.openNotificationSettingsURLString, label: "Official: this app's notifications"),
         .init(id: "App-prefs:", label: "Settings root"),
         .init(id: "App-prefs:Privacy", label: "Privacy & Security"),
         .init(id: "App-prefs:Privacy&path=LOCATION", label: "Location Services"),

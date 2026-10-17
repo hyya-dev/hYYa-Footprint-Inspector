@@ -14,9 +14,10 @@ enum hYYaLinks {
     static let source = URL(string: "https://github.com/hyya-dev/hYYa-Footprint-Inspector")!
     /// ⚠️ Showcase page owed by hyya.com. Used for Share until the App Store id exists.
     static let showcase = URL(string: "https://hyya.com/hyya-footprint-inspector.html")!
-    /// Set once the app has an App Store record. While `nil`, "Rate the App" is hidden: a button
-    /// that leads nowhere is worse than no button.
-    static let appStoreID: String? = nil
+    /// App Store Connect record created 2026-10-17 (SKU hyya-footprint-inspector). The listing goes
+    /// live only once a version is approved, so before launch the Share and Rate links reach a
+    /// "not available" App Store page; after launch they resolve.
+    static let appStoreID: String? = "6824033636"
     static var appStoreReview: URL? {
         appStoreID.flatMap { URL(string: "https://apps.apple.com/app/id\($0)?action=write-review") }
     }
@@ -28,7 +29,6 @@ enum hYYaLinks {
 struct SettingsView: View {
     @Environment(HistoryStore.self) private var history
     @Environment(\.openURL) private var openURL
-    @AppStorage("theme") private var theme: AppTheme = .auto
     @AppStorage(HyyaSuggestions.settingKey) private var showSuggestions = true
     @State private var confirmingClear = false
 
@@ -36,76 +36,100 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                Section {
-                    Picker("Theme", selection: $theme) {
-                        ForEach(AppTheme.allCases) { Text($0.displayName).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                } header: {
-                    Text("Appearance")
-                }
+            Page {
+                HeroCard(eyebrow: "Settings", title: "hYYa Footprint Inspector",
+                         subtitle: "Everything here stays on this iPhone.", mood: .idle, mascotSize: 96)
 
-                Section {
+                ReviewCard()
+
+                SectionTitle(title: "Your data")
+                Panel {
                     NavigationLink { HistoryView() } label: {
-                        LabeledContent {
-                            Text("\(history.snapshots.count)")
-                        } label: {
-                            Label("Scan history", systemImage: "clock.arrow.circlepath")
+                        RowCard(symbol: "clock.arrow.circlepath", title: "Scan history") {
+                            HStack(spacing: 8) { Text("\(history.snapshots.count)"); Image(systemName: "chevron.right") }
                         }
                     }
+                    .buttonStyle(PressableCardStyle())
                     NavigationLink { ScoreboardView() } label: {
-                        Label("iOS scoreboard", systemImage: "checkmark.seal")
+                        RowCard(symbol: "checkmark.seal", title: "iOS scoreboard")
                     }
-                    Button(role: .destructive) { confirmingClear = true } label: {
-                        Label("Clear history", systemImage: "trash")
+                    .buttonStyle(PressableCardStyle())
+                    Button { confirmingClear = true } label: {
+                        RowCard(symbol: "trash", title: "Clear history", tileFG: Brand.concern) { EmptyView() }
                     }
+                    .buttonStyle(PressableCardStyle())
                     .disabled(history.snapshots.isEmpty)
-                } header: {
-                    Text("Your data")
-                } footer: {
-                    Text("Everything stays on this iPhone. Sensitive-app results are never saved.")
                 }
+                Text("Sensitive-app results are never saved.")
+                    .font(.footnote).foregroundStyle(Brand.textSubtle).padding(.horizontal, 4).padding(.top, -14)
 
-                Section {
+                SectionTitle(title: "Suggestions")
+                Panel {
                     Toggle(isOn: $showSuggestions) {
-                        Label("Suggest hYYa apps in fixes", systemImage: "lightbulb")
+                        Text("Suggest hYYa apps in fixes").foregroundStyle(Brand.ink)
                     }
-                } footer: {
-                    Text("Where one of our apps genuinely helps with a fix, we mention it after the free fix. Turn this off to hide them.")
+                    .tint(Brand.sand)
+                    .padding(16)
+                }
+                Text("Where one of our apps genuinely helps, it's mentioned after the free fix.")
+                    .font(.footnote).foregroundStyle(Brand.textSubtle).padding(.horizontal, 4).padding(.top, -14)
+
+                SectionTitle(title: "Open source")
+                Panel {
+                    Button { open(hYYaLinks.source) } label: {
+                        RowCard(symbol: "chevron.left.forwardslash.chevron.right", title: "Source code", subtitle: "github.com/hyya-dev") {
+                            Image(systemName: "arrow.up.right")
+                        }
+                    }
+                    .buttonStyle(PressableCardStyle())
+                    RowCard(symbol: "doc.text", title: "Licence") { Text("MPL 2.0") }
+                    RowCard(symbol: "number", title: "Version") { Text(Self.version) }
                 }
 
-                Section {
-                    Button { openURL(hYYaLinks.source) } label: {
-                        Label("Source code", systemImage: "chevron.left.forwardslash.chevron.right")
+                SectionTitle(title: "Support hYYa")
+                Panel {
+                    ShareLink(item: hYYaLinks.shareTarget, message: Text(Self.shareMessage)) {
+                        RowCard(symbol: "square.and.arrow.up", title: "Share", subtitle: "Help your friends take back their digital privacy.")
                     }
-                    LabeledContent("Licence", value: "MPL 2.0")
-                    LabeledContent("Version", value: Self.version)
-                } header: {
-                    Text("Open source")
-                } footer: {
-                    Text("No account, no server, no analytics. Read the code to check.")
+                    .buttonStyle(PressableCardStyle())
+                    Button { open(hYYaLinks.contact) } label: {
+                        RowCard(symbol: "envelope", title: "Contact hYYa") { Image(systemName: "arrow.up.right") }
+                    }
+                    .buttonStyle(PressableCardStyle())
+                    Button { open(hYYaLinks.privacy) } label: {
+                        RowCard(symbol: "hand.raised", title: "Privacy Policy") { Image(systemName: "arrow.up.right") }
+                    }
+                    .buttonStyle(PressableCardStyle())
+                    Button { open(hYYaLinks.security) } label: {
+                        RowCard(symbol: "lock.shield", title: "Report a Security Issue", subtitle: "Opens Mail") { Image(systemName: "arrow.up.right") }
+                    }
+                    .buttonStyle(PressableCardStyle())
                 }
 
-                supportSection
-                moreSection
-
-                Section {
-                    VStack(spacing: Brand.Space.sm) {
-                        MascotEmblem(size: 82)
-                        Text(Brand.brandUppercased("hYYa Footprint Inspector"))
-                            .font(.caption2.weight(.heavy))
-                            .tracking(1.4)
-                            .foregroundStyle(Brand.textSubtle)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Brand.Space.sm)
-                    .listRowBackground(Color.clear)
+                SectionTitle(title: "More from hYYa")
+                Panel {
+                    PromoRow(imageName: "PromoHyyaAI", title: "hYYa ai", tagline: "Two engines. Offline & Online.", url: hYYaLinks.hyyaAIAppStore)
+                    PromoRow(imageName: "HyyaDev", title: "hYYa \u{2728}", tagline: "Companions you can trust.", url: hYYaLinks.website)
                 }
+
+                #if DEBUG
+                SectionTitle(title: "Developer")
+                Panel {
+                    NavigationLink { SettingsLinkLab() } label: { RowCard(symbol: "hammer", title: "Settings link lab") }
+                        .buttonStyle(PressableCardStyle())
+                }
+                #endif
+
+                VStack(spacing: Brand.Space.sm) {
+                    SectionDivider()
+                    Text(Brand.brandUppercased("hYYa Footprint Inspector"))
+                        .font(.caption2.weight(.semibold))
+                        .tracking(1.4)
+                        .foregroundStyle(Brand.textSubtle)
+                }
+                .frame(maxWidth: .infinity)
             }
-            .brandListBackground()
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
+            .toolbar(.hidden, for: .navigationBar)
             .confirmationDialog("Clear all saved scans?", isPresented: $confirmingClear, titleVisibility: .visible) {
                 Button("Clear history", role: .destructive) { history.clear(); Haptics.success() }
             } message: {
@@ -114,37 +138,9 @@ struct SettingsView: View {
         }
     }
 
-    private var supportSection: some View {
-        Section {
-            ShareLink(item: hYYaLinks.shareTarget, message: Text(Self.shareMessage)) {
-                SupportRow(symbol: "square.and.arrow.up", title: "Share", tagline: "Help your friends take back their digital privacy.")
-            }
-            if let review = hYYaLinks.appStoreReview {
-                Button { Haptics.selection(); openURL(review) } label: {
-                    SupportRow(symbol: "star", title: "Rate the App", tagline: "Your reviews keep us smiling while coding.")
-                }
-            }
-            Button { Haptics.selection(); openURL(hYYaLinks.contact) } label: {
-                Label("Contact hYYa", systemImage: "envelope")
-            }
-            Button { Haptics.selection(); openURL(hYYaLinks.privacy) } label: {
-                Label("Privacy Policy", systemImage: "hand.raised")
-            }
-            Button { Haptics.selection(); openURL(hYYaLinks.security) } label: {
-                Label("Report a Security Issue", systemImage: "lock.shield.fill")
-            }
-        } header: {
-            Text(Brand.brandUppercased("Support hYYa"))
-        }
-    }
-
-    private var moreSection: some View {
-        Section {
-            PromoRow(imageName: "PromoHyyaAI", title: "hYYa ai", tagline: "Two engines. Offline & Online.", url: hYYaLinks.hyyaAIAppStore)
-            PromoRow(imageName: "HyyaDev", title: "hYYa \u{2728}", tagline: "Companions you can trust.", url: hYYaLinks.website)
-        } header: {
-            Text(Brand.brandUppercased("More from hYYa"))
-        }
+    private func open(_ url: URL) {
+        Haptics.selection()
+        openURL(url)
     }
 
     static var version: String {
@@ -213,10 +209,12 @@ struct PromoRow: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(Brand.textSubtle)
             }
-            .padding(.vertical, 4)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
             .contentShape(Rectangle())
+            .overlay(alignment: .bottom) { Rectangle().fill(Brand.rule).frame(height: 0.5).padding(.leading, 75) }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PressableCardStyle())
         .accessibilityLabel("\(title). \(tagline)")
         .accessibilityHint((url.host()?.hasSuffix("apple.com") ?? false) ? "Opens the App Store" : "Opens in your browser")
     }

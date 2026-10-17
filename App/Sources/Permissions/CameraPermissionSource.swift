@@ -43,17 +43,22 @@ final class CameraPermissionSource: SignalSource {
             return [SignalReading(id: "cam-list", value: "No cameras found")]
         }
 
-        let back = devices.filter { $0.position == .back }.count
-        let front = devices.filter { $0.position == .front }.count
-        let other = devices.count - back - front
+        // Lenses only. The TrueDepth and LiDAR entries are depth sensors built on top of a lens
+        // already listed, so counting them double-counted (a 17 Pro Max read "7 cameras" on the
+        // device test, 2026-10-17). They're still listed in the details.
+        let lensTypes: Set<AVCaptureDevice.DeviceType> = [.builtInWideAngleCamera, .builtInUltraWideCamera, .builtInTelephotoCamera, .external]
+        let lenses = devices.filter { lensTypes.contains($0.deviceType) }
+        let back = lenses.filter { $0.position == .back }.count
+        let front = lenses.filter { $0.position == .front }.count
+        let other = lenses.count - back - front
 
         var parts: [String] = []
         if back > 0 { parts.append("\(back) on the back") }
         if front > 0 { parts.append("\(front) on the front") }
         if other > 0 { parts.append("\(other) connected") }
-        let value = "\(PermissionText.count(devices.count, "camera")): \(parts.joined(separator: ", "))"
+        let value = "\(PermissionText.count(lenses.count, "camera")): \(parts.joined(separator: ", "))"
 
-        var items = devices.map { device -> String in
+        var items = lenses.map { device -> String in
             let side: String
             switch device.position {
             case .back: side = "Back"
@@ -63,6 +68,9 @@ final class CameraPermissionSource: SignalSource {
             let view = device.activeFormat.videoFieldOfView
             let field = view > 0 ? ", \(Int(view.rounded()))° view" : ""
             return "\(side): \(device.localizedName)\(field)"
+        }
+        if devices.contains(where: { $0.deviceType == .builtInTrueDepthCamera }) {
+            items.append("Has a TrueDepth sensor for Face ID")
         }
         if devices.contains(where: { $0.deviceType == .builtInLiDARDepthCamera }) {
             items.append("Has a LiDAR depth sensor, found only on Pro models")

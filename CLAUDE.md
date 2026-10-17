@@ -42,8 +42,25 @@ look there first. They are read-only from here.
 - **Installed-app checks:** cover the most sensitive apps, grouped by category. The user picks
   which categories to scan. See `docs/SENSITIVE-APP-CATALOGUE.md`.
 - **Subtitle / ASO:** decided at the store-listing stage, not before.
-- **Mascot:** a blue furry detective (fedora, round glasses, trench coat, fingerprint tablet).
-  Source: iCloud Drive `hYYa HD/hYYa Apps/hYYa.com UI/Mascots/hYYa Footprint Inspector.jpg`.
+- **🚨 Never submit for review without the owner's explicit consent** (Apple or Google; a
+  version, a build, a custom product page or a PPO test). Prepare everything up to the submit
+  button, then ask, naming exactly what would be submitted.
+- **Store growth:** use App Store Connect's Custom Product Pages, Asset Library and Product Page
+  Optimization wherever possible. Plan: `docs/STORE-GROWTH-PLAN.md`.
+- **App Store record:** Apple ID 6824033636, SKU `hyya-footprint-inspector`, created
+  2026-10-17.
+- **Mascot:** a blue furry detective in a fedora, round glasses and trench coat, studying a
+  footprint with a magnifier and a brush. It was changed by the owner on 2026-10-17.
+  - Source: iCloud Drive `hYYa HD/hYYa Apps/hYYa.com UI/Mascots/hYYa Footprint Inspector.jpg`.
+  - The cut-out (`MascotCutout`) was made with Vision subject lifting.
+- **Look: "Quiet Noir"** (owner, 2026-10-17, after several rejected rounds):
+  - Black ground, a quiet near-black panel, and hairline borders and separators.
+  - The accent is the footprint's sand-brown (#D2AE88; borders use #8F7560).
+  - Coral (#EC7F6A) means "worth a look", green means fixed.
+  - The primary button is white with black text. There's almost no glow.
+  - The mascot is on every page. The app is dark only.
+  - Rejected looks, so don't repeat them: magenta/violet; full neon glow; boxy cards inside boxes;
+    rounded "playful" type.
 
 ## Platform facts that shape the product (verified 2026-10-17)
 - **No iOS app can list installed apps.** It can only ask about URL schemes it declares in
