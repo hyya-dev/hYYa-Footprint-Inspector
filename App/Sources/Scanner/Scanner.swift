@@ -107,6 +107,11 @@ final class Scanner {
         SignalSection.allCases.flatMap(findings(in:))
     }
 
+    /// What any app can read with no prompt: everything except findings from granted permissions.
+    var findingsWithoutAsking: [Finding] {
+        allFindings.filter { $0.definition.section.group != .permission }
+    }
+
     var concerning: [Finding] {
         allFindings.filter(\.isConcerning)
     }

@@ -88,7 +88,7 @@ struct ShareCardButton: View {
     @MainActor
     private func render() -> Image? {
         let card = ShareCardView(score: scanner.score,
-                                 total: scanner.allFindings.count,
+                                 total: scanner.findingsWithoutAsking.count,
                                  concerningTitles: scanner.concerning.map(\.definition.title))
         let renderer = ImageRenderer(content: card)
         renderer.scale = displayScale

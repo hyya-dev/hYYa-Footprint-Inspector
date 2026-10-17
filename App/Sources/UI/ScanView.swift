@@ -121,7 +121,7 @@ private struct Results: View {
                     .font(.system(size: 30, weight: .bold))
                     .foregroundStyle(Brand.ink)
                 AccentRule().padding(.vertical, 4)
-                Text("Any app can read \(scanner.allFindings.count) things about this iPhone. \(concerning.isEmpty ? "Nothing stands out." : "\(concerning.count) are worth a look.")")
+                Text("Any app can read \(scanner.findingsWithoutAsking.count) things about this iPhone. \(concerning.isEmpty ? "Nothing stands out." : "\(concerning.count) are worth a look.")")
                     .font(.body)
                     .foregroundStyle(Brand.textMuted)
                     .lineSpacing(2)
