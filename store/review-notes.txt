@@ -1,0 +1,19 @@
+hYYa Footprint Inspector is a free privacy-education app. It reads the same device information any iOS app can read and shows it ONLY to the person holding the phone, so they can see their own "fingerprint" and reduce it. Nothing is collected, stored off the device or transmitted: there is no account, no server, no analytics and no third-party SDK. The App Privacy label is "Data Not Collected".
+
+No login is required. To review:
+1. Tap "Start scan" on the first screen. Results appear in about 3 seconds.
+2. Tap any clue to see what it reveals, why iOS allows it, and how to fix it.
+3. Each permission category ("Seen once you allow it") asks for that permission only when the user taps "Show me", and then shows counts and summaries (never contacts' names, numbers or event titles).
+4. "Sensitive apps" tab: the user picks categories, then taps Check.
+
+About fingerprinting (5.1.2): the app does not fingerprint anyone. Every value is displayed to the device owner on screen and never leaves the device. Scan history keeps only salted one-way hashes, the score and the ids of notable findings, never the values, and is excluded from backups.
+
+About LSApplicationQueriesSchemes (25 schemes): these are used only for the user-initiated "Sensitive apps" check, which shows the user which kinds of apps any other app could detect on their phone with canOpenURL. Categories are off by default, results are blurred until tapped, cleared when the app leaves the screen, and never stored or sent.
+
+About Required Reason APIs: system boot time, disk space, active keyboards, file timestamps and user defaults are read solely to display them to the user as part of the privacy report. The privacy manifest declares them.
+
+The keychain item the app writes holds only this app's own install dates, as an on-device demonstration that apps can recognise a reinstall. It is ThisDeviceOnly and never synced.
+
+Motion sensors are also used for a subtle tilt effect on the mascot. Nothing is recorded.
+
+The app uses only Apple frameworks. StoreKit and MusicKit are used to show the App Store country, the original download date and Apple Music subscription status to the user.

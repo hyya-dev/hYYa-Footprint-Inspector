@@ -49,6 +49,8 @@ look there first. They are read-only from here.
   Optimization wherever possible. Plan: `docs/STORE-GROWTH-PLAN.md`.
 - **App Store record:** Apple ID 6824033636, SKU `hyya-footprint-inspector`, created
   2026-10-17.
+- **First release is v1.0.0 on every store and platform** (App Store Connect and Google Play
+  Console; owner, 2026-10-17). `MARKETING_VERSION` 1.0.0.
 - **Mascot:** a blue furry detective in a fedora, round glasses and trench coat, studying a
   footprint with a magnifier and a brush. It was changed by the owner on 2026-10-17.
   - Source: iCloud Drive `hYYa HD/hYYa Apps/hYYa.com UI/Mascots/hYYa Footprint Inspector.jpg`.

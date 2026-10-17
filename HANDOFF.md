@@ -1,5 +1,42 @@
 # HANDOFF: where the work is
 
+**2026-10-17: Store setup started (App Store Connect app 6824033636, version 1.0.0, "Prepare for
+Submission"). 🚨 Nothing has been submitted, and nothing will be without the owner's explicit
+consent.**
+
+Done in App Store Connect:
+- **Bundle ID:** registered.
+- **App record:** created, SKU `hyya-footprint-inspector`.
+- **Version:** renamed 1.0 → 1.0.0.
+- **Listing:** name, subtitle ("Privacy Scan: What Apps Know"), keywords, description, promo text,
+  support, marketing and privacy URLs, copyright. Source of truth is `store/listing-en-US.json`;
+  push it with `scripts/asc-fill-listing.mjs`.
+- **Categories:** Utilities / Developer Tools.
+- **Age rating:** all "none", which gives 4+.
+- **Reviewer contact and notes:** notes in `store/review-notes.txt`; the contact is copied from
+  hYYa Encrypted Notes.
+- **App Privacy:** published as "Data Not Collected".
+- **Price and availability:** free, in all 175 territories plus new ones.
+- **Content rights:** no third-party content.
+- **App:** `MARKETING_VERSION` 1.0.0 and `ITSAppUsesNonExemptEncryption` NO.
+
+Still blocking submission:
+1. **Privacy policy page** on hyya.com (brief: `docs/WEBSITE-PRIVACY-POLICY-PROMPT.md`). The URL
+   is set but 404s.
+2. **GitHub repo is private.** The listing, Settings and policy all say "open source", so it must
+   be public before launch. Owner decision.
+3. **Screenshots and preview.** 6.9″ iPhone required, 13″ iPad because the app supports iPad.
+   They go in the Asset Library.
+4. **Release build** uploaded to TestFlight and attached to 1.0.0.
+5. **App icon.** The current one is the mascot JPG. A proper Icon Composer icon (and PPO
+   alternates) is recommended.
+6. **App Accessibility** declarations, after a VoiceOver and large-text pass.
+7. **The hyya.com showcase page and universal links** for custom product pages. Brief owed
+   later.
+
+---
+
+
 **2026-10-17: Phase 3 built, not committed.** It builds, all 14 unit tests pass, and it was
 checked in the iOS 26.4 Simulator in light and dark mode.
 

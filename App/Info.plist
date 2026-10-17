@@ -7,6 +7,9 @@
 -->
 <plist version="1.0">
 <dict>
+	<!-- Export compliance: only Apple's hashing (CryptoKit SHA-256) is used; no encryption of user data in transit. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSMotionUsageDescription</key>
 	<string>To show you what any app with Motion &amp; Fitness access can learn, such as your steps and whether you walk or drive. It stays on this iPhone.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
