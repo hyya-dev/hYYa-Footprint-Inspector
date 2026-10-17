@@ -1,0 +1,30 @@
+name: New signal
+description: Something any iOS app can read that we don't show yet.
+labels: [signal]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Signal
+      placeholder: e.g. Focus status
+    validations:
+      required: true
+  - type: textarea
+    id: api
+    attributes:
+      label: How an app reads it
+      description: The iOS API, and whether it needs a permission or entitlement.
+    validations:
+      required: true
+  - type: textarea
+    id: reveals
+    attributes:
+      label: What it reveals
+      description: Why it matters for fingerprinting or privacy, and how long the value lasts.
+    validations:
+      required: true
+  - type: textarea
+    id: fix
+    attributes:
+      label: Can people reduce it?
+      description: Settings steps if there are any, or "only Apple can fix it".
