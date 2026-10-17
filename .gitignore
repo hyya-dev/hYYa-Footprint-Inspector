@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+
+# XcodeGen output (regenerated from project.yml — project.yml is the source of truth)
+hYYaFootprintInspector.xcodeproj/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Secrets / local config — never commit
+.env
+*.env
+.env.local
+*.token
+secrets/
