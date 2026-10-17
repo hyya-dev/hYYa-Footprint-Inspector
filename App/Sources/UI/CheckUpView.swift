@@ -11,40 +11,49 @@ struct CheckUpView: View {
     private var done: Set<String> { Set(stored.split(separator: ",").map(String.init)) }
 
     var body: some View {
+        let total = CheckUpGuide.steps.count
         NavigationStack {
-            List {
-                Section {
-                    Text("iPhone never tells one app which other apps can reach your Health data, location or photos. Only Settings knows. This check-up walks you through it, one area at a time.")
-                        .font(.subheadline)
-                    ProgressView(value: Double(done.count), total: Double(CheckUpGuide.steps.count)) {
-                        Text("\(done.count) of \(CheckUpGuide.steps.count) checked")
-                            .font(.caption)
-                    }
-                    .tint(Brand.calm)
+            Page {
+                HeroCard(eyebrow: "Permission check-up",
+                         title: done.count == total ? "All checked!" : "\(done.count) of \(total) checked",
+                         subtitle: "iPhone never tells one app which other apps can reach your Health, location or photos. Only Settings knows, so let's look together.",
+                         mood: done.count == total ? .happy : .idle,
+                         mascotSize: 104) {
+                    ProgressView(value: Double(done.count), total: Double(total))
+                        .tint(Brand.sunflower)
+                        .padding(.top, 6)
+                        .animation(.spring, value: done.count)
                 }
-                Section {
-                    ForEach(CheckUpGuide.steps) { step in
+
+                Panel {
+                    ForEach(Array(CheckUpGuide.steps.enumerated()), id: \.element.id) { index, step in
                         NavigationLink {
-                            CheckUpStepView(step: step, isDone: binding(for: step.id))
+                            CheckUpStepView(step: step, number: index + 1, isDone: binding(for: step.id))
                         } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: done.contains(step.id) ? "checkmark.circle.fill" : step.symbol)
-                                    .foregroundStyle(done.contains(step.id) ? Brand.calm : Brand.blue)
-                                    .frame(width: 28)
-                                Text(step.title)
+                            RowCard(symbol: done.contains(step.id) ? "checkmark" : step.symbol,
+                                    title: step.title,
+                                    subtitle: step.path,
+                                    tileFG: done.contains(step.id) ? .white : Brand.accent,
+                                    tileBG: done.contains(step.id) ? Brand.mint : Brand.lilacSoft) {
+                                Text("\(index + 1)")
+                                    .font(.system(.footnote).weight(.heavy))
+                                    .foregroundStyle(Brand.textSubtle)
                             }
                         }
+                        .buttonStyle(PressableCardStyle())
                     }
                 }
+
                 if !done.isEmpty {
-                    Section {
-                        Button("Start over", role: .destructive) { stored = "" }
-                    }
+                    Button("Start over") { stored = "" }
+                        .buttonStyle(GhostButtonStyle(tint: Brand.concern))
+                        .frame(maxWidth: .infinity)
                 }
             }
-            .brandListBackground()
-            .navigationTitle("Permission check-up")
+            .navigationTitle("Check-up")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.hidden, for: .navigationBar)
+            .sensoryFeedback(.success, trigger: done.count == total)
         }
     }
 
@@ -61,33 +70,35 @@ struct CheckUpView: View {
 
 struct CheckUpStepView: View {
     let step: CheckUpStep
+    var number: Int = 1
     @Binding var isDone: Bool
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        List {
-            Section("Why it matters") { Text(step.why) }
-            Section("Where to go") {
-                Label(step.path, systemImage: "gear")
+        Page {
+            HeroCard(eyebrow: "Step \(number)", title: step.title, subtitle: step.why,
+                     mood: isDone ? .happy : .thinking, mascotSize: 96)
+
+            InfoCard(title: "Where to go", symbol: "gearshape.fill") {
+                Text(step.path)
+                    .font(.system(.body).weight(.semibold))
+                    .foregroundStyle(Brand.accent)
                     .textSelection(.enabled)
             }
-            Section("What to do") {
-                ForEach(Array(step.actions.enumerated()), id: \.offset) { index, action in
-                    HStack(alignment: .firstTextBaseline, spacing: 10) {
-                        Text("\(index + 1)")
-                            .font(.caption.weight(.bold))
-                            .frame(width: 22, height: 22)
-                            .background(Circle().fill(Brand.blue.opacity(0.15)))
-                        Text(action)
-                    }
-                }
-                Button("Open Settings") { SettingsLink.openSettingsHome() }
+            InfoCard(title: "What to do", symbol: "list.number") {
+                StepList(steps: step.actions)
             }
-            Section {
-                Toggle("I've checked this", isOn: $isDone)
-                    .tint(Brand.calm)
+            Button("Open Settings") { SettingsLink.openSettingsHome() }
+                .buttonStyle(GhostButtonStyle())
+                .frame(maxWidth: .infinity)
+
+            Button(isDone ? "Checked ✓" : "I've checked this") {
+                isDone.toggle()
+                if isDone { Haptics.success(); dismiss() }
             }
+            .buttonStyle(PrimaryCTAButtonStyle(fill: isDone ? Brand.green : Brand.cta,
+                                               depthColor: isDone ? Color(hex: 0x0E8A56) : Brand.ctaDepth))
         }
-        .brandListBackground()
         .navigationTitle(step.title)
         .navigationBarTitleDisplayMode(.inline)
     }

@@ -89,6 +89,11 @@ struct HistoryView: View {
 
     var body: some View {
         List {
+                Section {
+                    MascotSays(line: history.snapshots.count < 2 ? "Scan a few times and I’ll draw your progress here." : "Here’s how your footprint has changed.", mood: .thinking, size: 80)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
+                }
             if history.snapshots.count >= 2 {
                 Section {
                     Chart(history.snapshots) { snapshot in
@@ -153,6 +158,11 @@ struct ScoreboardView: View {
 
     var body: some View {
         List {
+                Section {
+                    MascotSays(line: "I keep score of what Apple has fixed. Updating iOS is the easiest privacy win.", mood: .happy, size: 80)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
+                }
             Section {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("You're on iOS \(UIDevice.current.systemVersion)")
