@@ -6,29 +6,26 @@ import SwiftUI
 
 @main
 struct FootprintInspectorApp: App {
+    @State private var scanner = Scanner()
+
     var body: some Scene {
         WindowGroup {
             RootView()
+                .environment(scanner)
+                .tint(Brand.blue)
         }
     }
 }
 
-/// Phase 1 placeholder. The real home screen arrives in Phase 2.
 struct RootView: View {
     var body: some View {
-        NavigationStack {
-            List {
-                Section {
-                    Text("Groundwork build. The scanner arrives in Phase 2.")
-                        .foregroundStyle(.secondary)
-                }
-                #if DEBUG
-                Section("Developer") {
-                    NavigationLink("Settings link lab") { SettingsLinkLab() }
-                }
-                #endif
-            }
-            .navigationTitle("Footprint Inspector")
+        TabView {
+            Tab("Scan", systemImage: "magnifyingglass") { ScanView() }
+            Tab("Sensitive apps", systemImage: "eye.slash") { SensitiveView() }
+            Tab("Check-up", systemImage: "checklist") { CheckUpView() }
+            #if DEBUG
+            Tab("Lab", systemImage: "hammer") { NavigationStack { SettingsLinkLab() } }
+            #endif
         }
     }
 }
