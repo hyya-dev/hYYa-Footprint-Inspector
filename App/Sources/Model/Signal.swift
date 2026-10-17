@@ -195,9 +195,10 @@ struct SignalReading: Identifiable, Sendable, Equatable {
     var value: String
     /// Extra lines (a list of keyboards, fonts, devices…). Shown in the detail view.
     var items: [String] = []
-    /// Set when this reading on *this* phone deserves more attention than the definition's
-    /// default (for example a first name found in an accessory name).
-    var raisedSeverity: Severity? = nil
+    /// Set when this reading on *this* phone deserves more or less attention than the
+    /// definition's default: higher for a first name in an accessory name, lower for a setting
+    /// that's at its ordinary default.
+    var severityOverride: Severity? = nil
     /// A one-line, calm explanation of why this reading was raised.
     var note: String? = nil
 }

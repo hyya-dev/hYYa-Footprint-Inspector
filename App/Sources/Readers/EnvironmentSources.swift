@@ -21,7 +21,7 @@ struct AudioSource: SignalSource {
                                   value: route.outputs.first?.portName ?? "None",
                                   items: outputs + route.inputs.map { "Input: \($0.portName)" })
         if let firstName {
-            audio.raisedSeverity = .high
+            audio.severityOverride = .high
             audio.note = "This name suggests the owner is called \(firstName). Any app can read it."
         }
         return [
@@ -89,8 +89,10 @@ struct LanguageSource: SignalSource {
         let tz = TimeZone.current
         let offset = tz.secondsFromGMT() / 3600
         return [
-            .init(id: "languages", value: displayNames.joined(separator: ", "), items: displayNames),
-            .init(id: "keyboards", value: "\(keyboards.count) keyboard\(keyboards.count == 1 ? "" : "s")", items: keyboardNames),
+            .init(id: "languages", value: displayNames.joined(separator: ", "), items: displayNames,
+                  severityOverride: languages.count <= 1 ? .low : nil),
+            .init(id: "keyboards", value: "\(keyboards.count) keyboard\(keyboards.count == 1 ? "" : "s")", items: keyboardNames,
+                  severityOverride: keyboards.filter { $0 != "emoji" }.count <= 1 ? .low : nil),
             .init(id: "region", value: region, items: regionItems),
             .init(id: "timezone", value: tz.identifier.replacingOccurrences(of: "_", with: " "),
                   items: ["UTC\(offset >= 0 ? "+" : "")\(offset)"]),

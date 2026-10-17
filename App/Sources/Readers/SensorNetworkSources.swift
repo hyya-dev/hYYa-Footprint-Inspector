@@ -83,7 +83,8 @@ final class NetworkSource: SignalSource {
         return [
             .init(id: "connection", value: kinds.first ?? "Offline", items: items),
             .init(id: "vpn", value: tunnels.isEmpty ? "No VPN detected" : "VPN detected",
-                  items: tunnels.isEmpty ? [] : ["Tunnels: \(tunnels.joined(separator: ", "))"]),
+                  items: tunnels.isEmpty ? [] : ["Tunnels: \(tunnels.joined(separator: ", "))"],
+                  severityOverride: tunnels.isEmpty ? .low : nil),
             .init(id: "local-ip", value: "\(addresses.count) address\(addresses.count == 1 ? "" : "es")", items: addresses),
         ]
     }

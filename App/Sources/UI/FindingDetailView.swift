@@ -9,6 +9,8 @@ struct FindingDetailView: View {
     @Environment(Scanner.self) private var scanner
     let finding: Finding
     @State private var cleared = false
+    @AppStorage(HyyaSuggestions.settingKey) private var showSuggestions = true
+    @Environment(\.openURL) private var openURL
 
     private var def: SignalDefinition { finding.definition }
 
@@ -28,7 +30,7 @@ struct FindingDetailView: View {
                     if let note = finding.reading.note {
                         Text(note)
                             .font(.subheadline)
-                            .foregroundStyle(finding.reading.raisedSeverity == .high ? Brand.amber : .secondary)
+                            .foregroundStyle(finding.reading.severityOverride == .high ? Brand.amber : .secondary)
                     }
                     StatusBadge(status: def.status)
                 }
@@ -72,7 +74,17 @@ struct FindingDetailView: View {
             } header: {
                 Label(def.fix.level.label, systemImage: def.fix.level == .onlyApple ? "applelogo" : "wrench.and.screwdriver")
             }
+
+            if showSuggestions, let suggestion = HyyaSuggestions.suggestion(for: def.id) {
+                Section {
+                    Text(suggestion.reason)
+                    Button("Open \(suggestion.appName)") { openURL(suggestion.url) }
+                } header: {
+                    Text("From the makers of this app")
+                }
+            }
         }
+        .brandListBackground()
         .navigationTitle(def.title)
         .navigationBarTitleDisplayMode(.inline)
     }

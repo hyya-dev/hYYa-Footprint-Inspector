@@ -59,6 +59,7 @@ struct SensitiveView: View {
 
                 if let results { resultSection(results) }
             }
+            .brandListBackground()
             .navigationTitle("Sensitive apps")
             .navigationBarTitleDisplayMode(.inline)
             .alert("Before you check",

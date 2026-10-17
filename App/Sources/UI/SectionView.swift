@@ -48,6 +48,7 @@ struct SectionView: View {
                 }
             }
         }
+        .brandListBackground()
         .navigationTitle(section.title)
     }
 

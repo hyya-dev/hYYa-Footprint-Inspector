@@ -95,7 +95,7 @@ struct ReinstallSource: SignalSource {
             note: count == 1
                 ? "Delete this app and install it again: it will still remember you. That's the point."
                 : "You deleted this app before, and it still recognised you.")
-        if count > 1 { reading.raisedSeverity = .high }
+        if count > 1 { reading.severityOverride = .high }
         return [reading]
     }
 
