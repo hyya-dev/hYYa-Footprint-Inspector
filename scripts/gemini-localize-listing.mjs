@@ -7,7 +7,9 @@
 // with Gemini, writing store/localized/<locale>.json. Each result is checked against App Store
 // limits and our wording rules; failures are retried with the reasons, then reported.
 //
-//   GEMINI_API_KEY=… node scripts/gemini-localize-listing.mjs [locale …] [--model name] [--force]
+//   node scripts/gemini-localize-listing.mjs [locale …] [--model name] [--force]
+//
+// The key comes from GEMINI_API_KEY in the environment or in the gitignored .env file.
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 
@@ -15,8 +17,10 @@ const argv = process.argv.slice(2);
 const opt = (name, fallback) => { const i = argv.indexOf(name); return i >= 0 ? argv.splice(i, 2)[1] : fallback; };
 const MODEL = opt("--model", "gemini-3.7-flash");
 const FORCE = argv.includes("--force");
-const KEY = process.env.GEMINI_API_KEY;
-if (!KEY) { console.error("Missing env GEMINI_API_KEY"); process.exit(1); }
+const envFile = new URL("../.env", import.meta.url);
+const KEY = process.env.GEMINI_API_KEY || (existsSync(envFile) ? (readFileSync(envFile, "utf8").split("\n")
+  .find((l) => l.startsWith("GEMINI_API_KEY=")) ?? "").slice(15).trim() : "");
+if (!KEY || KEY.startsWith("PASTE_")) { console.error("Add GEMINI_API_KEY to .env first"); process.exit(1); }
 
 const en = JSON.parse(readFileSync(new URL("../store/listing-en-US.json", import.meta.url), "utf8"));
 const OUT = new URL("../store/localized/", import.meta.url);
