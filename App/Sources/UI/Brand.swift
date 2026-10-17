@@ -149,15 +149,6 @@ extension View {
     }
 }
 
-// MARK: - Theme (kept for stored preferences; the app is dark only)
-
-enum AppTheme: String, CaseIterable, Identifiable {
-    case auto, light, dark
-    var id: String { rawValue }
-    var colorScheme: ColorScheme? { .dark }
-    var displayName: String { rawValue.capitalized }
-}
-
 // MARK: - Surfaces
 
 struct BrandBackground: View {

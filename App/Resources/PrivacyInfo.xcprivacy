@@ -3,9 +3,12 @@
 <!--
   No tracking, no data collected. Every Required Reason API is used only to show the value to the
   person holding the phone.
-  ⚠️ Reason codes need checking against Apple's current list before submission (HANDOFF.md).
+  Reason codes checked against Apple's NSPrivacyAccessedAPITypeReasons reference on 2026-10-17:
+    85F4.1 display disk space · DDA9.1 display file timestamps · C617.1 metadata of files in the
+    app container · 35F9.1 elapsed time between events · 54BD.1 keyboard-dependent UI ·
+    CA92.1 defaults only this app can read.
   Boot time and active keyboards have no "display to the user" reason, so the closest codes are
-  used here and the review notes must explain.
+  used and the review notes explain.
 -->
 <plist version="1.0">
 <dict>

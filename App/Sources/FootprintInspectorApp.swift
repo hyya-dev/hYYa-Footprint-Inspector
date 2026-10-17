@@ -8,7 +8,6 @@ import SwiftUI
 struct FootprintInspectorApp: App {
     @State private var history: HistoryStore
     @State private var scanner: Scanner
-    @AppStorage("theme") private var theme: AppTheme = .auto
 
     init() {
         let history = HistoryStore()
@@ -22,7 +21,7 @@ struct FootprintInspectorApp: App {
                 .environment(scanner)
                 .environment(history)
                 .tint(Brand.accent)
-                .preferredColorScheme(theme.colorScheme)
+                .preferredColorScheme(.dark)
         }
     }
 }
