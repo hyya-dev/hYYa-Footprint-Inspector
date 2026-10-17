@@ -101,7 +101,16 @@ final class HistoryStore {
         let fresh = UUID().uuidString + UUID().uuidString
         try? FileManager.default.createDirectory(at: saltURL.deletingLastPathComponent(), withIntermediateDirectories: true)
         try? Data(fresh.utf8).write(to: saltURL, options: [.atomic, .completeFileProtection])
+        Self.excludeFromBackup(saltURL)
         return fresh
+    }
+
+    /// Neither the history nor its salt goes into iCloud or computer backups.
+    private static func excludeFromBackup(_ url: URL) {
+        var url = url
+        var values = URLResourceValues()
+        values.isExcludedFromBackup = true
+        try? url.setResourceValues(values)
     }
 
     private func load() {
