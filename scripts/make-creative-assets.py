@@ -7,7 +7,7 @@
     python3 scripts/make-creative-assets.py <raw-iphone-dir> <out-dir>
 
 - Header, 21:9 at 3840 x 1646: one idea and no headline. The mascot studies the footprint between
-  six things an app could learn about you, flagged like the app's findings. Laid out inside the
+  six things an app can learn, everyday and sensitive, flagged like the app's findings. Laid out inside the
   area that both the iPhone and the iPad crop keep (see header()).
 - Search results, 3:2 at 3840 x 2560: says what the app does at a glance and shows the real
   interface, as Apple advises. The headline, three iPhone screens (the mascot is on the centre one) are all centred.
@@ -23,12 +23,13 @@ slides = importlib.util.module_from_spec(spec); spec.loader.exec_module(slides)
 font, device, draw_headline = slides.font, slides.device, slides.draw_headline
 SAND, SAND_DEEP, INK, MUTED = slides.SAND, slides.SAND_DEEP, slides.INK, slides.MUTED
 
-# What an app can learn about you, each with its honest source. Shown as concerns (coral dot), the
-# same way the app flags findings that are worth a look.
+# A mix of everyday signals and sensitive inferences from installed apps. Sensitive ones use only
+# categories the app really checks (App/Sources/Sensitive/SensitiveCatalogue.swift), so the header
+# never promises more than the app shows. Coral dot, like the app's "worth a look" findings.
 CONCERNS = [
-    ("Your first name", "from your headphones’ name"), ("The apps you use", "dating, health, VPN…"),
-    ("Where you’ve been", "with Photos access"), ("Who you know", "with Contacts access"),
-    ("A unique fingerprint", "links you across apps"), ("Your last restart", "to the second"),
+    ("Your dating life", "dating and LGBTQ+ apps"), ("Your first name", "from your headphones’ name"),
+    ("Your health", "period, fertility, therapy apps"), ("A unique fingerprint", "links you across apps"),
+    ("Your money", "crypto and betting apps"), ("Where you’ve been", "with Photos access"),
 ]
 CORAL = (236, 127, 106)
 
