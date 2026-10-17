@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security issue privately
+    url: https://github.com/hyya-dev/hYYa-Footprint-Inspector/security/advisories/new
+    about: Please don't open a public issue for security problems.
+  - name: Questions and ideas
+    url: https://github.com/hyya-dev/hYYa-Footprint-Inspector/discussions
+    about: Ask a question or share an idea in Discussions.
