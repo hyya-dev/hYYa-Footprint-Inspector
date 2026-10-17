@@ -42,6 +42,7 @@ struct CheckUpView: View {
                     }
                 }
             }
+            .brandListBackground()
             .navigationTitle("Permission check-up")
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -86,6 +87,7 @@ struct CheckUpStepView: View {
                     .tint(Brand.calm)
             }
         }
+        .brandListBackground()
         .navigationTitle(step.title)
         .navigationBarTitleDisplayMode(.inline)
     }

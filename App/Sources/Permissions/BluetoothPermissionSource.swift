@@ -54,7 +54,7 @@ final class BluetoothPermissionSource: SignalSource {
         }
         var reading = SignalReading(id: "ble-nearby", value: value, items: names)
         if names.contains(where: PermissionText.looksLikeOwnersName) {
-            reading.raisedSeverity = .high
+            reading.severityOverride = .high
             reading.note = "Some device names include a first name, which can tell an app who is nearby."
         }
         return [reading]

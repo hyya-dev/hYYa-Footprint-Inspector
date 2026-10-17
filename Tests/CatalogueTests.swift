@@ -52,7 +52,7 @@ struct CatalogueTests {
 struct PassiveSourceTests {
     /// Every reading a passive source produces must have something to say about it.
     @Test func passiveReadingsAllHaveDefinitions() async {
-        let scanner = Scanner()
+        let scanner = Scanner(history: HistoryStore(directory: FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)))
         for source in scanner.passiveSources {
             for reading in await source.read() {
                 #expect(SignalCatalogue.definition(reading.id) != nil, "No definition for reading \(reading.id)")

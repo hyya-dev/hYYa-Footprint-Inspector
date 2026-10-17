@@ -62,7 +62,7 @@ final class PhotosPermissionSource: SignalSource {
             places.items.append("Stopped after \(summary.scanned.formatted(.number)) items to keep this quick")
         }
         if summary.geotagged > 0 {
-            places.raisedSeverity = .high
+            places.severityOverride = .high
             places.note = places.note ?? "Grouped on this iPhone. Nothing was sent anywhere."
         }
 
@@ -76,7 +76,7 @@ final class PhotosPermissionSource: SignalSource {
             }
         )
         if !standouts.isEmpty {
-            homeWork.raisedSeverity = .high
+            homeWork.severityOverride = .high
             homeWork.note = "Worked out on this iPhone from photo locations alone. Any app with full Photos access could do the same."
         }
 

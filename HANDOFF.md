@@ -1,5 +1,46 @@
 # HANDOFF: where the work is
 
+**2026-10-17: Phase 3 built, not committed.** It builds, all 14 unit tests pass, and it was
+checked in the iOS 26.4 Simulator in light and dark mode.
+
+What Phase 3 added:
+- **Design layer:** `App/Sources/UI/Brand.swift`, with colours from the mascot. Blue is the accent,
+  cyan the glow, amber means "worth a look", green means fixed. Includes the Auto/Light/Dark theme,
+  cards, CTA and ghost buttons, haptics and the mascot emblem.
+- **Footprint score:** 0–100, in `Scanner/FootprintScore.swift`. Only fixable findings count: 10
+  points for a high one, 2 for a medium one. Readers lower a signal to "low" when it's at its
+  ordinary default. Things only Apple can fix are listed separately. The formula is shown in the
+  app, and the app never claims "1 in N".
+- **Before/after:** `HistoryStore` keeps snapshots holding the score, the ids worth a look and
+  salted hashes of each value. **No values are saved.** The file and salt sit in Application
+  Support, excluded from backup. The Scan screen shows a "Since your last scan" card.
+- **History view** with a chart, and an **iOS scoreboard** (closed by Apple, still open, changes
+  after your last iOS update).
+- **Share card:** an image with the score, counts and finding titles only. No values.
+- **Settings tab:**
+  - Appearance
+  - Your data (history, scoreboard, clear)
+  - "Suggest hYYa apps in fixes" toggle
+  - Open source (code link, MPL 2.0, version)
+  - Support hYYa: Share, Rate (hidden until the App Store id exists), Contact, Privacy Policy,
+    Report a Security Issue
+  - More from hYYa (hYYa ai, hYYa ✨)
+- **hYYa suggestions:** `Model/HyyaSuggestions.swift` is empty on purpose. The owner pairs apps
+  with findings case by case.
+- **Placeholder app icon:** made from the mascot JPG. It needs a proper icon, made in Icon
+  Composer with Liquid Glass layers, before launch.
+
+Owed before launch, besides the device tests below:
+- The App Store id goes in `hYYaLinks.appStoreID`. That turns on Rate and makes Share point at the
+  store.
+- hyya.com pages: `privacypolicy/hyya-footprint-inspector.html` and
+  `hyya-footprint-inspector.html`.
+- In dark mode, list rows use the system grey rather than the brand navy surface. Polish item.
+
+---
+
+Earlier status:
+
 **2026-10-17: Phase 2 scanner built.** It builds with no warnings in our code, all 7 unit tests
 pass, and it was walked through by hand in the iOS 26.4 Simulator. Phase 2 is **not committed**
 yet. Phase 1 is on `main`.

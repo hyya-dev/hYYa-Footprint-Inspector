@@ -6,13 +6,23 @@ import SwiftUI
 
 @main
 struct FootprintInspectorApp: App {
-    @State private var scanner = Scanner()
+    @State private var history: HistoryStore
+    @State private var scanner: Scanner
+    @AppStorage("theme") private var theme: AppTheme = .auto
+
+    init() {
+        let history = HistoryStore()
+        _history = State(initialValue: history)
+        _scanner = State(initialValue: Scanner(history: history))
+    }
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environment(scanner)
-                .tint(Brand.blue)
+                .environment(history)
+                .tint(Brand.accent)
+                .preferredColorScheme(theme.colorScheme)
         }
     }
 }
@@ -23,6 +33,7 @@ struct RootView: View {
             Tab("Scan", systemImage: "magnifyingglass") { ScanView() }
             Tab("Sensitive apps", systemImage: "eye.slash") { SensitiveView() }
             Tab("Check-up", systemImage: "checklist") { CheckUpView() }
+            Tab("Settings", systemImage: "gearshape") { SettingsView() }
             #if DEBUG
             Tab("Lab", systemImage: "hammer") { NavigationStack { SettingsLinkLab() } }
             #endif

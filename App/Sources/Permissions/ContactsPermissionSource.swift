@@ -60,7 +60,7 @@ final class ContactsPermissionSource: SignalSource {
             items: ranked.map { "\($0.key): \($0.value.formatted(.number))" }
         )
         if summary.customLabels > 0 {
-            labels.raisedSeverity = .high
+            labels.severityOverride = .high
             labels.note = "\(PermissionText.count(summary.customLabels, "label")) you typed yourself. Labels like these can hint at family and close friends."
         }
 

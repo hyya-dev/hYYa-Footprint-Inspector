@@ -10,7 +10,9 @@ struct Finding: Identifiable, Sendable {
     let definition: SignalDefinition
     let reading: SignalReading
     var id: String { definition.id }
-    var severity: Severity { max(definition.severity, reading.raisedSeverity ?? .low) }
+    /// The reading's own assessment wins when it has one: a reader can raise a signal (a first
+    /// name found) or lower it (a setting left at its ordinary default).
+    var severity: Severity { reading.severityOverride ?? definition.severity }
     var isConcerning: Bool { severity == .high }
 }
 
@@ -25,6 +27,14 @@ final class Scanner {
     private(set) var permissionStates: [PermissionKind: PermissionState] = [:]
     private(set) var loadingPermissions: Set<PermissionKind> = []
     private(set) var lastScan: Date?
+    /// What changed since the scan before this one. `nil` on the first scan.
+    private(set) var comparison: ScanComparison?
+
+    let history: HistoryStore
+
+    init(history: HistoryStore) {
+        self.history = history
+    }
 
     let passiveSources: [any SignalSource] = [
         IdentitySource(), SystemSource(), StorageSource(), DisplaySource(), AudioSource(),
@@ -46,8 +56,14 @@ final class Scanner {
             await readPermission(kind)
         }
         lastScan = Date()
+        let snapshot = history.makeSnapshot(findings: allFindings, score: score,
+                                            osVersion: ProcessInfo.processInfo.operatingSystemVersionString)
+        comparison = history.latest.map { ScanComparison(previous: $0, current: snapshot) }
+        history.append(snapshot)
         phase = .done
     }
+
+    var score: FootprintScore { FootprintScore(findings: allFindings) }
 
     func refreshPermissionStates() {
         for kind in PermissionKind.allCases {

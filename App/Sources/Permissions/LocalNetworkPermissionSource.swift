@@ -92,7 +92,7 @@ final class LocalNetworkPermissionSource: SignalSource {
             items: items
         )
         if found.keys.contains(where: PermissionText.looksLikeOwnersName) {
-            reading.raisedSeverity = .high
+            reading.severityOverride = .high
             reading.note = "Some names include a first name, which can tell an app who lives or works here."
         }
         return [reading]

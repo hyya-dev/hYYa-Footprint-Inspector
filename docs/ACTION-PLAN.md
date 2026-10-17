@@ -39,7 +39,7 @@ What people asked for, from App Store reviews, Hacker News, Privacy Guides, Mast
 - A guided permission check-up for things only Settings can show (which apps can reach Health,
   Location, Photos and so on).
 
-### Phase 3: What makes us better (2–3 weeks)
+### Phase 3: What makes us better. Built 2026-10-17; real icon and device pass still owed
 - A fix on every finding, at the four levels in CLAUDE.md, with a re-scan showing before and after.
 - One calm overall score; concerns in amber.
 - An iOS-version scoreboard: closed by Apple, still open, new.

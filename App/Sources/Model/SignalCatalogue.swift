@@ -150,7 +150,8 @@ extension SignalCatalogue {
         .init(id: "audio-route", section: .audio, title: "Connected headphones and speakers",
               reveals: "What's playing your audio, by name. Headphones are often named after their owner, such as \"Sam's AirPods\", which hands over a first name.",
               why: "So apps can route sound to the right place.",
-              persistence: .untilYouChangeIt, severity: .high,
+              // Medium by default; the reader raises it to high when a name holds a first name.
+              persistence: .untilYouChangeIt, severity: .medium,
               fix: .guided("Rename your headphones so the name doesn't include yours.", [
                   "Connect your headphones, then open Settings.",
                   "Tap their name near the top, or go to Settings › Bluetooth and tap ⓘ next to them.",

@@ -101,7 +101,7 @@ struct SecuritySource: SignalSource {
         }
         var passcode = SignalReading(id: "passcode", value: hasPasscode ? "Passcode set · \(biometry)" : "No passcode")
         if !hasPasscode {
-            passcode.raisedSeverity = .high
+            passcode.severityOverride = .high
             passcode.note = "Without a passcode, anyone holding this iPhone can see everything on it."
         }
 
@@ -124,8 +124,9 @@ struct SecuritySource: SignalSource {
                   items: cards.isEmpty ? ["No cards detected"] : ["Card networks: \(cards.joined(separator: ", "))"]),
             .init(id: "mail-messages", value: "Mail \(MFMailComposeViewController.canSendMail() ? "set up" : "not set up") · Texts \(MFMessageComposeViewController.canSendText() ? "yes" : "no")"),
             .init(id: "on-call", value: Format.yesNo(!CXCallObserver().calls.isEmpty)),
-            .init(id: "tracking", value: tracking),
-            .init(id: "managed", value: managed ? "Yes" : "No"),
+            .init(id: "tracking", value: tracking,
+                  severityOverride: ATTrackingManager.trackingAuthorizationStatus == .denied ? .low : nil),
+            .init(id: "managed", value: managed ? "Yes" : "No", severityOverride: managed ? nil : .low),
             .init(id: "location-services", value: Format.onOff(locationOn)),
         ]
     }
