@@ -185,9 +185,9 @@ final class DeviceWalkthroughUITests: XCTestCase {
         app.launch()
         handleSystemAlert(context: "lab-launch")
         // The lab lives in Settings › Developer (Debug builds only) since 2026-10-17.
-        let settings = app.tabBars.buttons["Settings"]
-        XCTAssertTrue(settings.waitForExistence(timeout: 10), "Settings tab missing")
-        settings.tap()
+        let settingsTab = app.tabBars.buttons["Settings"]
+        XCTAssertTrue(settingsTab.waitForExistence(timeout: 10), "Settings tab missing")
+        settingsTab.tap()
         let lab = app.buttons["Settings link lab"]
         for _ in 0..<8 where !lab.isHittable { app.swipeUp() }
         lab.tap()

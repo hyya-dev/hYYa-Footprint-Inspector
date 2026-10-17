@@ -25,9 +25,16 @@ Still blocking submission:
    is set but 404s.
 2. **GitHub repo is private.** The listing, Settings and policy all say "open source", so it must
    be public before launch. Owner decision.
-3. **Screenshots and preview.** 6.9″ iPhone required, 13″ iPad because the app supports iPad.
-   They go in the Asset Library.
-4. **Release build** uploaded to TestFlight and attached to 1.0.0.
+3. ~~Screenshots~~ **Done 2026-10-17.** Seven slides each for 6.9″ iPhone and 13″ iPad
+   (`store/slides/`), built by `scripts/make-store-slides.py` from Simulator captures
+   (`UITests/StoreScreenshotsUITests.swift`) and uploaded by `scripts/asc-upload-screenshots.mjs`.
+   They're in the Asset Library, which also holds 7 stale iPhone assets from the first upload. An
+   app preview video is still to do.
+4. ~~Release build~~ **Done.** 1.0.0 (1) uploaded with `scripts/testflight-upload.sh` and
+   attached to version 1.0.0.
+   - Signing is manual: the local Apple Distribution certificate plus the profile "hYYa Footprint
+     Inspector App Store". The API key has no cloud-signing permission.
+   - The next upload must bump `CURRENT_PROJECT_VERSION`.
 5. **App icon.** The current one is the mascot JPG. A proper Icon Composer icon (and PPO
    alternates) is recommended.
 6. **App Accessibility** declarations, after a VoiceOver and large-text pass.

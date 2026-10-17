@@ -16,9 +16,12 @@ struct Page<Content: View>: View {
             VStack(alignment: .leading, spacing: spacing) {
                 content
             }
+            // A comfortable reading width on iPad; full width on iPhone.
+            .frame(maxWidth: 720)
             .padding(.horizontal, 20)
             .padding(.top, 8)
             .padding(.bottom, 120)
+            .frame(maxWidth: .infinity)
         }
         .scrollIndicators(.hidden)
         .background(BrandBackground())
