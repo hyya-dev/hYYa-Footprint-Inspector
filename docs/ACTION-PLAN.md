@@ -30,7 +30,7 @@ What people asked for, from App Store reviews, Hacker News, Privacy Guides, Mast
 - [x] XcodeGen project skeleton that builds (iOS 26, arm64, team 8PYFWUL3ND,
   `com.hyya.footprintinspector`)
 
-### Phase 2: Scanner (2–3 weeks)
+### Phase 2: Scanner. Built 2026-10-17; device testing still owed
 - Our own signal readers, rebuilt from the inventory, organised in three sections:
   - What any app sees without asking
   - What apps see once you say yes

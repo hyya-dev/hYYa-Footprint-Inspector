@@ -1,29 +1,61 @@
 # HANDOFF: where the work is
 
-**2026-10-17: Phase 1 groundwork done, except the device tests.** Nothing is committed yet. The
-local git repo has `origin` set to hyya-dev/hYYa-Footprint-Inspector and nothing has been pushed.
+**2026-10-17: Phase 2 scanner built.** It builds with no warnings in our code, all 7 unit tests
+pass, and it was walked through by hand in the iOS 26.4 Simulator. Phase 2 is **not committed**
+yet. Phase 1 is on `main`.
 
-## Done
-- Repo scaffold: MPL 2.0 `LICENSE`, `README.md`, `CLAUDE.md` (standing decisions),
-  `docs/ACTION-PLAN.md`.
-- `project.yml`: iOS 26, arm64, `com.hyya.footprintinspector`. The skeleton app builds for the
-  Simulator. In Debug builds a "Settings link lab" screen is available.
-- `docs/SIGNAL-INVENTORY.md`: 163 signals plus about 50 gaps, inference cards and our
-  permission needs.
-- `docs/SENSITIVE-APP-CATALOGUE.md`: 9 categories, a 50-app list and a prioritised 25-app list.
-  **25 is the binding cap:** this Mac only has Xcode 27.1 (iOS 27 SDK).
-- `docs/SETTINGS-LINKS.md`: in the Simulator, `App-prefs:` links only reach the Settings home
-  screen, on both iOS 26.4 and iOS 27.0.
-- `docs/HYYA-APPS-DETECTABILITY.md`: only Subscriptions Tracker declares a probe-able scheme.
+## What's in the app
+Four tabs:
+- **Scan:** 49 passive and advanced signals read with no prompt. "Worth a look" summary, then
+  sections, then a detail page with what it reveals, why iOS allows it, how long it lasts and the
+  fix.
+- **Permission sections:** 10 categories and 23 signals, requested only on "Show me". Before
+  asking, each one previews what an app would get.
+- **Sensitive apps:** 9 categories and 25 schemes, all off by default. Results are blurred until
+  tapped, cleared when the app leaves the screen, and never stored. There's a caution alert for the
+  LGBTQ+ and circumvention categories.
+- **Check-up:** 12 guided Settings steps with ticks remembered on the phone.
+- **Lab:** a Debug-only Settings link lab.
+
+Other pieces:
+- **Reinstall demo:** a keychain install log for this app only, `ThisDeviceOnly`.
+- **Privacy manifest:** `App/Resources/PrivacyInfo.xcprivacy`, with no tracking and no data
+  collected.
+- **Nothing contacts the network:** grep for URLSession, CLGeocoder or http finds none.
+
+## Layout
+- `App/Sources/Model/`: signal types, plus the passive catalogue (`SignalCatalogue.swift`) and the
+  permission catalogue.
+- `App/Sources/Readers/`: passive sources.
+- `App/Sources/Permissions/`: permission sources.
+- `App/Sources/Scanner/`: `Scanner` (@Observable, in memory only).
+- `App/Sources/Sensitive/`, `App/Sources/CheckUp/`, `App/Sources/UI/`.
+- `Tests/CatalogueTests.swift`: unique ids, steps on every guided fix, the scheme list matching
+  Info.plist (25 max), no URL scheme of our own, owner-name detection, and every passive reading
+  having a definition.
 
 ## Owed (needs a real iPhone)
-1. Run the Settings link lab on a device and record where each link lands.
-2. Test every sensitive-app scheme with the app installed and after uninstalling it. Start with
-   `flo`.
-3. Check the Required Reason codes for boot time and active keyboards against Apple's current list.
-   No "show to user" reason may exist for them.
+1. Run every permission flow:
+   - Local Network: does the prompt get detected?
+   - Motion: is the first query the prompt?
+   - Bluetooth: do devices show up in 4 s?
+   - Photos: speed on a large library.
+   - Calendars: is access seen straight after granting?
+   - Camera: device list.
+   - Location: does a fix arrive within 5 s?
+2. Apple Music subscription uses `MusicSubscription.current`. It may need the MusicKit service on
+   the App ID; until then it shows "Couldn't tell".
+3. Settings link lab results, and every sensitive scheme with the app installed and after
+   uninstalling it (start with `flo`).
+4. Required Reason codes for boot time (35F9.1) and active keyboards (54BD.1). Neither has a
+   "display to the user" reason, so prepare reviewer notes.
+5. Motion sensors and heading only show values on a device (the Simulator has none).
 
-## Next: Phase 2
-Build the scanner from `docs/SIGNAL-INVENTORY.md`.
-- Don't use the undocumented Lockdown Mode key.
-- Name photo places offline: `CLGeocoder` sends coordinates to Apple.
+## Next: Phase 3
+- Port the hYYa design layer from Encrypted Notes.
+- One calm overall score.
+- Before/after re-scan.
+- iOS-version scoreboard.
+- History kept on the phone.
+- Share card.
+- Settings screen (Support hYYa, More from hYYa) and hYYa app suggestions on findings.

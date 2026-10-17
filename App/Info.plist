@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Merged with the build-generated Info.plist (GENERATE_INFOPLIST_FILE = YES).
+  Every permission is requested only when the user taps "Show me" for that category, never at launch.
+  No microphone, Health, HomeKit or tracking keys: we don't use them.
+-->
+<plist version="1.0">
+<dict>
+	<key>NSMotionUsageDescription</key>
+	<string>To show you what any app with Motion &amp; Fitness access can learn, such as your steps and whether you walk or drive. It stays on this iPhone.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>To show you what any app with location access can see about where you are. It stays on this iPhone.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>To show you what any app with camera access can learn about your cameras. No photo or video is taken.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>To show you which nearby devices any app with Bluetooth access can see, often with their owners' names. It stays on this iPhone.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>To show you which devices on your Wi-Fi any app with Local Network access can see. It stays on this iPhone.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>To show you what any app with Contacts access can learn. We only count; nothing is saved or sent.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>To show you what any app with Photos access can learn, such as the places your photos were taken. It stays on this iPhone.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>To show you what any app with Calendar access can learn. We only count; nothing is saved or sent.</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>To show you what any app with Reminders access can learn. We only count; nothing is saved or sent.</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>To show you what any app with Media &amp; Apple Music access can learn about your taste. It stays on this iPhone.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_airplay._tcp</string>
+		<string>_raop._tcp</string>
+		<string>_companion-link._tcp</string>
+		<string>_hap._tcp</string>
+		<string>_homekit._tcp</string>
+		<string>_matter._tcp</string>
+		<string>_googlecast._tcp</string>
+		<string>_spotify-connect._tcp</string>
+		<string>_sonos._tcp</string>
+		<string>_roku._tcp</string>
+		<string>_ipp._tcp</string>
+		<string>_ipps._tcp</string>
+		<string>_printer._tcp</string>
+		<string>_scanner._tcp</string>
+		<string>_uscan._tcp</string>
+		<string>_smb._tcp</string>
+		<string>_afpovertcp._tcp</string>
+		<string>_ssh._tcp</string>
+		<string>_sftp-ssh._tcp</string>
+		<string>_rfb._tcp</string>
+		<string>_hue._tcp</string>
+		<string>_device-info._tcp</string>
+		<string>_http._tcp</string>
+		<string>_amzn-wplay._tcp</string>
+	</array>
+	<!-- Sensitive-app check: exactly 25, the iOS 27 SDK cap. Grouped by category in
+	     App/Sources/Sensitive/SensitiveCatalogue.swift. See docs/SENSITIVE-APP-CATALOGUE.md. -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>grindr</string>
+		<string>blued</string>
+		<string>tinder</string>
+		<string>bumble</string>
+		<string>muslimpro</string>
+		<string>youversion</string>
+		<string>flo</string>
+		<string>clue</string>
+		<string>talkspace</string>
+		<string>headspace</string>
+		<string>iamsober</string>
+		<string>psiphon</string>
+		<string>onionhttp</string>
+		<string>protonvpn</string>
+		<string>nordvpn</string>
+		<string>sgnl</string>
+		<string>tg</string>
+		<string>threema</string>
+		<string>weixin</string>
+		<string>bnc</string>
+		<string>coinbase</string>
+		<string>metamask</string>
+		<string>bet365</string>
+		<string>teamblind</string>
+		<string>foxnews</string>
+	</array>
+</dict>
+</plist>
