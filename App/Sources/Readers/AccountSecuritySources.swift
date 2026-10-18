@@ -102,7 +102,7 @@ struct SecuritySource: SignalSource {
         var passcode = SignalReading(id: "passcode", value: hasPasscode ? "Passcode set · \(biometry)" : "No passcode")
         if !hasPasscode {
             passcode.severityOverride = .high
-            passcode.note = "Without a passcode, anyone holding this iPhone can see everything on it."
+            passcode.note = "Without a passcode, anyone holding this device can see everything on it."
         }
 
         let networks: [(String, PKPaymentNetwork)] = [("Visa", .visa), ("Mastercard", .masterCard), ("Amex", .amex), ("Discover", .discover), ("Maestro", .maestro), ("mada", .mada)]

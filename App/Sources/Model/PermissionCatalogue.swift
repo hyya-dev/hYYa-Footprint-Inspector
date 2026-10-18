@@ -30,7 +30,7 @@ extension SignalCatalogue {
 
         // Location
         .init(id: "loc-where", section: .location, title: "Where you are",
-              reveals: "Your position on a map, often to within a few metres, and how sure the phone is about it. Checked a few times a day, it shows where you live, work and spend your time.",
+              reveals: "Your position on a map, often to within a few metres, and how sure the device is about it. Checked a few times a day, it shows where you live, work and spend your time.",
               why: "So maps, delivery and weather apps can work where you are.",
               persistence: .changesOften, severity: .high, fix: locationFix),
         .init(id: "loc-altitude", section: .location, title: "Altitude and floor",
@@ -53,7 +53,7 @@ extension SignalCatalogue {
 
         // Camera
         .init(id: "cam-list", section: .camera, title: "Your cameras",
-              reveals: "Which cameras and depth sensors your phone has and which way they face. The line-up points to your exact model, for example whether it's a Pro.",
+              reveals: "Which cameras and depth sensors your device has and which way they face. The line-up points to your exact model, for example whether it's a Pro.",
               why: "So camera apps can offer the right lenses.",
               persistence: .hardware, severity: .low,
               fix: .guided("The list itself only reflects your model. What matters more is which apps can use the camera at all.", [

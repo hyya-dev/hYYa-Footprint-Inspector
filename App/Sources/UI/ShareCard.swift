@@ -21,7 +21,7 @@ struct ShareCardView: View {
                     .background(Color.white)
                     .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("My iPhone's footprint")
+                    Text("My device's footprint")
                         .font(.headline)
                         .foregroundStyle(.white.opacity(0.85))
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -32,7 +32,7 @@ struct ShareCardView: View {
                     .foregroundStyle(.white)
                 }
             }
-            Text("\(total) things any app could learn about my phone, without asking.")
+            Text("\(total) things any app could learn about my device, without asking.")
                 .font(.title3.weight(.semibold))
                 .foregroundStyle(.white)
             if !concerningTitles.isEmpty {
@@ -50,7 +50,7 @@ struct ShareCardView: View {
                 }
             }
             Divider().overlay(.white.opacity(0.3))
-            Text("Check yours with hYYa Footprint Inspector. Free, open source, and nothing leaves your phone.")
+            Text("Check yours with hYYa Footprint Inspector. Free, open source, and nothing leaves your device.")
                 .font(.footnote)
                 .foregroundStyle(.white.opacity(0.85))
         }
@@ -78,7 +78,7 @@ struct ShareCardButton: View {
 
     var body: some View {
         if let image = render() {
-            ShareLink(item: image, preview: SharePreview("My iPhone's footprint", image: image)) {
+            ShareLink(item: image, preview: SharePreview("My device's footprint", image: image)) {
                 Label("Share my result", systemImage: "square.and.arrow.up")
             }
             .buttonStyle(GhostButtonStyle())

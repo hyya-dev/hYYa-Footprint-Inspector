@@ -95,7 +95,7 @@ final class StoreScreenshotsUITests: XCTestCase {
         shot("store-06-checkup")
 
         tab("Scan")
-        let board = app.buttons.containing(NSPredicate(format: "label CONTAINS 'iOS scoreboard'")).firstMatch
+        let board = app.buttons.containing(NSPredicate(format: "label CONTAINS 'Privacy scoreboard'")).firstMatch
         scrollTo(board, max: 14)
         if board.exists { board.tap(); sleep(2); shot("store-07-scoreboard") }
     }

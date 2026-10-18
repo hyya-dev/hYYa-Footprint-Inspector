@@ -25,7 +25,7 @@ struct SectionView: View {
             if let kind { permissionCard(kind, hasFindings: !findings.isEmpty) }
 
             if !findings.isEmpty {
-                SectionTitle(title: "On this iPhone")
+                SectionTitle(title: "On this device")
                 Panel {
                     ForEach(findings) { finding in
                         NavigationLink { FindingDetailView(finding: finding) } label: {
@@ -73,7 +73,7 @@ struct SectionView: View {
         switch state {
         case .notAsked:
             InfoCard {
-                Text("Tap below and I'll ask iOS for the same permission an app would, then show you exactly what it gets. Nothing is saved or sent.")
+                Text("Tap below and I'll ask the system for the same permission an app would, then show you exactly what it gets. Nothing is saved or sent.")
                     .font(.system(.subheadline))
                     .foregroundStyle(Brand.textMuted)
                 Button {

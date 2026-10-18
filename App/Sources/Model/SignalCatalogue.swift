@@ -25,16 +25,16 @@ enum SignalCatalogue {
 // MARK: - Shared fix wording
 
 extension Fix {
-    static let restart = Fix.guided("Restarting your iPhone gives this a new value.", [
-        "Press and hold the side button and either volume button.",
-        "Drag the slider to turn the iPhone off.",
-        "Wait a few seconds, then hold the side button until the Apple logo appears.",
+    static let restart = Fix.guided("Restarting your device gives this a new value.", [
+        "Press and hold the side or top button and either volume button until the slider appears. On a device with a Home button, hold the side or top button alone.",
+        "Drag the slider to turn the device off.",
+        "Wait a few seconds, then hold the side or top button until the Apple logo appears.",
     ])
 
-    static let rename = Fix.guided("Give your iPhone a name that doesn't include your own.", [
+    static let rename = Fix.guided("Give your device a name that doesn't include your own.", [
         "Open Settings › General › About.",
         "Tap Name.",
-        "Choose something generic, such as \"iPhone\".",
+        "Choose something generic, such as the model name.",
     ])
 
     static let languageRegion = Fix.guided("Remove languages and custom formats you don't use. The fewer unusual choices, the more you blend in.", [
@@ -43,7 +43,7 @@ extension Fix {
         "Check the formats below (calendar, temperature, first day of week). Set back any you changed but don't need.",
     ])
 
-    static let keyboards = Fix.guided("Remove keyboards you don't use. Each extra keyboard makes your phone easier to tell apart.", [
+    static let keyboards = Fix.guided("Remove keyboards you don't use. Each extra keyboard makes your device easier to tell apart.", [
         "Open Settings › General › Keyboard › Keyboards.",
         "Tap Edit.",
         "Remove the keyboards you no longer type with.",
@@ -58,7 +58,7 @@ extension SignalCatalogue {
     static let passive: [SignalDefinition] = [
         // Device identity
         .init(id: "idfv", section: .identity, title: "Vendor ID",
-              reveals: "A long code that's the same in every app from one company on this phone. That company can link everything you do across its apps.",
+              reveals: "A long code that's the same in every app from one company on this device. That company can link everything you do across its apps.",
               why: "So one developer's apps can share settings and spot abuse.",
               persistence: .untilVendorAppsDeleted, severity: .high,
               fix: .guided("The code resets only when every app from that company is deleted.", [
@@ -66,18 +66,18 @@ extension SignalCatalogue {
                   "Delete all of them. The next install gets a new code.",
               ])),
         .init(id: "device-name", section: .identity, title: "Device name",
-              reveals: "Usually just \"iPhone\". A few apps with Apple's special permission can still read the name you chose, which often includes your first name.",
+              reveals: "Usually just the model name. A few apps with Apple's special permission can still read the name you chose, which often includes your first name.",
               why: "So you can tell your devices apart when sharing or syncing.",
               persistence: .untilYouChangeIt, severity: .low, fix: .rename),
-        .init(id: "os-version", section: .identity, title: "iOS version",
-              reveals: "Exactly which iOS version you run.",
+        .init(id: "os-version", section: .identity, title: "System version",
+              reveals: "Exactly which system version you run.",
               why: "So apps can turn features on or off.",
               persistence: .untilUpdate, severity: .low,
               fix: .guided("Keeping up to date puts you in the biggest crowd and gets you Apple's privacy fixes.", [
                   "Open Settings › General › Software Update.",
                   "Turn on Automatic Updates.",
               ])),
-        .init(id: "os-build", section: .identity, title: "iOS build number",
+        .init(id: "os-build", section: .identity, title: "System build number",
               reveals: "The exact build, which shows whether you run a beta or a rapid security update.",
               why: "So developers can match bug reports to builds.",
               persistence: .untilUpdate, severity: .medium,
@@ -86,7 +86,7 @@ extension SignalCatalogue {
                   "Choose Off, then install the next regular update.",
               ])),
         .init(id: "model-id", section: .identity, title: "Exact model",
-              reveals: "The precise iPhone model and its internal board code.",
+              reveals: "The precise device model and its internal board code.",
               why: "So apps can tune performance for your hardware.",
               persistence: .hardware, severity: .low, fix: .onlyApple()),
         .init(id: "kernel-version", section: .identity, title: "System core version",
@@ -96,11 +96,11 @@ extension SignalCatalogue {
 
         // System
         .init(id: "cpu-ram", section: .system, title: "Processor and memory",
-              reveals: "How many processor cores and how much memory your phone has.",
+              reveals: "How many processor cores and how much memory your device has.",
               why: "So apps can size their work to your hardware.",
               persistence: .hardware, severity: .low, fix: .onlyApple()),
         .init(id: "boot-time", section: .system, title: "Last restart",
-              reveals: "The exact second your phone last started. Few phones share it, so it can link you across apps until you restart.",
+              reveals: "The exact second your device last started. Few devices share it, so it can link you across apps until you restart.",
               why: "So apps can measure time that has passed.",
               persistence: .untilRestart, severity: .high, fix: .restart),
         .init(id: "low-power", section: .system, title: "Low Power Mode",
@@ -112,7 +112,7 @@ extension SignalCatalogue {
               why: "So apps can put off heavy work when the battery is low.",
               persistence: .changesOften, severity: .low, fix: .onlyApple()),
         .init(id: "thermal", section: .system, title: "Temperature state",
-              reveals: "Whether the phone is running warm.",
+              reveals: "Whether the device is running warm.",
               why: "So apps can ease off and avoid overheating.",
               persistence: .changesOften, severity: .low, fix: .onlyApple()),
 
@@ -122,14 +122,14 @@ extension SignalCatalogue {
               why: "So apps can plan downloads.",
               persistence: .hardware, severity: .low, fix: .onlyApple()),
         .init(id: "disk-free", section: .storage, title: "Free space, to the byte",
-              reveals: "Exactly how much space is free. It changes slowly, so two apps that read the same number at about the same time can tell they're on the same phone.",
+              reveals: "Exactly how much space is free. It changes slowly, so two apps that read the same number at about the same time can tell they're on the same device.",
               why: "So apps can check there's room before downloading.",
               persistence: .changesOften, severity: .high, fix: .onlyApple()),
-        .init(id: "volume-created", section: .storage, title: "When this iPhone was set up",
-              reveals: "The exact second this phone was set up or last erased. Hardly any other phone shares it, and it stays the same for years.",
+        .init(id: "volume-created", section: .storage, title: "When this device was set up",
+              reveals: "The exact second this device was set up or last erased. Hardly any other device shares it, and it stays the same for years.",
               why: "It's a side effect of how storage works. There's no good reason for apps to see it.",
               persistence: .untilErase, severity: .high,
-              fix: .onlyApple("Erasing the phone resets it, but that's not a real fix. Apple needs to hide this."),
+              fix: .onlyApple("Erasing the device resets it, but that's not a real fix. Apple needs to hide this."),
               status: .stillOpen),
 
         // Display
@@ -201,7 +201,7 @@ extension SignalCatalogue {
               reveals: "A number that goes up every time anything is copied. Two apps that read the same number can link you.",
               why: "So apps know when to refresh a Paste button.",
               persistence: .untilRestart, severity: .medium, fix: .restart,
-              status: .changed("Since iOS 27 it resets to zero when you restart.")),
+              status: .changed("Since version 27 it resets to zero when you restart.")),
         .init(id: "clip-kinds", section: .clipboard, title: "What's on the clipboard",
               reveals: "Whether you've copied text, a link, an image or a number, without the \"pasted from\" banner appearing. The contents themselves still trigger the banner.",
               why: "So apps can show or hide their Paste button.",
@@ -212,7 +212,7 @@ extension SignalCatalogue {
 
         // Motion sensors
         .init(id: "motion-raw", section: .motionSensors, title: "Motion sensors",
-              reveals: "Live readings from the accelerometer, gyroscope and magnetometer. They can reveal how you walk, hold the phone or travel, and tiny factory flaws can single out your phone.",
+              reveals: "Live readings from the accelerometer, gyroscope and magnetometer. They can reveal how you walk, hold the device or travel, and tiny factory flaws can single out your device.",
               why: "For games, orientation and fitness. Apple doesn't ask permission for these raw readings.",
               persistence: .changesOften, severity: .medium, fix: .onlyApple(), status: .stillOpen),
         .init(id: "heading", section: .motionSensors, title: "Which way you're facing",
@@ -231,7 +231,7 @@ extension SignalCatalogue {
               persistence: .changesOften, severity: .medium,
               fix: .leaveIt("Nothing to fix: a VPN can't hide that it's on. Keep using it if it helps you.")),
         .init(id: "local-ip", section: .network, title: "Device addresses",
-              reveals: "Your phone's addresses on the local network and on mobile data. Some can point to your home network.",
+              reveals: "Your device's addresses on the local network and on mobile data. Some can point to your home network.",
               why: "So apps can connect to nearby devices.",
               persistence: .changesOften, severity: .medium,
               fix: .guided("Private Wi-Fi addresses limit what networks see about you.", [
@@ -241,7 +241,7 @@ extension SignalCatalogue {
 
         // Fonts and voices
         .init(id: "fonts", section: .fontsVoices, title: "Fonts",
-              reveals: "Every font family on the phone. Extra fonts you installed make your phone stand out.",
+              reveals: "Every font family on the device. Extra fonts you installed make your device stand out.",
               why: "So apps can show text correctly.",
               persistence: .untilYouChangeIt, severity: .low,
               fix: .guided("Remove fonts you added but don't use.", [
@@ -249,7 +249,7 @@ extension SignalCatalogue {
                   "Remove fonts or font apps you don't need.",
               ])),
         .init(id: "voices", section: .fontsVoices, title: "Downloaded voices",
-              reveals: "The spoken voices on the phone. Voices you chose to download hint at languages you use or accessibility needs.",
+              reveals: "The spoken voices on the device. Voices you chose to download hint at languages you use or accessibility needs.",
               why: "So apps can read text aloud.",
               persistence: .untilYouChangeIt, severity: .medium,
               fix: .guided("Delete voices you don't use.", [
@@ -268,7 +268,7 @@ extension SignalCatalogue {
               persistence: .untilReinstall, severity: .low,
               fix: .leaveIt("Reinstalling resets it, which is rarely worth doing.")),
         .init(id: "first-download", section: .accountAndApp, title: "When your account first got this app",
-              reveals: "When your Apple Account first downloaded this app. It survives deleting the app and moving to a new phone.",
+              reveals: "When your Apple Account first downloaded this app. It survives deleting the app and moving to a new device.",
               why: "So developers can honour earlier purchases.",
               persistence: .followsAppleAccount, severity: .medium, fix: .onlyApple()),
 
@@ -300,10 +300,10 @@ extension SignalCatalogue {
               why: "So apps know whether to show an Apple Pay button.",
               persistence: .untilYouChangeIt, severity: .low, fix: .onlyApple()),
         .init(id: "mail-messages", section: .security, title: "Mail and Messages set up",
-              reveals: "Whether the Mail app has an account and whether the phone can send texts.",
+              reveals: "Whether the Mail app has an account and whether the device can send texts.",
               why: "So apps know whether to offer email or text sharing.",
               persistence: .untilYouChangeIt, severity: .low, fix: .onlyApple()),
-        .init(id: "on-call", section: .security, title: "Phone call in progress",
+        .init(id: "on-call", section: .security, title: "Call in progress",
               reveals: "Whether you're on a call right now.",
               why: "So apps can pause audio during calls.",
               persistence: .changesOften, severity: .low, fix: .onlyApple()),
@@ -316,10 +316,10 @@ extension SignalCatalogue {
                   "Turn off Allow Apps to Request to Track.",
               ])),
         .init(id: "managed", section: .security, title: "Managed by an organisation",
-              reveals: "Whether an organisation's profile configures apps on this phone, such as on a work phone.",
+              reveals: "Whether an organisation's profile configures apps on this device, such as on a work device.",
               why: "So work apps can pick up their settings.",
               persistence: .untilYouChangeIt, severity: .medium,
-              fix: .guided("If this is your own phone and you don't recognise a profile, review it.", [
+              fix: .guided("If this is your own device and you don't recognise a profile, review it.", [
                   "Open Settings › General › VPN & Device Management.",
                   "Check each profile. Remove any you don't recognise.",
               ])),
@@ -343,9 +343,9 @@ extension SignalCatalogue {
                   "Set Advanced Tracking and Fingerprinting Protection to All Browsing.",
               ])),
         .init(id: "reinstall-memory", section: .reinstall, title: "Recognised after you delete an app",
-              reveals: "Apps can leave a note in the phone's keychain, which survives deleting the app. When you reinstall, the app finds its note and knows you're back, and how many times you've reinstalled.",
+              reveals: "Apps can leave a note in the device's keychain, which survives deleting the app. When you reinstall, the app finds its note and knows you're back, and how many times you've reinstalled.",
               why: "The keychain keeps passwords safe across reinstalls; apps can store anything there.",
               persistence: .untilErase, severity: .high,
-              fix: .onlyApple("Only erasing the whole phone clears it. Apple could limit this.")),
+              fix: .onlyApple("Only erasing the whole device clears it. Apple could limit this.")),
     ]
 }

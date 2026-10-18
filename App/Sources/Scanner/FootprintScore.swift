@@ -76,8 +76,8 @@ struct FootprintScore: Equatable, Sendable {
     static let explanation = """
     Everyone starts at 100. Each detail worth a look that you can fix takes off \(highWeight) points, and each smaller one takes off \(mediumWeight). Settings left at their ordinary default don't count.
 
-    Things only Apple can fix aren't in the score, because they're the same on every iPhone and nothing you do changes them. We list them separately and track Apple's progress in the iOS scoreboard.
+    Things only Apple can fix aren't in the score, because they're the same on every device and nothing you do changes them. We list them separately and track Apple's progress in the privacy scoreboard.
 
-    The score isn't a measure of how unique your phone is: that would need data from other phones, and this app never sends or receives any.
+    The score isn't a measure of how unique your device is: that would need data from other devices, and this app never sends or receives any.
     """
 }

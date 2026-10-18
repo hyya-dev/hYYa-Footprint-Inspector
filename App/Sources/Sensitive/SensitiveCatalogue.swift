@@ -27,7 +27,7 @@ struct SensitiveApp: Identifiable, Sendable, Hashable {
 }
 
 enum SensitiveCatalogue {
-    static let riskyCountriesCaution = "In some countries, having these apps can be risky. This check runs only on your phone, and only you see the result."
+    static let riskyCountriesCaution = "In some countries, having these apps can be risky. This check runs only on your device, and only you see the result."
 
     static let categories: [SensitiveCategory] = [
         .init(id: "dating", title: "Dating and LGBTQ+", symbol: "heart",
@@ -46,7 +46,7 @@ enum SensitiveCatalogue {
               caution: nil,
               apps: [.init(name: "Flo", scheme: "flo"), .init(name: "Clue", scheme: "clue"),
                      .init(name: "Talkspace", scheme: "talkspace"), .init(name: "Headspace", scheme: "headspace")],
-              advice: ["Prefer apps that keep your data on the phone or offer an anonymous mode.", "Delete health apps you no longer use, after asking the app to delete your data."]),
+              advice: ["Prefer apps that keep your data on the device or offer an anonymous mode.", "Delete health apps you no longer use, after asking the app to delete your data."]),
         .init(id: "recovery", title: "Addiction and recovery", symbol: "leaf",
               inference: "An app could guess you're recovering from a dependence.",
               caution: nil,
@@ -74,7 +74,7 @@ enum SensitiveCatalogue {
               inference: "An app could guess you talk anonymously about your workplace, or are looking to leave.",
               caution: nil,
               apps: [.init(name: "Blind", scheme: "teamblind")],
-              advice: ["If your employer manages this phone, keep job-hunting and workplace-forum apps on a personal device."]),
+              advice: ["If your employer manages this device, keep job-hunting and workplace-forum apps on a personal device."]),
         .init(id: "politics", title: "Politics and news", symbol: "newspaper",
               inference: "An app could guess your political leaning from the news you read.",
               caution: nil,

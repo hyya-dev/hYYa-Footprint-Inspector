@@ -63,7 +63,7 @@ final class PhotosPermissionSource: SignalSource {
         }
         if summary.geotagged > 0 {
             places.severityOverride = .high
-            places.note = places.note ?? "Grouped on this iPhone. Nothing was sent anywhere."
+            places.note = places.note ?? "Grouped on this device. Nothing was sent anywhere."
         }
 
         // Likely home and work
@@ -77,7 +77,7 @@ final class PhotosPermissionSource: SignalSource {
         )
         if !standouts.isEmpty {
             homeWork.severityOverride = .high
-            homeWork.note = "Worked out on this iPhone from photo locations alone. Any app with full Photos access could do the same."
+            homeWork.note = "Worked out on this device from photo locations alone. Any app with full Photos access could do the same."
         }
 
         // Library size

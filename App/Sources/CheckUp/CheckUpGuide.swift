@@ -25,7 +25,7 @@ enum CheckUpGuide {
               path: "Settings › Privacy & Security › Safety Check",
               actions: ["Tap Manage Sharing & Access.", "Go through each screen and remove anything you don't recognise or no longer need."]),
         .init(id: "health", title: "Health", symbol: "heart.text.square",
-              why: "Health data is the most personal information on your phone: sleep, heart, cycles, medicines.",
+              why: "Health data is the most personal information on your device: sleep, heart, cycles, medicines.",
               path: "Settings › Health › Data Access & Devices",
               actions: ["Open each app in the list.", "Turn off any data type the app doesn't truly need.", "Remove apps you no longer use."]),
         .init(id: "location", title: "Location", symbol: "location",
