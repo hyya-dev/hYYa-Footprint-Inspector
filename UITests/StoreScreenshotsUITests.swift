@@ -50,13 +50,6 @@ final class StoreScreenshotsUITests: XCTestCase {
     }
 
     /// The Settings screen from top to bottom, attached as `settings-1…`, for design review.
-    /// Drags the screen so `element` ends up at `y` points from the top.
-    private func align(_ element: XCUIElement, toY y: CGFloat) {
-        let start = element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-        let end = app.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: element.frame.midX, dy: y))
-        start.press(forDuration: 0.1, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.6)
-    }
-
     func testCaptureSettings() {
         app.launch()
         sleep(2)
@@ -77,15 +70,15 @@ final class StoreScreenshotsUITests: XCTestCase {
         sleep(5)
         shot("store-02-results")
 
-        // Land with the "Worth a look" heading just below the status bar, not mid-card.
-        let worth = app.staticTexts.containing(NSPredicate(format: "label CONTAINS[c] 'worth a look'")).element(boundBy: 1)
-        if worth.waitForExistence(timeout: 3) {
-            align(worth, toY: 120)
-        } else {
-            app.swipeUp(velocity: .slow)
-        }
-        sleep(1)
+        // A clue group opened from the top, so nothing sits half-scrolled under the status bar.
+        let group = app.buttons.containing(NSPredicate(format: "label BEGINSWITH 'Storage'")).firstMatch
+        scrollTo(group)
+        group.tap()
+        sleep(2)
         shot("store-03-clues")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        sleep(1)
+        app.swipeDown(velocity: .fast)
 
         let clue = app.buttons.containing(NSPredicate(format: "label CONTAINS 'Last restart'")).firstMatch
         scrollTo(clue)
