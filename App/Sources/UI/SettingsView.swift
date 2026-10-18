@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+import StoreKit
 import SwiftUI
 
 enum hYYaLinks {
@@ -29,7 +30,8 @@ enum hYYaLinks {
 struct SettingsView: View {
     @Environment(HistoryStore.self) private var history
     @Environment(\.openURL) private var openURL
-    @AppStorage(HyyaSuggestions.settingKey) private var showSuggestions = true
+    @Environment(\.requestReview) private var requestReview
+    @AppStorage("reviewCardTapped") private var reviewTapped = false
     @State private var confirmingClear = false
 
     static let shareMessage = "hYYa Footprint Inspector shows what any app can learn about your iPhone, and how to fix it. Free, open source, nothing leaves your phone."
@@ -42,7 +44,7 @@ struct SettingsView: View {
 
                 ReviewCard()
 
-                SectionTitle(title: "Your data")
+                SectionTitle(title: "Your scans")
                 Panel {
                     NavigationLink { HistoryView() } label: {
                         RowCard(symbol: "clock.arrow.circlepath", title: "Scan history") {
@@ -63,33 +65,16 @@ struct SettingsView: View {
                 Text("Sensitive-app results are never saved.")
                     .font(.footnote).foregroundStyle(Brand.textSubtle).padding(.horizontal, 4).padding(.top, -14)
 
-                SectionTitle(title: "Suggestions")
-                Panel {
-                    Toggle(isOn: $showSuggestions) {
-                        Text("Suggest hYYa apps in fixes").foregroundStyle(Brand.ink)
-                    }
-                    .tint(Brand.sand)
-                    .padding(16)
-                }
-                Text("Where one of our apps genuinely helps, it's mentioned after the free fix.")
-                    .font(.footnote).foregroundStyle(Brand.textSubtle).padding(.horizontal, 4).padding(.top, -14)
-
-                SectionTitle(title: "Open source")
-                Panel {
-                    Button { open(hYYaLinks.source) } label: {
-                        RowCard(symbol: "chevron.left.forwardslash.chevron.right", title: "Source code", subtitle: "github.com/hyya-dev") {
-                            Image(systemName: "arrow.up.right")
-                        }
-                    }
-                    .buttonStyle(PressableCardStyle())
-                    RowCard(symbol: "doc.text", title: "Licence") { Text("MPL 2.0") }
-                    RowCard(symbol: "number", title: "Version") { Text(Self.version) }
-                }
-
+                // Same order as Encrypted Notes. Share and Rate carry subtitles because they're asks;
+                // the other three are errands the user already knows the reason for.
                 SectionTitle(title: "Support hYYa")
                 Panel {
                     ShareLink(item: hYYaLinks.shareTarget, message: Text(Self.shareMessage)) {
                         RowCard(symbol: "square.and.arrow.up", title: "Share", subtitle: "Help your friends take back their digital privacy.")
+                    }
+                    .buttonStyle(PressableCardStyle())
+                    Button { rate() } label: {
+                        RowCard(symbol: "star", title: "Rate the App", subtitle: "Your reviews keep us smiling while coding.")
                     }
                     .buttonStyle(PressableCardStyle())
                     Button { open(hYYaLinks.contact) } label: {
@@ -101,7 +86,7 @@ struct SettingsView: View {
                     }
                     .buttonStyle(PressableCardStyle())
                     Button { open(hYYaLinks.security) } label: {
-                        RowCard(symbol: "lock.shield", title: "Report a Security Issue", subtitle: "Opens Mail") { Image(systemName: "arrow.up.right") }
+                        RowCard(symbol: "lock.shield", title: "Report a Security Issue") { Image(systemName: "arrow.up.right") }
                     }
                     .buttonStyle(PressableCardStyle())
                 }
@@ -126,6 +111,15 @@ struct SettingsView: View {
                         .font(.caption2.weight(.semibold))
                         .tracking(1.4)
                         .foregroundStyle(Brand.textSubtle)
+                    Text("Version \(Self.version) · Open source, MPL 2.0")
+                        .font(.caption)
+                        .foregroundStyle(Brand.textSubtle)
+                    Button { open(hYYaLinks.source) } label: {
+                        Label("View the source code", systemImage: "arrow.up.right")
+                            .labelStyle(TrailingIconLabelStyle())
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Brand.sand)
+                    }
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -138,6 +132,13 @@ struct SettingsView: View {
         }
     }
 
+    /// Same behaviour as the rating card at the top.
+    private func rate() {
+        Haptics.selection()
+        reviewTapped = true
+        if let url = hYYaLinks.appStoreReview { openURL(url) } else { requestReview() }
+    }
+
     private func open(_ url: URL) {
         Haptics.selection()
         openURL(url)
@@ -148,6 +149,12 @@ struct SettingsView: View {
         let short = info?["CFBundleShortVersionString"] as? String ?? "?"
         let build = info?["CFBundleVersion"] as? String ?? "?"
         return "\(short) (\(build))"
+    }
+}
+
+struct TrailingIconLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 4) { configuration.title; configuration.icon }
     }
 }
 
