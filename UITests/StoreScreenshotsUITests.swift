@@ -50,6 +50,37 @@ final class StoreScreenshotsUITests: XCTestCase {
     }
 
     /// The Settings screen from top to bottom, attached as `settings-1…`, for design review.
+    /// Candidate screens for a stronger slide, attached as `cand-…`. Grants permissions when asked.
+    func testCaptureCandidates() {
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        app.launch()
+        sleep(2)
+        tap("Start scan")
+        XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 20))
+        for group in ["Remembered after deleting", "Location", "Photos", "Contacts", "Web fingerprint", "Account and App Store"] {
+            app.swipeDown(velocity: .fast); app.swipeDown(velocity: .fast)
+            let row = app.buttons.containing(NSPredicate(format: "label BEGINSWITH %@", group)).firstMatch
+            scrollTo(row, max: 16)
+            guard row.exists else { continue }
+            row.tap()
+            sleep(1)
+            let show = app.buttons["Show me"].firstMatch
+            if show.waitForExistence(timeout: 2) {
+                show.tap()
+                for label in ["Allow While Using App", "Allow Full Access", "Allow", "Continue", "OK"] {
+                    let b = springboard.buttons[label]
+                    if b.waitForExistence(timeout: 3) { b.tap(); sleep(1) }
+                }
+                sleep(4)
+            }
+            shot("cand-\(group)")
+            app.swipeUp(velocity: .slow)
+            shot("cand-\(group)-2")
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+            sleep(1)
+        }
+    }
+
     func testCaptureSettings() {
         app.launch()
         sleep(2)
@@ -70,15 +101,17 @@ final class StoreScreenshotsUITests: XCTestCase {
         sleep(5)
         shot("store-02-results")
 
-        // A clue group opened from the top, so nothing sits half-scrolled under the status bar.
-        let group = app.buttons.containing(NSPredicate(format: "label BEGINSWITH 'Storage'")).firstMatch
-        scrollTo(group)
-        group.tap()
+        // The "Worth a look" list, with the comparison card's top edge just below the status bar,
+        // so nothing sits half-hidden under the clock.
+        let card = app.staticTexts.containing(NSPredicate(format: "label CONTAINS[c] 'since your last scan'")).firstMatch
+        if card.waitForExistence(timeout: 3) {
+            let top = app.windows.firstMatch.frame.minY + 66
+            let start = card.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            let end = app.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: card.frame.midX, dy: top + 34))
+            start.press(forDuration: 0.1, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.8)
+        }
         sleep(2)
         shot("store-03-clues")
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-        sleep(1)
-        app.swipeDown(velocity: .fast)
 
         let clue = app.buttons.containing(NSPredicate(format: "label CONTAINS 'Last restart'")).firstMatch
         scrollTo(clue)
