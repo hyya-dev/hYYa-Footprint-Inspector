@@ -49,6 +49,15 @@ final class StoreScreenshotsUITests: XCTestCase {
         while !element.isHittable && n < max { app.swipeUp(velocity: .slow); n += 1 }
     }
 
+    /// The Settings screen from top to bottom, attached as `settings-1…`, for design review.
+    func testCaptureSettings() {
+        app.launch()
+        sleep(2)
+        tab("Settings")
+        shot("settings-1")
+        for i in 2...4 { app.swipeUp(velocity: .slow); shot("settings-\(i)") }
+    }
+
     func testCaptureStoreScreens() {
         app.launch()
         sleep(2)
