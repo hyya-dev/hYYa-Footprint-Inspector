@@ -36,7 +36,7 @@ struct LivingMascot: View {
 
     static let defaultTips = [
         "Every app can read what I read. That's the point.",
-        "Restarting your phone gives some clues a fresh value.",
+        "Restarting your device gives some clues a fresh value.",
         "Fewer apps installed means fewer clues to find.",
         "I never send anything anywhere. Promise.",
     ]

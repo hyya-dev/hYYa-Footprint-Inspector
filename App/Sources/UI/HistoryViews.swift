@@ -32,7 +32,7 @@ struct ComparisonCard: View {
             .font(.title2.weight(.bold).monospacedDigit())
 
             if comparison.osChanged {
-                Label("You updated iOS since then.", systemImage: "arrow.down.app")
+                Label("You updated the system since then.", systemImage: "arrow.down.app")
                     .font(.subheadline)
                     .foregroundStyle(Brand.accent)
             }
@@ -131,7 +131,7 @@ struct HistoryView: View {
                     }
                 }
             } footer: {
-                Text("Kept only on this iPhone, not in backups. Values themselves are never saved: only the score, what was worth a look, and a scrambled marker to spot changes.")
+                Text("Kept only on this device, not in backups. Values themselves are never saved: only the score, what was worth a look, and a scrambled marker to spot changes.")
             }
         }
         .brandListBackground()
@@ -139,7 +139,7 @@ struct HistoryView: View {
     }
 
     static func shortOS(_ full: String) -> String {
-        full.replacingOccurrences(of: "Version ", with: "iOS ").components(separatedBy: " (").first ?? full
+        full.replacingOccurrences(of: "Version ", with: "\(System.name) ").components(separatedBy: " (").first ?? full
     }
 }
 
@@ -159,16 +159,16 @@ struct ScoreboardView: View {
     var body: some View {
         List {
                 Section {
-                    MascotSays(line: "I keep score of what Apple has fixed. Updating iOS is the easiest privacy win.", mood: .happy, size: 80)
+                    MascotSays(line: "I keep score of what Apple has fixed. Updating the system is the easiest privacy win.", mood: .happy, size: 80)
                         .listRowBackground(Color.clear)
                         .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
                 }
             Section {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("You're on iOS \(UIDevice.current.systemVersion)")
+                    Text("You're on \(System.name) \(UIDevice.current.systemVersion)")
                         .font(.headline)
                     Text(Self.majorVersion < 27
-                         ? "Updating to iOS 27 brings the fixes below."
+                         ? "Updating to \(System.name) 27 brings the fixes below."
                          : "You have Apple's latest fixes.")
                         .font(.subheadline)
                         .foregroundStyle(Brand.textMuted)
@@ -195,12 +195,12 @@ struct ScoreboardView: View {
                     }
                 }
             } header: {
-                Text("Still open in iOS 27")
+                Text("Still open in \(System.name) 27")
             } footer: {
                 Text("These need a change from Apple. Nothing in Settings switches them off.")
             }
             if let change = osChange {
-                Section("After your last iOS update") {
+                Section("After your last system update") {
                     Text("Your score went from \(change.previous.score) to \(change.current.score) across the update to \(HistoryView.shortOS(change.current.osVersion)).")
                     if !change.resolved.isEmpty {
                         Text("No longer worth a look: \(ComparisonCard.titles(change.resolved).joined(separator: ", ")).")
@@ -210,7 +210,7 @@ struct ScoreboardView: View {
             }
         }
         .brandListBackground()
-        .navigationTitle("iOS scoreboard")
+        .navigationTitle("Privacy scoreboard")
     }
 
     private static var majorVersion: Int {

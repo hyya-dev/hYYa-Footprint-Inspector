@@ -308,6 +308,11 @@ struct SeverityDot: View {
     }
 }
 
+/// The running system's own name ("iOS", "iPadOS"), so no copy assumes which device it's on.
+@MainActor enum System {
+    static var name: String { UIDevice.current.systemName }
+}
+
 struct StatusBadge: View {
     let status: IOSStatus
     var body: some View {
@@ -315,7 +320,7 @@ struct StatusBadge: View {
         case .unverified:
             EmptyView()
         case .stillOpen:
-            Pill(text: "Still open in iOS 27", symbol: "exclamationmark.circle.fill", fg: Brand.concern, bg: Brand.sunflowerSoft)
+            Pill(text: "Still open in \(System.name) 27", symbol: "exclamationmark.circle.fill", fg: Brand.concern, bg: Brand.sunflowerSoft)
         case .changed(let note):
             Pill(text: note, symbol: "checkmark.seal.fill", fg: Brand.green, bg: Brand.mintSoft)
         }

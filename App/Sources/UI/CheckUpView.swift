@@ -16,7 +16,7 @@ struct CheckUpView: View {
             Page {
                 HeroCard(eyebrow: "Permission check-up",
                          title: done.count == total ? "All checked!" : "\(done.count) of \(total) checked",
-                         subtitle: "iPhone never tells one app which other apps can reach your Health, location or photos. Only Settings knows, so let's look together.",
+                         subtitle: "The system never tells one app which other apps can reach your Health, location or photos. Only Settings knows, so let's look together.",
                          mood: done.count == total ? .happy : .idle,
                          mascotSize: 104) {
                     ProgressView(value: Double(done.count), total: Double(total))

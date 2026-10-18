@@ -44,7 +44,7 @@ private struct IdleHome: View {
                     .font(.system(size: 34, weight: .bold))
                     .foregroundStyle(Brand.ink)
                     .fixedSize(horizontal: false, vertical: true)
-                Text("A scan reads exactly what any app on this iPhone can read, then shows you how to hide what matters.")
+                Text("A scan reads exactly what any app on this device can read, then shows you how to hide what matters.")
                     .font(.body)
                     .foregroundStyle(Brand.textMuted)
                     .lineSpacing(2)
@@ -52,7 +52,7 @@ private struct IdleHome: View {
             VStack(spacing: 14) {
                 Button("Start scan") { Task { await scanner.scan() } }
                     .buttonStyle(PrimaryCTAButtonStyle())
-                Text("Nothing leaves your phone · Free · Open source")
+                Text("Nothing leaves your device · Free · Open source")
                     .font(.footnote)
                     .foregroundStyle(Brand.textSubtle)
             }
@@ -121,7 +121,7 @@ private struct Results: View {
                     .font(.system(size: 30, weight: .bold))
                     .foregroundStyle(Brand.ink)
                 AccentRule().padding(.vertical, 4)
-                Text("Any app can read \(scanner.findingsWithoutAsking.count) things about this iPhone. \(concerning.isEmpty ? "Nothing stands out." : "\(concerning.count) are worth a look.")")
+                Text("Any app can read \(scanner.findingsWithoutAsking.count) things about this device. \(concerning.isEmpty ? "Nothing stands out." : "\(concerning.count) are worth a look.")")
                     .font(.body)
                     .foregroundStyle(Brand.textMuted)
                     .lineSpacing(2)
@@ -165,11 +165,11 @@ private struct Results: View {
         SectionTitle(title: "Over time")
         Panel {
             NavigationLink { ScoreboardView() } label: {
-                RowCard(symbol: "checkmark.seal", title: "iOS scoreboard", subtitle: "What Apple has fixed, and what's still open")
+                RowCard(symbol: "checkmark.seal", title: "Privacy scoreboard", subtitle: "What Apple has fixed, and what's still open")
             }
             .buttonStyle(PressableCardStyle())
             NavigationLink { HistoryView() } label: {
-                RowCard(symbol: "chart.line.uptrend.xyaxis", title: "Scan history", subtitle: "Kept only on this iPhone")
+                RowCard(symbol: "chart.line.uptrend.xyaxis", title: "Scan history", subtitle: "Kept only on this device")
             }
             .buttonStyle(PressableCardStyle())
         }

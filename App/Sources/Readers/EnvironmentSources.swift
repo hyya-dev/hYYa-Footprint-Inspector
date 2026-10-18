@@ -169,7 +169,7 @@ struct ClipboardSource: SignalSource {
         if board.hasColors { kinds.append("Colour") }
         return [
             .init(id: "clip-count", value: board.changeCount.formatted(.number),
-                  items: ["Every copy on this phone adds one."]),
+                  items: ["Every copy on this device adds one."]),
             .init(id: "clip-kinds",
                   value: kinds.isEmpty ? "Empty" : kinds.joined(separator: ", "),
                   items: ["Items: \(board.numberOfItems)", "None of the contents were read."]),

@@ -91,7 +91,7 @@ private struct ContactSummary: Sendable {
         summary.accounts = containers.map { container in
             let kind: String
             switch container.type {
-            case .local: kind = "On this iPhone"
+            case .local: kind = "On this device"
             case .exchange: kind = "Exchange"
             case .cardDAV: kind = "CardDAV"
             default: kind = "Other"

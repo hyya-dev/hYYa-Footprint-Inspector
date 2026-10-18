@@ -42,7 +42,7 @@ struct IdentitySource: SignalSource {
             out.append(.init(id: "idfv", value: idfv))
         }
         out.append(.init(id: "device-name", value: device.name))
-        out.append(.init(id: "os-version", value: "iOS \(device.systemVersion)"))
+        out.append(.init(id: "os-version", value: "\(device.systemName) \(device.systemVersion)"))
         let build = Sysctl.string("kern.osversion") ?? "Unknown"
         out.append(.init(id: "os-build", value: build, items: [ProcessInfo.processInfo.operatingSystemVersionString]))
         let machine = Sysctl.string("hw.machine") ?? "Unknown"
@@ -125,7 +125,7 @@ struct StorageSource: SignalSource {
         }
         if let created = values.volumeCreationDate {
             out.append(.init(id: "volume-created", value: Format.dateTime(created),
-                             note: "Few phones were set up in this exact second."))
+                             note: "Few devices were set up in this exact second."))
         }
         return out
     }

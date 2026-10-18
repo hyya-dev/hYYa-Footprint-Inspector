@@ -38,12 +38,12 @@ enum Persistence: Sendable {
         case .untilRestart: "Until you restart"
         case .untilVendorAppsDeleted: "Until you delete every app from that company"
         case .untilReinstall: "Until you reinstall the app"
-        case .untilErase: "Until you erase the phone"
+        case .untilErase: "Until you erase the device"
         case .hardware: "Fixed for this model"
         case .untilYouChangeIt: "Until you change the setting"
         case .changesOften: "Changes often"
         case .followsAppleAccount: "Follows your Apple Account"
-        case .untilUpdate: "Until you update iOS"
+        case .untilUpdate: "Until you update the system"
         }
     }
 }
@@ -76,7 +76,7 @@ struct Fix: Sendable {
     /// Ordered steps for guided fixes. Empty when there's nothing to do.
     var steps: [String] = []
 
-    static func onlyApple(_ summary: String = "No setting changes this. Only an iOS update from Apple can.") -> Fix {
+    static func onlyApple(_ summary: String = "No setting changes this. Only a system update from Apple can.") -> Fix {
         Fix(level: .onlyApple, summary: summary)
     }
     static func guided(_ summary: String, _ steps: [String]) -> Fix {

@@ -30,7 +30,7 @@ struct FindingDetailView: View {
                 Text(def.title)
                     .font(.system(size: 30, weight: .bold))
                     .foregroundStyle(Brand.textPrimary)
-                Text("On your iPhone")
+                Text("On your device")
                     .font(.system(.caption).weight(.bold))
                     .foregroundStyle(Brand.textSubtle)
                 Text(finding.reading.value)
@@ -72,7 +72,7 @@ struct FindingDetailView: View {
 
             MascotSays(line: def.reveals, mood: finding.severity == .high ? .concerned : .thinking, size: 78)
 
-            InfoCard(title: "Why iPhone allows it", symbol: "questionmark.circle") {
+            InfoCard(title: "Why the system allows it", symbol: "questionmark.circle") {
                 Text(def.why).font(.system(.body)).foregroundStyle(Brand.textMuted)
             }
 

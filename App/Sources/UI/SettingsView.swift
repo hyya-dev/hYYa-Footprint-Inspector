@@ -34,13 +34,13 @@ struct SettingsView: View {
     @AppStorage("reviewCardTapped") private var reviewTapped = false
     @State private var confirmingClear = false
 
-    static let shareMessage = "hYYa Footprint Inspector shows what any app can learn about your iPhone, and how to fix it. Free, open source, nothing leaves your phone."
+    static let shareMessage = "hYYa Footprint Inspector shows what any app can learn about your device, and how to fix it. Free, open source, nothing leaves your device."
 
     var body: some View {
         NavigationStack {
             Page {
                 HeroCard(eyebrow: "Settings", title: "hYYa Footprint Inspector",
-                         subtitle: "Everything here stays on this iPhone.", mood: .idle, mascotSize: 96)
+                         subtitle: "Everything here stays on this device.", mood: .idle, mascotSize: 96)
 
                 ReviewCard()
 
@@ -53,7 +53,7 @@ struct SettingsView: View {
                     }
                     .buttonStyle(PressableCardStyle())
                     NavigationLink { ScoreboardView() } label: {
-                        RowCard(symbol: "checkmark.seal", title: "iOS scoreboard")
+                        RowCard(symbol: "checkmark.seal", title: "Privacy scoreboard")
                     }
                     .buttonStyle(PressableCardStyle())
                     Button { confirmingClear = true } label: {
@@ -107,6 +107,11 @@ struct SettingsView: View {
 
                 VStack(spacing: Brand.Space.sm) {
                     SectionDivider()
+                    Image("MascotCutout")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 82)
+                        .accessibilityHidden(true)
                     Text(Brand.brandUppercased("hYYa Footprint Inspector"))
                         .font(.caption2.weight(.semibold))
                         .tracking(1.4)

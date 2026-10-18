@@ -42,7 +42,7 @@ struct SensitiveView: View {
                         CategoryToggle(category: category, isOn: chosen.contains(category.id)) { toggle(category.id) }
                     }
                 }
-                Text("iOS lets each app ask about 25 apps at most, so I picked the ones that say the most about a person.")
+                Text("The system lets each app ask about 25 apps at most, so I picked the ones that say the most about a person.")
                     .font(.system(.footnote))
                     .foregroundStyle(Brand.textSubtle)
                     .padding(.horizontal, 4)
@@ -130,7 +130,7 @@ struct SensitiveView: View {
                 Text("What you can do")
                     .font(.headline)
                     .foregroundStyle(Brand.ink)
-                Text("Any app on this phone could find the same, without asking. No setting stops it. What helps is fewer revealing apps installed:")
+                Text("Any app on this device could find the same, without asking. No setting stops it. What helps is fewer revealing apps installed:")
                     .font(.subheadline)
                     .foregroundStyle(Brand.textMuted)
                 StepList(steps: [

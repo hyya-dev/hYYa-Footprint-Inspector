@@ -89,7 +89,7 @@ struct ReinstallSource: SignalSource {
         let count = log.count
         var reading = SignalReading(
             id: "reinstall-memory",
-            value: count == 1 ? "Installed once on this iPhone" : "Installed \(count) times on this iPhone",
+            value: count == 1 ? "Installed once on this device" : "Installed \(count) times on this device",
             items: log.enumerated().map { "Install \($0.offset + 1): \(Format.dateTime($0.element))" }
                 + ["First seen: \(Format.dateTime(first))"],
             note: count == 1
