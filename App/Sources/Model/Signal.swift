@@ -31,7 +31,7 @@ enum Severity: Int, Comparable, Sendable {
 
 /// How long a value stays the same, which is what makes it useful for tracking.
 enum Persistence: Sendable {
-    case untilRestart, untilReinstall, untilVendorAppsDeleted, untilErase, hardware, untilYouChangeIt, changesOften, followsAppleAccount, untilUpdate
+    case untilRestart, untilReinstall, untilVendorAppsDeleted, untilErase, hardware, untilYouChangeIt, changesOften, followsAppleAccount, untilUpdate, permanent
 
     var label: String {
         switch self {
@@ -44,6 +44,7 @@ enum Persistence: Sendable {
         case .changesOften: "Changes often"
         case .followsAppleAccount: "Follows your Apple Account"
         case .untilUpdate: "Until you update the system"
+        case .permanent: "Never changes, even if you erase the device"
         }
     }
 }
@@ -75,12 +76,19 @@ struct Fix: Sendable {
     var summary: String
     /// Ordered steps for guided fixes. Empty when there's nothing to do.
     var steps: [String] = []
+    /// Mac only: the System Settings page that "Open in System Settings" goes to, as an
+    /// `x-apple.systempreferences:` id (docs/MACOS-PLAN.md lists the ones that work).
+    var settingsPane: String? = nil
 
     static func onlyApple(_ summary: String = "No setting changes this. Only a system update from Apple can.") -> Fix {
         Fix(level: .onlyApple, summary: summary)
     }
     static func guided(_ summary: String, _ steps: [String]) -> Fix {
         Fix(level: .guided, summary: summary, steps: steps)
+    }
+    /// Mac: steps plus a button that opens the right System Settings page.
+    static func settings(_ summary: String, pane: String, _ steps: [String]) -> Fix {
+        Fix(level: .openSettings, summary: summary, steps: steps, settingsPane: pane)
     }
     /// For signals that reflect a choice the user needs (accessibility, protective settings).
     static func leaveIt(_ summary: String) -> Fix {
@@ -100,13 +108,15 @@ enum SignalSection: String, CaseIterable, Identifiable, Sendable {
     case identity, system, storage, display, audio, language, accessibility, clipboard, motionSensors
     case network, fontsVoices, accountAndApp, graphics, security, web, reinstall
     case motion, location, camera, bluetooth, localNetwork, contacts, photos, calendars, reminders, music
+    /// Mac only.
+    case person, apps
 
     var id: String { rawValue }
 
     /// The sections this platform's scan fills, in display order.
     static var onThisPlatform: [SignalSection] {
         #if os(iOS)
-        allCases
+        allCases.filter { ![.person, .apps].contains($0) }
         #else
         MacSources.sections
         #endif
@@ -114,17 +124,28 @@ enum SignalSection: String, CaseIterable, Identifiable, Sendable {
 
     var title: String {
         switch self {
+        #if os(macOS)
+        case .identity: "This Mac"
+        case .audio: "Sound and accessories"
+        case .system: "Since you started it"
+        case .storage: "Storage and drives"
+        case .display: "Screens"
+        case .fontsVoices: "Fonts"
+        #else
         case .identity: "Device identity"
+        case .audio: "Audio and accessories"
         case .system: "System"
         case .storage: "Storage"
         case .display: "Screen"
-        case .audio: "Audio and accessories"
+        case .fontsVoices: "Fonts and voices"
+        #endif
+        case .person: "You"
+        case .apps: "Apps on this Mac"
         case .language: "Language, region and time"
         case .accessibility: "Accessibility and appearance"
         case .clipboard: "Clipboard"
         case .motionSensors: "Motion sensors"
         case .network: "Network"
-        case .fontsVoices: "Fonts and voices"
         case .accountAndApp: "Account and App Store"
         case .graphics: "Graphics and mobile network"
         case .security: "Security set-up"
@@ -145,7 +166,11 @@ enum SignalSection: String, CaseIterable, Identifiable, Sendable {
 
     var symbol: String {
         switch self {
+        #if os(macOS)
+        case .identity: "laptopcomputer"
+        #else
         case .identity: "iphone"
+        #endif
         case .system: "cpu"
         case .storage: "internaldrive"
         case .display: "rectangle.on.rectangle"
@@ -171,6 +196,8 @@ enum SignalSection: String, CaseIterable, Identifiable, Sendable {
         case .calendars: "calendar"
         case .reminders: "checklist"
         case .music: "music.note"
+        case .person: "person.crop.circle"
+        case .apps: "square.grid.2x2"
         }
     }
 

@@ -6,15 +6,22 @@
 import Foundation
 
 /// What the Mac scan reads, and the sections it fills, in display order.
+///
+/// No "What websites see": a web view in a sandboxed Mac app needs the outgoing-network
+/// entitlement, and this app holds none.
 @MainActor
 enum MacSources {
     static var all: [any SignalSource] {
-        [WebFingerprintSource(), ReinstallSource()]
+        [PersonSource(), MacIdentitySource(), MacSystemSource(), MacStorageSource(), MacDisplaySource(),
+         MacAudioSource(), MacLanguageSource(), MacAccessibilitySource(), MacClipboardSource(),
+         MacNetworkSource(), MacFontsSource(), MacAppsSource(), MacAccountSource(),
+         ReinstallSource()]
     }
 
     static let sections: [SignalSection] = [
-        .web, .reinstall,
-        .location, .camera, .bluetooth, .localNetwork, .contacts, .photos, .calendars, .reminders,
+        .person, .identity, .apps, .system, .storage, .display, .audio, .language, .accessibility,
+        .clipboard, .network, .fontsVoices, .accountAndApp, .reinstall,
+        .location, .camera, .bluetooth, .contacts, .photos, .calendars, .reminders,
     ]
 }
 #endif
