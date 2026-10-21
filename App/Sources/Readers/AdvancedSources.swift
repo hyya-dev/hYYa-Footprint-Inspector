@@ -76,7 +76,7 @@ struct ReinstallSource: SignalSource {
     var sections: [SignalSection] { [.reinstall] }
 
     private static let service = "com.hyya.footprintinspector.install-log"
-    private static let recordedKey = "installRecorded"
+    static let recordedKey = "installRecorded"
 
     func read() async -> [SignalReading] {
         var log = Self.loadLog()
@@ -100,9 +100,16 @@ struct ReinstallSource: SignalSource {
     }
 
     private static var query: [String: Any] {
-        [kSecClass as String: kSecClassGenericPassword,
-         kSecAttrService as String: service,
-         kSecAttrAccount as String: "dates"]
+        var q: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
+                                kSecAttrService as String: service,
+                                kSecAttrAccount as String: "dates"]
+        #if os(macOS)
+        // The same device-only keychain iOS uses. Without this a Mac uses the file-based login
+        // keychain, which ignores ThisDeviceOnly, so a backup restore or Migration Assistant could
+        // carry the list to another Mac (spotted by the hyya.com policy review, 2026-10-21).
+        q[kSecUseDataProtectionKeychain as String] = true
+        #endif
+        return q
     }
 
     private static func loadLog() -> [Date] {

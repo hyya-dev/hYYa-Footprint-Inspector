@@ -88,6 +88,13 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_HARDENED_RUNTIME: YES
         COMBINE_HIDPI_IMAGES: YES
+      configs:
+        # The keychain group needs a real profile even for Debug (Xcode has no account signed in
+        # here, so automatic signing can't make one). Release is signed by testflight-upload-mac.sh.
+        Debug:
+          CODE_SIGN_STYLE: Manual
+          CODE_SIGN_IDENTITY: "Apple Development"
+          PROVISIONING_PROFILE_SPECIFIER: "hYYa Footprint Inspector Mac Development"
 
   hYYaFootprintInspectorMacTests:
     type: bundle.unit-test
