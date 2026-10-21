@@ -7,7 +7,7 @@
 | App Store, iOS/iPadOS | v1.0.0 (build 5) | Waiting for review. Resubmitted by the owner after the CallKit/China and price-in-screenshots rejection was fixed. |
 | App Store, macOS | v1.0.0 (build 6, keychain fix) | Waiting for review. Resubmitted by the owner. |
 | Google Play, closed testing (alpha) | 1.0.0 (versionCode 1) | **Live** since 2026-10-21 ("Your update is live"). |
-| Google Play, listing | 86 localised listings and the English gallery | Sent for review 2026-10-21. |
+| Google Play, listing | 86 localised listings and the English gallery | **Live** since 2026-10-21 (approved the same day). |
 
 🚨 Nothing goes to review (Apple or Google) without the owner's explicit consent. Releases are
 always set to release automatically after approval.
@@ -36,7 +36,7 @@ always set to release automatically after approval.
 ### Owed
 - **Owner:** get 12 testers opted in to the closed test, and keep them 14 days. Then apply for
   production; the questionnaire needs owner answers.
-- **Owner:** forward the review verdicts (Apple iOS, Apple macOS, Google listing).
+- **Owner:** forward the Apple review verdicts (iOS, macOS).
 - **After Play production:** a hyya.com brief to add the Google Play badge/link to the app page.
 - **Device tests** still open from the original plan (see `docs/DEVICE-TEST-LOG.md`).
 - **Polish, not blocking:** a proper Icon Composer icon and PPO alternates; App Accessibility
