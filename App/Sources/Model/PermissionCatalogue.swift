@@ -95,7 +95,7 @@ extension SignalCatalogue {
               // labels the user typed.
               persistence: .untilYouChangeIt, severity: .low, fix: contactsFix),
         .init(id: "contact-accounts", section: .contacts, title: "Contact accounts",
-              reveals: "Where your contacts come from, such as iCloud, Google or a work Exchange account. A work account suggests where you're employed.",
+              reveals: "Where your contacts come from, such as iCloud, Google or a work email account. A work account suggests where you're employed.",
               why: "So apps can save new contacts to the right place.",
               persistence: .untilYouChangeIt, severity: .medium, fix: contactsFix),
 
@@ -108,11 +108,11 @@ extension SignalCatalogue {
                   "Open Settings › Privacy & Security › Photos.",
                   "For each app, choose Limited Access (only the photos you pick) or None.",
                   "To stop new location tags, open Settings › Privacy & Security › Location Services › Camera and choose Never.",
-                  "When sharing a photo, tap Options at the top of the share sheet and turn off Location.",
+                  "When sharing a photo, tap Options at the top of the Share screen and turn off Location.",
               ])),
         .init(id: "photo-home-work", section: .photos, title: "Likely home and work",
               reveals: "The places that appear most often in your photos. Photos taken on weekday working hours or in the evenings make it easy to guess which is work and which is home.",
-              why: "It falls out of the photo locations; no extra permission is needed.",
+              why: "It comes from the photo locations alone; no extra permission is needed.",
               persistence: .untilYouChangeIt, severity: .medium, fix: photosFix),
         .init(id: "photo-library", section: .photos, title: "Library size",
               reveals: "How many photos, videos and albums you have, and whether you use shared albums with family or friends.",

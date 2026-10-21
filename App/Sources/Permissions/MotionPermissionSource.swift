@@ -135,7 +135,7 @@ final class MotionPermissionSource: SignalSource {
         }
 
         guard pressure != nil || altitude != nil else {
-            return SignalReading(id: "motion-pressure", value: "No barometer reading")
+            return SignalReading(id: "motion-pressure", value: "No air pressure reading")
         }
         var parts: [String] = []
         if let pressure {

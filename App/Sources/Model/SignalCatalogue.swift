@@ -57,7 +57,7 @@ extension Fix {
 extension SignalCatalogue {
     static let passive: [SignalDefinition] = [
         // Device identity
-        .init(id: "idfv", section: .identity, title: "Vendor ID",
+        .init(id: "idfv", section: .identity, title: "Code shared by one company's apps",
               reveals: "A long code that's the same in every app from one company on this device. That company can link everything you do across its apps.",
               why: "So one developer's apps can share settings and spot abuse.",
               persistence: .untilVendorAppsDeleted, severity: .high,
@@ -78,25 +78,25 @@ extension SignalCatalogue {
                   "Turn on Automatic Updates.",
               ])),
         .init(id: "os-build", section: .identity, title: "System build number",
-              reveals: "The exact build, which shows whether you run a beta or a rapid security update.",
-              why: "So developers can match bug reports to builds.",
+              reveals: "The exact software build. It shows whether you run test (beta) versions or a quick security update.",
+              why: "So developers can match problem reports to the right software.",
               persistence: .untilUpdate, severity: .medium,
-              fix: .guided("Beta testers stand out. If you don't need betas, switch back to regular updates.", [
+              fix: .guided("People testing early (beta) versions stand out. If you don't need them, switch back to regular updates.", [
                   "Open Settings › General › Software Update › Beta Updates.",
                   "Choose Off, then install the next regular update.",
               ])),
         .init(id: "model-id", section: .identity, title: "Exact model",
-              reveals: "The precise device model and its internal board code.",
+              reveals: "The precise model of your device, down to its internal code name.",
               why: "So apps can tune performance for your hardware.",
               persistence: .hardware, severity: .low, fix: .onlyApple()),
-        .init(id: "kernel-version", section: .identity, title: "System core version",
-              reveals: "The version string of the system core, including when it was built.",
-              why: "Mainly for diagnostics.",
+        .init(id: "kernel-version", section: .identity, title: "Software core version",
+              reveals: "The exact version of the software at the heart of your device, including the day it was built.",
+              why: "Mostly used to track down bugs.",
               persistence: .untilUpdate, severity: .low, fix: .onlyApple()),
 
         // System
         .init(id: "cpu-ram", section: .system, title: "Processor and memory",
-              reveals: "How many processor cores and how much memory your device has.",
+              reveals: "How powerful your device is: how many processor cores and how much memory it has.",
               why: "So apps can size their work to your hardware.",
               persistence: .hardware, severity: .low, fix: .onlyApple()),
         .init(id: "boot-time", section: .system, title: "Last restart",
@@ -111,7 +111,7 @@ extension SignalCatalogue {
               reveals: "Your exact charge and whether you're charging. Two apps opened minutes apart see almost the same number, which can link them.",
               why: "So apps can put off heavy work when the battery is low.",
               persistence: .changesOften, severity: .low, fix: .onlyApple()),
-        .init(id: "thermal", section: .system, title: "Temperature state",
+        .init(id: "thermal", section: .system, title: "Device temperature",
               reveals: "Whether the device is running warm.",
               why: "So apps can ease off and avoid overheating.",
               persistence: .changesOften, severity: .low, fix: .onlyApple()),
@@ -134,7 +134,7 @@ extension SignalCatalogue {
 
         // Display
         .init(id: "screen", section: .display, title: "Screen details",
-              reveals: "Resolution, sharpness, refresh rate and colour range. Together they point to your model, and whether Display Zoom is on.",
+              reveals: "Your screen's size, sharpness, smoothness and colours. Together they point to your model, and to whether Display Zoom is on.",
               why: "So apps can lay out and draw correctly.",
               persistence: .hardware, severity: .low, fix: .onlyApple()),
         .init(id: "brightness", section: .display, title: "Brightness",
@@ -212,8 +212,8 @@ extension SignalCatalogue {
 
         // Motion sensors
         .init(id: "motion-raw", section: .motionSensors, title: "Motion sensors",
-              reveals: "Live readings from the accelerometer, gyroscope and magnetometer. They can reveal how you walk, hold the device or travel, and tiny factory flaws can single out your device.",
-              why: "For games, orientation and fitness. Apple doesn't ask permission for these raw readings.",
+              reveals: "Live readings from the sensors that feel movement, turning and direction. They can reveal how you walk, hold the device or travel, and tiny factory flaws can single out your device.",
+              why: "For games, screen rotation and fitness. Apple doesn't ask your permission for these.",
               persistence: .changesOften, severity: .medium, fix: .onlyApple(), status: .stillOpen),
         .init(id: "heading", section: .motionSensors, title: "Which way you're facing",
               reveals: "Your compass direction, without any location permission.",
@@ -231,7 +231,7 @@ extension SignalCatalogue {
               persistence: .changesOften, severity: .medium,
               fix: .leaveIt("Nothing to fix: a VPN can't hide that it's on. Keep using it if it helps you.")),
         .init(id: "local-ip", section: .network, title: "Device addresses",
-              reveals: "Your device's addresses on the local network and on mobile data. Some can point to your home network.",
+              reveals: "The network addresses your device uses on Wi-Fi and mobile data. Some can point to your home network.",
               why: "So apps can connect to nearby devices.",
               persistence: .changesOften, severity: .medium,
               fix: .guided("Private Wi-Fi addresses limit what networks see about you.", [
@@ -274,7 +274,7 @@ extension SignalCatalogue {
 
         // Graphics and cellular
         .init(id: "gpu", section: .graphics, title: "Graphics chip",
-              reveals: "Your graphics chip and what it can do, which points to your chip generation.",
+              reveals: "Your graphics chip and what it can do, which points to how new your device is.",
               why: "So games and graphics apps can pick the right quality.",
               persistence: .hardware, severity: .low, fix: .onlyApple()),
         .init(id: "cellular", section: .graphics, title: "Mobile plans",
@@ -303,20 +303,16 @@ extension SignalCatalogue {
               reveals: "Whether the Mail app has an account and whether the device can send texts.",
               why: "So apps know whether to offer email or text sharing.",
               persistence: .untilYouChangeIt, severity: .low, fix: .onlyApple()),
-        .init(id: "on-call", section: .security, title: "Call in progress",
-              reveals: "Whether you're on a call right now.",
-              why: "So apps can pause audio during calls.",
-              persistence: .changesOften, severity: .low, fix: .onlyApple()),
         .init(id: "tracking", section: .security, title: "Tracking requests",
-              reveals: "Whether apps are allowed to ask to track you. If tracking is allowed, apps can get a shared advertising ID.",
-              why: "It's Apple's App Tracking Transparency switch.",
+              reveals: "Whether apps are allowed to ask to track you. If tracking is allowed, apps can get a shared advertising code that follows you between them.",
+              why: "It's Apple's \"Allow Apps to Request to Track\" switch.",
               persistence: .untilYouChangeIt, severity: .medium,
               fix: .guided("Turn off tracking requests so every app is told no automatically.", [
                   "Open Settings › Privacy & Security › Tracking.",
                   "Turn off Allow Apps to Request to Track.",
               ])),
         .init(id: "managed", section: .security, title: "Managed by an organisation",
-              reveals: "Whether an organisation's profile configures apps on this device, such as on a work device.",
+              reveals: "Whether a company or school controls settings on this device, as on a work device.",
               why: "So work apps can pick up their settings.",
               persistence: .untilYouChangeIt, severity: .medium,
               fix: .guided("If this is your own device and you don't recognise a profile, review it.", [
@@ -343,8 +339,8 @@ extension SignalCatalogue {
                   "Set Advanced Tracking and Fingerprinting Protection to All Browsing.",
               ])),
         .init(id: "reinstall-memory", section: .reinstall, title: "Recognised after you delete an app",
-              reveals: "Apps can leave a note in the device's keychain, which survives deleting the app. When you reinstall, the app finds its note and knows you're back, and how many times you've reinstalled.",
-              why: "The keychain keeps passwords safe across reinstalls; apps can store anything there.",
+              reveals: "Apps can leave a note in the device's password store, which survives deleting the app. When you reinstall, the app finds its note and knows you're back, and how many times you've reinstalled.",
+              why: "The password store keeps your sign-ins when you reinstall an app, and apps can store anything there.",
               persistence: .untilErase, severity: .high,
               fix: .onlyApple("Only erasing the whole device clears it. Apple could limit this.")),
     ]

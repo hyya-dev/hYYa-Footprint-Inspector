@@ -52,7 +52,7 @@ private struct IdleHome: View {
             VStack(spacing: 14) {
                 Button("Start scan") { Task { await scanner.scan() } }
                     .buttonStyle(PrimaryCTAButtonStyle())
-                Text("Nothing leaves your device · Free · Open source")
+                Text("Nothing leaves your device · Open source")
                     .font(.footnote)
                     .foregroundStyle(Brand.textSubtle)
             }

@@ -13,7 +13,6 @@ struct SensitiveView: View {
     @AppStorage("sensitiveCategories") private var storedChoice = ""
     @State private var results: [String: [SensitiveApp]]? = nil
     @State private var revealed = false
-    @State private var pendingCaution: [SensitiveCategory] = []
     @State private var checks = 0
 
     private var chosen: Set<String> {
@@ -27,14 +26,11 @@ struct SensitiveView: View {
             Page {
                 HeroCard(eyebrow: "Sensitive apps",
                          title: "Which apps give you away?",
-                         subtitle: "Apps can't list what you've installed, but they can ask about specific apps, one by one. Pick what to check.",
+                         subtitle: "Any app can ask whether certain apps are installed, one by one, without asking you. Pick the kinds to check.",
                          mood: heroMood,
                          mascotSize: 104)
 
-                if let results {
-                    resultCard(results)
-                    if revealed { adviceCards(results) }
-                }
+                if let results { resultCard(results) }
 
                 SectionTitle(title: "Kinds of apps", trailing: "\(chosen.count) on")
                 Panel {
@@ -47,20 +43,21 @@ struct SensitiveView: View {
                     .foregroundStyle(Brand.textSubtle)
                     .padding(.horizontal, 4)
 
-                Button(chosen.isEmpty ? "Pick at least one kind" : "Check \(chosen.count) kind\(chosen.count == 1 ? "" : "s")") { startCheck() }
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "lock.fill").foregroundStyle(Brand.sand)
+                    Text("Runs only on this device. The result stays hidden until you tap it, and is gone when you leave. Nothing is saved or sent.")
+                        .font(.footnote)
+                        .foregroundStyle(Brand.textSubtle)
+                }
+                .padding(.horizontal, 4)
+
+                Button(chosen.isEmpty ? "Pick at least one kind" : "Check \(chosen.count) kind\(chosen.count == 1 ? "" : "s")") { runCheck() }
                     .buttonStyle(PrimaryCTAButtonStyle())
                     .disabled(chosen.isEmpty)
             }
             .navigationTitle("Sensitive apps")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.hidden, for: .navigationBar)
-            .alert("Before you check",
-                   isPresented: Binding(get: { !pendingCaution.isEmpty }, set: { if !$0 { pendingCaution = [] } })) {
-                Button("Check") { pendingCaution = []; runCheck() }
-                Button("Cancel", role: .cancel) { pendingCaution = [] }
-            } message: {
-                Text(SensitiveCatalogue.riskyCountriesCaution)
-            }
             .onChange(of: scenePhase) { _, phase in
                 if phase != .active { results = nil; revealed = false }
             }
@@ -74,34 +71,27 @@ struct SensitiveView: View {
     }
 
     private func resultCard(_ results: [String: [SensitiveApp]]) -> some View {
-        let categories = SensitiveCatalogue.categories.filter { !(results[$0.id] ?? []).isEmpty }
+        let found: [(SensitiveCategory, SensitiveApp)] = SensitiveCatalogue.categories.flatMap { category in
+            (results[category.id] ?? []).map { (category, $0) }
+        }
         return VStack(alignment: .leading, spacing: 12) {
-            if foundCount == 0 {
+            if found.isEmpty {
                 MascotSays(line: "None of these apps answered. Any app asking the same would find nothing.", mood: .happy, size: 76)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .brandCard(padding: 18)
             } else {
-                Text("Found \(foundCount)")
+                Text(found.count == 1 ? "1 app gives you away" : "\(found.count) apps give you away")
                     .font(Brand.display(24))
                     .foregroundStyle(Brand.textPrimary)
                 ZStack {
-                    VStack(alignment: .leading, spacing: 14) {
-                        ForEach(categories) { category in
-                            HStack(alignment: .top, spacing: 12) {
-                                IconTile(symbol: category.symbol, fg: Brand.concern, bg: Brand.sunflowerSoft, size: 40)
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(category.title).font(.system(.headline))
-                                    Text((results[category.id] ?? []).map(\.name).joined(separator: ", "))
-                                        .font(.system(.body).weight(.semibold))
-                                        .foregroundStyle(Brand.accent)
-                                    Text(category.inference)
-                                        .font(.system(.footnote))
-                                        .foregroundStyle(Brand.textMuted)
-                                }
-                            }
+                    VStack(spacing: 12) {
+                        ForEach(found, id: \.1.id) { category, app in
+                            FoundAppCard(category: category, app: app)
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                     .blur(radius: revealed ? 0 : 14)
                     .accessibilityHidden(!revealed)
+                    .allowsHitTesting(revealed)
                     if !revealed {
                         Button {
                             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { revealed = true }
@@ -112,49 +102,13 @@ struct SensitiveView: View {
                         .buttonStyle(GhostButtonStyle())
                     }
                 }
-                Text("Hidden again when you leave the app. Never saved. A similar app can sometimes answer for the one named.")
+                Text("Rarely, a different app answers to the same name.")
                     .font(.system(.caption))
                     .foregroundStyle(Brand.textSubtle)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .brandCard(padding: 18)
         .transition(.scale(scale: 0.95).combined(with: .opacity))
-    }
-
-    @ViewBuilder
-    private func adviceCards(_ results: [String: [SensitiveApp]]) -> some View {
-        let found = SensitiveCatalogue.categories.filter { !(results[$0.id] ?? []).isEmpty }
-        if !found.isEmpty {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("What you can do")
-                    .font(.headline)
-                    .foregroundStyle(Brand.ink)
-                Text("Any app on this device could find the same, without asking. No setting stops it. What helps is fewer revealing apps installed:")
-                    .font(.subheadline)
-                    .foregroundStyle(Brand.textMuted)
-                StepList(steps: [
-                    "Delete apps you no longer use. Your accounts usually stay, so you can reinstall later.",
-                    "Use the website instead of the app where you can. Websites can't be detected this way.",
-                    "Hiding an app or moving it off your Home Screen doesn't help: it's still installed.",
-                ])
-            }
-            .padding(18)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Brand.surface))
-
-            ForEach(found) { category in
-                InfoCard(title: category.title, symbol: category.symbol) {
-                    ForEach(category.advice, id: \.self) { line in
-                        HStack(alignment: .firstTextBaseline, spacing: 8) {
-                            Image(systemName: "checkmark.circle.fill").foregroundStyle(Brand.mint)
-                            Text(line).font(.system(.subheadline))
-                        }
-                    }
-                }
-                .scrollIn3D()
-            }
-        }
     }
 
     private func toggle(_ id: String) {
@@ -165,17 +119,39 @@ struct SensitiveView: View {
         revealed = false
     }
 
-    private func startCheck() {
-        let cautious = SensitiveCatalogue.categories.filter { chosen.contains($0.id) && $0.caution != nil }
-        if cautious.isEmpty { runCheck() } else { pendingCaution = cautious }
-    }
-
     private func runCheck() {
         revealed = false
         withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
             results = SensitiveCatalogue.scan(chosen)
         }
         checks += 1
+    }
+}
+
+/// One app that answered: what any app learns from it, then what to do.
+private struct FoundAppCard: View {
+    let category: SensitiveCategory
+    let app: SensitiveApp
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Pill(text: "Worth a look", symbol: "exclamationmark.circle.fill", fg: Brand.concern, bg: Brand.sunflowerSoft)
+            Text("Any app can see you have \(app.name)")
+                .font(.headline)
+                .foregroundStyle(Brand.ink)
+            Text([category.tells, category.risk].compactMap { $0 }.joined(separator: " "))
+                .font(.subheadline)
+                .foregroundStyle(Brand.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(Brand.brandUppercased("What to do"))
+                .font(.caption.weight(.semibold))
+                .tracking(1.1)
+                .foregroundStyle(Brand.sand)
+                .padding(.top, 4)
+            StepList(steps: category.steps + [SensitiveCatalogue.deleteStep])
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .brandCard(padding: 16)
     }
 }
 

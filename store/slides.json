@@ -7,6 +7,6 @@
     {"screen": "store-05-sensitive", "headline": "Which apps *give you away?*", "highlights": ["Dating, faith, health, VPN", "Blurred until you tap", "Never saved"], "mascot": "left"},
     {"screen": "store-06-checkup", "headline": "A guided *permission* check-up", "highlights": ["12 areas, one at a time", "Health, location, photos", "Tick off as you go"], "mascot": "right"},
     {"screen": "store-07-scoreboard", "headline": "Know what *Apple* has fixed", "highlights": ["Latest release changes", "Leaks still open", "Updated each release"], "mascot": "left"},
-    {"screen": "store-01-home", "headline": "Free. Private. *Open source.*", "highlights": ["No account, no ads", "No tracking, ever", "Made by hYYa"], "mascot": "right"}
+    {"screen": "store-01-home", "headline": "Private. Yours. *Open source.*", "highlights": ["No account, no ads", "No tracking, ever", "Made by hYYa"], "mascot": "right"}
   ]
 }

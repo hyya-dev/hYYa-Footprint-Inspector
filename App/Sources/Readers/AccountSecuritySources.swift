@@ -4,7 +4,6 @@
 
 import AppTrackingTransparency
 import AVFoundation
-import CallKit
 import CoreLocation
 import CoreTelephony
 import LocalAuthentication
@@ -50,7 +49,7 @@ struct AccountSource: SignalSource {
         }
         if case .verified(let transaction)? = try? await AppTransaction.shared {
             out.append(.init(id: "first-download", value: Format.dateTime(transaction.originalPurchaseDate),
-                             items: ["First version: \(transaction.originalAppVersion)"]))
+                             items: ["First version you had: \(transaction.originalAppVersion)"]))
         }
         return out
     }
@@ -67,9 +66,9 @@ struct GraphicsSource: SignalSource {
             let families: [(String, MTLGPUFamily)] = [("Apple 7", .apple7), ("Apple 8", .apple8), ("Apple 9", .apple9), ("Metal 3", .metal3)]
             let supported = families.filter { gpu.supportsFamily($0.1) }.map(\.0)
             out.append(.init(id: "gpu", value: gpu.name, items: [
-                "Ray tracing: \(Format.yesNo(gpu.supportsRaytracing))",
-                "Working memory: \(Format.bytes(Int64(gpu.recommendedMaxWorkingSetSize)))",
-                "Families: \(supported.joined(separator: ", "))",
+                "Realistic lighting (ray tracing): \(Format.yesNo(gpu.supportsRaytracing))",
+                "Graphics memory: \(Format.bytes(Int64(gpu.recommendedMaxWorkingSetSize)))",
+                "Graphics generation: \(supported.joined(separator: ", "))",
             ]))
         }
         let radios = CTTelephonyNetworkInfo().serviceCurrentRadioAccessTechnology ?? [:]
@@ -123,7 +122,6 @@ struct SecuritySource: SignalSource {
             .init(id: "apple-pay", value: PKPaymentAuthorizationController.canMakePayments() ? "Available" : "Not available",
                   items: cards.isEmpty ? ["No cards detected"] : ["Card networks: \(cards.joined(separator: ", "))"]),
             .init(id: "mail-messages", value: "Mail \(MFMailComposeViewController.canSendMail() ? "set up" : "not set up") · Texts \(MFMessageComposeViewController.canSendText() ? "yes" : "no")"),
-            .init(id: "on-call", value: Format.yesNo(!CXCallObserver().calls.isEmpty)),
             .init(id: "tracking", value: tracking,
                   severityOverride: ATTrackingManager.trackingAuthorizationStatus == .denied ? .low : nil),
             .init(id: "managed", value: managed ? "Yes" : "No", severityOverride: managed ? nil : .low),

@@ -55,10 +55,10 @@ final class WebFingerprintSource: SignalSource {
         let canvas = (fields["canvas"] as? String) ?? ""
         let hash = SHA256.hash(data: Data(canvas.utf8)).prefix(6).map { String(format: "%02x", $0) }.joined()
         let langs = (fields["langs"] as? [String])?.joined(separator: ", ") ?? "?"
-        return [.init(id: "web-fingerprint", value: "Drawing signature \(hash)", items: [
-            "Browser: \(fields["ua"] as? String ?? "?")",
+        return [.init(id: "web-fingerprint", value: "Hidden drawing test: \(hash)", items: [
+            "How the browser describes itself: \(fields["ua"] as? String ?? "?")",
             "Languages: \(langs)",
-            "Cores: \(fields["cores"] as? Int ?? 0)",
+            "Processor cores: \(fields["cores"] as? Int ?? 0)",
             "Screen: \(fields["screen"] as? String ?? "?")",
             "Time zone: \(fields["tz"] as? String ?? "?")",
             "Graphics: \(fields["webgl"] as? String ?? "?")",
