@@ -33,6 +33,11 @@ always set to release automatically after approval.
 - Play Console in the built-in browser: labels inside `simple-html` are often blank in
   `innerText`. Read `textContent`, and click Material checkboxes with dispatched mouse events.
 
+### iOS 26 check
+- **2026-10-21, iOS 26.0 (23A343) Simulator, iPhone 17 Pro, the build in review:** builds, 14/14
+  unit tests pass, and the app launches. A sample-data scan finishes (score 64, 46 readings, 5
+  worth a look), and Scan, Sensitive apps, Check-up and Settings all draw correctly. ✅
+
 ### Owed
 - **Closed test:** 12+ testers opted in (dashboard ✓, 2026-10-21). The 14-day run ends around
   **2026-11-04**; then "Apply for production" in the dashboard, whose questionnaire needs owner
