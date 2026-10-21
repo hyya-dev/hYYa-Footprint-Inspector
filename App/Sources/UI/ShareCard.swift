@@ -92,7 +92,12 @@ struct ShareCardButton: View {
                                  concerningTitles: scanner.concerning.map(\.definition.title))
         let renderer = ImageRenderer(content: card)
         renderer.scale = displayScale
+        #if os(iOS)
         guard let ui = renderer.uiImage else { return nil }
         return Image(uiImage: ui)
+        #else
+        guard let ns = renderer.nsImage else { return nil }
+        return Image(nsImage: ns)
+        #endif
     }
 }

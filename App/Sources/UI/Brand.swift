@@ -3,7 +3,11 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+#if os(iOS)
 import UIKit
+#else
+import AppKit
+#endif
 
 /// hYYa Footprint Inspector design layer: "Quiet Noir" (owner, 2026-10-17: black ground from
 /// their reference, but "the glow is too much" and the layout must be elegant).
@@ -265,8 +269,37 @@ struct PressableCardStyle: ButtonStyle {
     }
 }
 
+// MARK: - Navigation bar (iOS only; no-ops on the Mac, whose windows have no navigation bar)
+
+extension View {
+    @ViewBuilder func inlineTitle() -> some View {
+        #if os(iOS)
+        navigationBarTitleDisplayMode(.inline)
+        #else
+        self
+        #endif
+    }
+
+    @ViewBuilder func hiddenNavigationBar() -> some View {
+        #if os(iOS)
+        toolbar(.hidden, for: .navigationBar)
+        #else
+        self
+        #endif
+    }
+
+    @ViewBuilder func clearNavigationBar() -> some View {
+        #if os(iOS)
+        toolbarBackground(.hidden, for: .navigationBar)
+        #else
+        self
+        #endif
+    }
+}
+
 // MARK: - Haptics
 
+#if os(iOS)
 @MainActor
 enum Haptics {
     static func selection() { UISelectionFeedbackGenerator().selectionChanged() }
@@ -277,12 +310,27 @@ enum Haptics {
     }
     static func soft() { UIImpactFeedbackGenerator(style: .soft).impactOccurred(intensity: 0.6) }
 }
+#else
+/// Macs give feedback only on Force Touch trackpads; a light tap where it helps, nothing otherwise.
+@MainActor
+enum Haptics {
+    private static func tap(_ pattern: NSHapticFeedbackManager.FeedbackPattern = .generic) {
+        NSHapticFeedbackManager.defaultPerformer.perform(pattern, performanceTime: .now)
+    }
+    static func selection() { tap(.alignment) }
+    static func success() { tap() }
+    static func warning() { tap() }
+    static func impact() { tap() }
+    static func soft() { tap(.alignment) }
+}
+#endif
 
 // MARK: - Settings links
 
 /// The only way we open Settings. On a real iPhone with iOS 27 only two links behave
 /// (docs/SETTINGS-LINKS.md): the official link to our own page, and plain `App-prefs:` to the
 /// Settings home screen. Every path-style link lands on the Apps list, so none ships.
+#if os(iOS)
 @MainActor
 enum SettingsLink {
     static func openOwnPage() {
@@ -293,6 +341,22 @@ enum SettingsLink {
         if let url = URL(string: "App-prefs:") { UIApplication.shared.open(url) }
     }
 }
+#else
+/// On a Mac, System Settings panes can be opened directly with `x-apple.systempreferences:` links.
+@MainActor
+enum SettingsLink {
+    static func openOwnPage() { openSettingsHome() }
+
+    static func openSettingsHome() {
+        NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/System Settings.app"))
+    }
+
+    /// For example "com.apple.settings.PrivacySecurity.extension?Privacy_Contacts".
+    static func open(pane: String) {
+        if let url = URL(string: "x-apple.systempreferences:\(pane)") { NSWorkspace.shared.open(url) }
+    }
+}
+#endif
 
 // MARK: - Small shared pieces
 
@@ -310,7 +374,16 @@ struct SeverityDot: View {
 
 /// The running system's own name ("iOS", "iPadOS"), so no copy assumes which device it's on.
 @MainActor enum System {
+    #if os(iOS)
     static var name: String { UIDevice.current.systemName }
+    static var version: String { System.version }
+    #else
+    static let name = "macOS"
+    static var version: String {
+        let v = ProcessInfo.processInfo.operatingSystemVersion
+        return v.patchVersion == 0 ? "\(v.majorVersion).\(v.minorVersion)" : "\(v.majorVersion).\(v.minorVersion).\(v.patchVersion)"
+    }
+    #endif
 }
 
 struct StatusBadge: View {

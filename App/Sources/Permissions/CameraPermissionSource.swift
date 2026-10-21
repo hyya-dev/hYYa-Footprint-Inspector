@@ -30,6 +30,7 @@ final class CameraPermissionSource: SignalSource {
     func read() async -> [SignalReading] {
         guard permissionState() == .granted else { return [] }
 
+        #if os(iOS)
         // Physical lenses and sensors only; the combined "dual" and "triple" cameras are made
         // from these.
         let session = AVCaptureDevice.DiscoverySession(
@@ -75,6 +76,33 @@ final class CameraPermissionSource: SignalSource {
         if devices.contains(where: { $0.deviceType == .builtInLiDARDepthCamera }) {
             items.append("Has a 3D depth scanner, found only on Pro models")
         }
+        #else
+        // Built-in, Continuity (an iPhone used as a webcam) and plugged-in cameras. Their names can
+        // carry a person's name, such as "Sam's iPhone Camera".
+        let session = AVCaptureDevice.DiscoverySession(
+            deviceTypes: [.builtInWideAngleCamera, .continuityCamera, .external, .deskViewCamera],
+            mediaType: nil,
+            position: .unspecified
+        )
+        let devices = session.devices
+        guard !devices.isEmpty else {
+            return [SignalReading(id: "cam-list", value: "No cameras found")]
+        }
+        let builtIn = devices.filter { $0.deviceType == .builtInWideAngleCamera }.count
+        let others = devices.count - builtIn
+        var parts: [String] = []
+        if builtIn > 0 { parts.append("\(builtIn) built in") }
+        if others > 0 { parts.append("\(others) connected") }
+        let value = "\(PermissionText.count(devices.count, "camera")): \(parts.joined(separator: ", "))"
+        let items = devices.map { device -> String in
+            switch device.deviceType {
+            case .builtInWideAngleCamera: "Built in: \(device.localizedName)"
+            case .continuityCamera: "An iPhone used as a camera: \(device.localizedName)"
+            case .deskViewCamera: "Desk View: \(device.localizedName)"
+            default: "Connected: \(device.localizedName)"
+            }
+        }
+        #endif
         return [SignalReading(id: "cam-list", value: value, items: items)]
     }
 }

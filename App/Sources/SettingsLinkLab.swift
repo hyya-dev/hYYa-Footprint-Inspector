@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+#if os(iOS)
+
 #if DEBUG
 import SwiftUI
 import UIKit
@@ -69,4 +71,5 @@ struct SettingsLinkLab: View {
         .navigationTitle("Settings link lab")
     }
 }
+#endif
 #endif

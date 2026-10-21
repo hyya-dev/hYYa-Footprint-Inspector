@@ -3,7 +3,11 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+#if os(iOS)
 import UIKit
+#else
+import AppKit
+#endif
 
 struct FindingDetailView: View {
     @Environment(Scanner.self) private var scanner
@@ -87,7 +91,7 @@ struct FindingDetailView: View {
             }
         }
         .navigationTitle(def.title)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
     }
 
     private var fixCard: some View {
@@ -109,7 +113,11 @@ struct FindingDetailView: View {
             }
             if def.id == "clip-kinds" {
                 Button(cleared ? "Clipboard cleared" : "Clear the clipboard now") {
+                    #if os(iOS)
                     UIPasteboard.general.items = []
+                    #else
+                    NSPasteboard.general.clearContents()
+                    #endif
                     cleared = true
                     Haptics.success()
                     Task { await scanner.scan() }

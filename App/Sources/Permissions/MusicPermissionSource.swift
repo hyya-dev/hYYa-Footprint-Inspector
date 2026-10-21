@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+#if os(iOS)
+
 import Foundation
 import MediaPlayer
 import MusicKit
@@ -147,3 +149,4 @@ private struct MusicSummary: Sendable {
             .map { Ranked(name: $0.key, count: $0.value) }
     }
 }
+#endif

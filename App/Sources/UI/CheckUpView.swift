@@ -51,8 +51,8 @@ struct CheckUpView: View {
                 }
             }
             .navigationTitle("Check-up")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.hidden, for: .navigationBar)
+            .inlineTitle()
+            .clearNavigationBar()
             .sensoryFeedback(.success, trigger: done.count == total)
         }
     }
@@ -100,6 +100,6 @@ struct CheckUpStepView: View {
                                                depthColor: isDone ? Color(hex: 0x0E8A56) : Brand.ctaDepth))
         }
         .navigationTitle(step.title)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
     }
 }

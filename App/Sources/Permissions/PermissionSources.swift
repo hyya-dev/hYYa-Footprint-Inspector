@@ -13,16 +13,24 @@ enum PermissionSources {
         if let existing = cache[kind] { return existing }
         let made: any SignalSource
         switch kind {
+        #if os(iOS)
         case .motion: made = MotionPermissionSource()
+        case .music: made = MusicPermissionSource()
+        #else
+        case .motion, .music: made = UnavailableSource()
+        #endif
         case .location: made = LocationPermissionSource()
         case .camera: made = CameraPermissionSource()
         case .bluetooth: made = BluetoothPermissionSource()
+        #if os(iOS)
         case .localNetwork: made = LocalNetworkPermissionSource()
+        #else
+        case .localNetwork: made = UnavailableSource()
+        #endif
         case .contacts: made = ContactsPermissionSource()
         case .photos: made = PhotosPermissionSource()
         case .calendars: made = CalendarsPermissionSource()
         case .reminders: made = RemindersPermissionSource()
-        case .music: made = MusicPermissionSource()
         }
         cache[kind] = made
         return made

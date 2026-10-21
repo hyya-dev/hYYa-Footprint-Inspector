@@ -2,7 +2,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+#if os(iOS)
 import UIKit
+#else
+import AppKit
+#endif
 
 /// The installed-app check. iOS only answers for schemes declared in Info.plist
 /// `LSApplicationQueriesSchemes` (25 at most with the iOS 27 SDK), so this list must match that
@@ -97,7 +101,12 @@ enum SensitiveCatalogue {
         var found: [String: [SensitiveApp]] = [:]
         for category in categories where categoryIDs.contains(category.id) {
             found[category.id] = category.apps.filter { app in
-                URL(string: "\(app.scheme)://").map(UIApplication.shared.canOpenURL) ?? false
+                guard let url = URL(string: "\(app.scheme)://") else { return false }
+                #if os(iOS)
+                return UIApplication.shared.canOpenURL(url)
+                #else
+                return NSWorkspace.shared.urlForApplication(toOpen: url) != nil
+                #endif
             }
         }
         return found

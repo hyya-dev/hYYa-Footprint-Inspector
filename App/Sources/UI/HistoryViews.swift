@@ -165,7 +165,7 @@ struct ScoreboardView: View {
                 }
             Section {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("You're on \(System.name) \(UIDevice.current.systemVersion)")
+                    Text("You're on \(System.name) \(System.version)")
                         .font(.headline)
                     Text(Self.majorVersion < 27
                          ? "Updating to \(System.name) 27 brings the fixes below."
@@ -214,7 +214,7 @@ struct ScoreboardView: View {
     }
 
     private static var majorVersion: Int {
-        Int(UIDevice.current.systemVersion.split(separator: ".").first ?? "0") ?? 0
+        Int(System.version.split(separator: ".").first ?? "0") ?? 0
     }
 
     /// The most recent pair of saved scans either side of an iOS update.
