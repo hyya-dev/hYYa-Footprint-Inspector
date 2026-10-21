@@ -1,5 +1,51 @@
 # HANDOFF: where the work is
 
+## Now (2026-10-21): v1.0.0 is with the reviewers on every store
+
+| Store | What | State |
+| --- | --- | --- |
+| App Store, iOS/iPadOS | v1.0.0 (build 5) | Waiting for review. Resubmitted by the owner after the CallKit/China and price-in-screenshots rejection was fixed. |
+| App Store, macOS | v1.0.0 (build 6, keychain fix) | Waiting for review. Resubmitted by the owner. |
+| Google Play, closed testing (alpha) | 1.0.0 (versionCode 1) | **Live** since 2026-10-21 ("Your update is live"). |
+| Google Play, listing | 86 localised listings and the English gallery | Sent for review 2026-10-21. |
+
+🚨 Nothing goes to review (Apple or Google) without the owner's explicit consent. Releases are
+always set to release automatically after approval.
+
+### Google Play facts (verified 2026-10-21)
+- Personal account "hYYa LLC", id 7244268045893720931, signed in at Play Console `u/1`. App id
+  4973134500799616661, package `com.hyya.footprintinspector`.
+- Service account `play-supply-hyya@…` has Admin on the app. Key:
+  `H-iCloud Drive/*Keys Wallet/keystores/play*.json` → `PLAY_SERVICE_ACCOUNT_JSON`.
+- **Closed test:** Google Group `testers-community@googlegroups.com` (the same group as hYYa
+  Encrypted Folder), feedback to h@hyya.com, all 178 countries/regions.
+  - Testers join at https://play.google.com/apps/testing/com.hyya.footprintinspector
+  - **Production access needs 12 opted-in testers for 14 days**, then an "Apply for production"
+    questionnaire in the dashboard.
+- **Listing changes are sent for review automatically:** Play refuses `changesNotSentForReview`
+  now that the app is live. So `scripts/play-push-listings.mjs --apply` is a review submission,
+  and needs consent. Without `--apply` it rehearses and discards.
+- Play does not inherit images from the default language. Every language gets the English gallery
+  (slides stay English).
+- App content answers: `GooglePlayConsole/app-content.md`. Listing source:
+  `GooglePlayConsole/listing-en-US.md`, translations in `GooglePlayConsole/localized/`
+  (`scripts/gemini-localize-play.mjs`).
+- Play Console in the built-in browser: labels inside `simple-html` are often blank in
+  `innerText`. Read `textContent`, and click Material checkboxes with dispatched mouse events.
+
+### Owed
+- **Owner:** get 12 testers opted in to the closed test, and keep them 14 days. Then apply for
+  production; the questionnaire needs owner answers.
+- **Owner:** forward the review verdicts (Apple iOS, Apple macOS, Google listing).
+- **After Play production:** a hyya.com brief to add the Google Play badge/link to the app page.
+- **Device tests** still open from the original plan (see `docs/DEVICE-TEST-LOG.md`).
+- **Polish, not blocking:** a proper Icon Composer icon and PPO alternates; App Accessibility
+  declarations after a VoiceOver and large-text pass; an app preview video.
+
+---
+
+## History
+
 **2026-10-17: Store setup started (App Store Connect app 6824033636, version 1.0.0, "Prepare for
 Submission"). 🚨 Nothing has been submitted, and nothing will be without the owner's explicit
 consent.**

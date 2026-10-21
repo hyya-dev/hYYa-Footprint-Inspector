@@ -93,8 +93,24 @@ look there first. They are read-only from here.
   publish the owner's real values. Other screenshot switches: `-autoScan`, `-startTab`,
   `-openFinding`, `-sensitiveCategories`, `-openSettings`.
 
+## Android (built 2026-10-21; project in `Android/`)
+- Kotlin + Jetpack Compose, Quiet Noir ported. minSdk 33, targetSdk 36, compileSdk 37. Build with
+  Android Studio's JBR as `JAVA_HOME`. Upload keystore and its passwords are in the Keys Wallet
+  (`hYYa Footprint Inspector Keys/android-signing/`), read by `app/build.gradle.kts`.
+- **No INTERNET permission**, no AD_ID, no QUERY_ALL_PACKAGES, no Photos permission (Play
+  policy). Sensitive apps use named `<queries>` packages. `allowBackup=false`.
+- An Android app reads `ANDROID_ID` (per signing key, survives reinstall), device name and boot
+  count with no prompt. Fixes open Settings intents, falling back to the Settings home.
+- Store screenshots: launch with the `sampleData` intent extra (also `startTab`, `autoScan`,
+  `sensitiveCategories`, `openFinding`).
+- Google Play: closed test first (12 testers, 14 days) before production. **Listing changes are
+  sent for review automatically**, so every commit of a Play edit is a review submission and
+  needs consent. Details: `HANDOFF.md`, `GooglePlayConsole/`.
+
 ## Layout
 - `project.yml`: XcodeGen spec and the source of truth. The `.xcodeproj` is generated and
   gitignored.
 - `App/`: the app (iOS and macOS). `Tests/` iOS unit tests, `TestsMac/` Mac unit tests.
+- `Android/`: the Android app. `GooglePlayConsole/`: Play listing, translations, App content.
+- `store/`: App Store listing, translations, slides, review notes. `scripts/`: store tooling.
 - `docs/`: the plan, research and inventories.
