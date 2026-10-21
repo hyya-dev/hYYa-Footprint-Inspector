@@ -8,6 +8,11 @@ import XCTest
 /// Runs every Mac reader on this Mac and checks the catalogue covers what they return.
 @MainActor
 final class MacReadersTests: XCTestCase {
+    override func setUp() {
+        // Every test starts as a fresh install would: nothing recorded yet.
+        UserDefaults.standard.removeObject(forKey: ReinstallSource.recordedKey)
+    }
+
     func testEveryReadingHasADefinitionAndEveryDefinitionIsRead() async {
         var ids: Set<String> = []
         for source in MacSources.all {
@@ -42,5 +47,20 @@ final class MacReadersTests: XCTestCase {
                 XCTAssertNil(line.range(of: #"\b(iPhone|iPad|iOS)\b"#, options: .regularExpression), "\(d.id): \(line)")
             }
         }
+    }
+
+    /// The install list must live in the device-only (data protection) keychain on a Mac, where
+    /// ThisDeviceOnly applies, not the login keychain that backups and Migration Assistant carry.
+    func testInstallListIsInTheDeviceOnlyKeychain() async {
+        let readings = await ReinstallSource().read()
+        XCTAssertTrue(readings.contains { $0.id == "reinstall-memory" && $0.value.contains("Installed") })
+        var found: CFTypeRef?
+        let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
+                                    kSecAttrAccount as String: "dates",
+                                    kSecUseDataProtectionKeychain as String: true,
+                                    kSecReturnAttributes as String: true,
+                                    kSecMatchLimit as String: kSecMatchLimitOne]
+        XCTAssertEqual(SecItemCopyMatching(query as CFDictionary, &found), errSecSuccess,
+                       "Install list not found in the data protection keychain")
     }
 }

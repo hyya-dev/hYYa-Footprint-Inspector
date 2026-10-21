@@ -20,5 +20,12 @@
 	<true/>
 	<key>com.apple.security.personal-information.photos-library</key>
 	<true/>
+	<!-- Lets the reinstall demonstration use the device-only (data protection) keychain, where
+	     ThisDeviceOnly applies, as on iPhone. Without a group the Mac falls back to the login
+	     keychain, which backups and Migration Assistant carry to other Macs. -->
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)com.hyya.footprintinspector</string>
+	</array>
 </dict>
 </plist>
