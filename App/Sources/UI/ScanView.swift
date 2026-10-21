@@ -6,6 +6,8 @@ import SwiftUI
 
 struct ScanView: View {
     @Environment(Scanner.self) private var scanner
+    /// Screenshot runs can open one finding with `-openFinding <id>`.
+    @State private var openedFindingID: String?
 
     var body: some View {
         NavigationStack {
@@ -17,6 +19,15 @@ struct ScanView: View {
                 }
             }
             .hiddenNavigationBar()
+            .task {
+                if LaunchOptions.autoScan, scanner.allFindings.isEmpty { await scanner.scan() }
+                openedFindingID = LaunchOptions.value(after: "-openFinding")
+            }
+            .navigationDestination(item: $openedFindingID) { id in
+                if let finding = scanner.allFindings.first(where: { $0.id == id }) {
+                    FindingDetailView(finding: finding)
+                }
+            }
             .sensoryFeedback(.impact(weight: .light, intensity: 0.4), trigger: Int(scanner.progress * 16))
             .sensoryFeedback(trigger: scanner.phase) { _, new in
                 guard new == .done else { return nil }

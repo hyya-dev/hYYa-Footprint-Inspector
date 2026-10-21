@@ -72,6 +72,8 @@ targets:
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
         INFOPLIST_KEY_NSHumanReadableCopyright: "© 2026 hYYa"
         CODE_SIGN_ENTITLEMENTS: App/macOS/FootprintInspectorMac.entitlements
+        # Sand accent for system controls the SwiftUI tint doesn't reach (sidebar, menus, alerts).
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         # Same wording as iOS: what the permission shows, and that it stays on the device.
         INFOPLIST_KEY_NSLocationUsageDescription: "To show you what any app with location access can see about where you are. It stays on this device."
         INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "To show you what any app with location access can see about where you are. It stays on this device."

@@ -22,6 +22,17 @@ struct SensitiveCategory: Identifiable, Sendable {
     let apps: [SensitiveApp]
     /// What to do, in order. ``SensitiveCatalogue/deleteStep`` is added after these.
     var steps: [String] = []
+
+    /// The apps checked on this platform. A Mac has no limit, so it checks more, by name.
+    var checkedApps: [SensitiveApp] {
+        #if os(macOS)
+        let extra = (SensitiveCatalogue.macExtra[id] ?? []).map { SensitiveApp(name: $0, scheme: "") }
+        var seen: Set<String> = []
+        return (apps + extra).filter { seen.insert($0.name.lowercased()).inserted }
+        #else
+        apps
+        #endif
+    }
 }
 
 struct SensitiveApp: Identifiable, Sendable, Hashable {
@@ -32,7 +43,25 @@ struct SensitiveApp: Identifiable, Sendable, Hashable {
 
 enum SensitiveCatalogue {
     /// The last step on every card: how to delete, and why hiding isn't enough.
+    #if os(macOS)
+    static let deleteStep = "To delete an app: open Finder › Applications and drag it to the Bin (Trash)."
+    #else
     static let deleteStep = "To delete an app: touch and hold its icon, then Remove App › Delete App. Hiding it doesn't help."
+    #endif
+
+    /// Mac only: more apps per category, matched by name against the installed-app list any Mac
+    /// app can read. Includes iPhone and iPad apps, which can run on Apple silicon Macs.
+    static let macExtra: [String: [String]] = [
+        "dating": ["Hinge", "OkCupid", "Feeld", "HER", "Badoo"],
+        "faith": ["Quran", "Bible", "Logos", "Hallow", "Sefaria", "Athan"],
+        "health": ["Calm", "BetterHelp", "MyFitnessPal", "Natural Cycles", "Stardust"],
+        "recovery": ["Sober", "Quitzilla", "Nomo", "Reframe"],
+        "circumvention": ["Tor Browser", "Mullvad VPN", "ExpressVPN", "Surfshark", "Windscribe", "Lantern"],
+        "messaging": ["WhatsApp", "Viber", "Session", "Element", "Wire", "LINE", "KakaoTalk"],
+        "money": ["Ledger Live", "Exodus", "Trezor Suite", "Electrum", "Kraken", "PokerStars"],
+        "work": ["Glassdoor", "Fishbowl"],
+        "politics": ["CNN", "MSNBC", "Breitbart", "Newsmax", "Al Jazeera", "RT News"],
+    ]
 
     static let categories: [SensitiveCategory] = [
         .init(id: "dating", title: "Dating and LGBTQ+", symbol: "heart",
@@ -99,13 +128,18 @@ enum SensitiveCatalogue {
     @MainActor
     static func scan(_ categoryIDs: Set<String>) -> [String: [SensitiveApp]] {
         var found: [String: [SensitiveApp]] = [:]
+        #if os(macOS)
+        let installed = Set(MacAppsSource.installedAppNames().map { $0.lowercased() })
+        #endif
         for category in categories where categoryIDs.contains(category.id) {
-            found[category.id] = category.apps.filter { app in
-                guard let url = URL(string: "\(app.scheme)://") else { return false }
-                #if os(iOS)
-                return UIApplication.shared.canOpenURL(url)
-                #else
+            found[category.id] = category.checkedApps.filter { app in
+                #if os(macOS)
+                if installed.contains(app.name.lowercased()) { return true }
+                guard !app.scheme.isEmpty, let url = URL(string: "\(app.scheme)://") else { return false }
                 return NSWorkspace.shared.urlForApplication(toOpen: url) != nil
+                #else
+                guard let url = URL(string: "\(app.scheme)://") else { return false }
+                return UIApplication.shared.canOpenURL(url)
                 #endif
             }
         }

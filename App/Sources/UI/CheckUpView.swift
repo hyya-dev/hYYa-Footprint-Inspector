@@ -5,6 +5,12 @@
 import SwiftUI
 
 struct CheckUpView: View {
+    #if os(macOS)
+    static let introLine = "macOS never tells one app which other apps can reach your location, contacts or screen. Only System Settings knows, so let's look together."
+    #else
+    static let introLine = "The system never tells one app which other apps can reach your Health, location or photos. Only Settings knows, so let's look together."
+    #endif
+
     /// Ticked steps, remembered on this phone only so the user can pick up where they left off.
     @AppStorage("checkUpDone") private var stored = ""
 
@@ -16,7 +22,7 @@ struct CheckUpView: View {
             Page {
                 HeroCard(eyebrow: "Permission check-up",
                          title: done.count == total ? "All checked!" : "\(done.count) of \(total) checked",
-                         subtitle: "The system never tells one app which other apps can reach your Health, location or photos. Only Settings knows, so let's look together.",
+                         subtitle: Self.introLine,
                          mood: done.count == total ? .happy : .idle,
                          mascotSize: 104) {
                     ProgressView(value: Double(done.count), total: Double(total))
@@ -88,9 +94,17 @@ struct CheckUpStepView: View {
             InfoCard(title: "What to do", symbol: "list.number") {
                 StepList(steps: step.actions)
             }
+            #if os(macOS)
+            Button("Open in System Settings") {
+                if let pane = step.pane { SettingsLink.open(pane: pane) } else { SettingsLink.openSettingsHome() }
+            }
+            .buttonStyle(GhostButtonStyle())
+            .frame(maxWidth: .infinity)
+            #else
             Button("Open Settings") { SettingsLink.openSettingsHome() }
                 .buttonStyle(GhostButtonStyle())
                 .frame(maxWidth: .infinity)
+            #endif
 
             Button(isDone ? "Checked ✓" : "I've checked this") {
                 isDone.toggle()
