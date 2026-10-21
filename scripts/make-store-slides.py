@@ -4,7 +4,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 """Builds the App Store marketing slides from raw Simulator screens.
 
-    python3 scripts/make-store-slides.py <raw-dir> <out-dir> <width> <height>
+    python3 scripts/make-store-slides.py <raw-dir> <out-dir> <width> <height> [slides.json]
 
 Layout (Quiet Noir): black ground with a soft sand glow; the mascot and the full name
 "hYYa Footprint Inspector" at the top; a benefit headline with one sand phrase; three highlight
@@ -149,7 +149,7 @@ def main():
     raw_dir, out_dir = Path(sys.argv[1]), Path(sys.argv[2])
     w, h = int(sys.argv[3]), int(sys.argv[4])
     out_dir.mkdir(parents=True, exist_ok=True)
-    spec = json.loads((ROOT / "store/slides.json").read_text())
+    spec = json.loads(Path(sys.argv[5]).read_text() if len(sys.argv) > 5 else (ROOT / "store/slides.json").read_text())
     mascot = Image.open(MASCOT).convert("RGBA")
     for i, s in enumerate(spec["slides"], 1):
         img = make_slide(s, raw_dir, w, h, mascot)

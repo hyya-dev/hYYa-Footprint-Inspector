@@ -1,0 +1,10 @@
+{
+  "_note": "Google Play phone slides (English only). Same rules as the iOS slides; raw screens come from the Android app launched with sampleData (made-up values).",
+  "slides": [
+    {"screen": "store-02-results", "headline": "See what *every app* can learn about you", "highlights": ["Every clue explained", "One calm score", "Nothing leaves your device"]},
+    {"screen": "store-04-finding", "headline": "Recognised *even after you delete it*", "highlights": ["Same code after reinstalling", "Only a reset changes it", "Explained in plain words"]},
+    {"screen": "store-05-sensitive", "headline": "Which apps *give you away?*", "highlights": ["Dating, faith, health, VPN", "Hidden until you tap", "Never saved"]},
+    {"screen": "store-06-checkup", "headline": "A guided *permission* check-up", "highlights": ["13 areas, one at a time", "Notifications, usage, keyboards", "One tap to each setting"]},
+    {"screen": "store-01-home", "headline": "Private. Yours. *Open source.*", "highlights": ["No internet permission", "No account, no ads", "Made by hYYa"]}
+  ]
+}

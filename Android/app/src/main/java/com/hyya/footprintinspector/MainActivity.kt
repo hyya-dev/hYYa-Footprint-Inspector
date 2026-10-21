@@ -23,6 +23,9 @@ class MainActivity : ComponentActivity() {
         Sample.on = intent.getBooleanExtra("sampleData", false)
         val startTab = intent.getStringExtra("startTab")?.let { name -> Tab.entries.firstOrNull { it.name.equals(name, true) } } ?: Tab.SCAN
         val autoScan = intent.getBooleanExtra("autoScan", false)
-        setContent { FootprintTheme { App(startTab, autoScan) } }
+        intent.getStringExtra("sensitiveCategories")?.let { ids ->
+            getSharedPreferences("app", MODE_PRIVATE).edit().putStringSet("sensitiveCategories", ids.split(",").toSet()).apply()
+        }
+        setContent { FootprintTheme { App(startTab, autoScan, intent.getStringExtra("openFinding")) } }
     }
 }
