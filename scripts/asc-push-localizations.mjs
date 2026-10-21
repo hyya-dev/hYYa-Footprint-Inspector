@@ -13,6 +13,8 @@ import { readFileSync, readdirSync } from "node:fs";
 import { createSign } from "node:crypto";
 
 const APP_ID = "6824033636";
+// IOS (default) or MAC_OS: which platform's editable version to fill.
+const PLATFORM = process.env.PLATFORM ?? "IOS";
 const { ASC_ISSUER_ID, ASC_KEY_ID, ASC_PRIVATE_KEY_PATH } = process.env;
 for (const [k, v] of Object.entries({ ASC_ISSUER_ID, ASC_KEY_ID, ASC_PRIVATE_KEY_PATH }))
   if (!v) { console.error(`Missing env ${k}`); process.exit(1); }
@@ -37,7 +39,7 @@ async function api(path, method = "GET", body) {
   return t ? JSON.parse(t) : null;
 }
 
-const versions = await api(`/v1/apps/${APP_ID}/appStoreVersions?filter[platform]=IOS&filter[appStoreState]=PREPARE_FOR_SUBMISSION,DEVELOPER_REJECTED,REJECTED,METADATA_REJECTED`);
+const versions = await api(`/v1/apps/${APP_ID}/appStoreVersions?filter[platform]=${PLATFORM}&filter[appStoreState]=PREPARE_FOR_SUBMISSION,DEVELOPER_REJECTED,REJECTED,METADATA_REJECTED`);
 const version = versions.data[0];
 if (!version) throw new Error("No editable iOS version");
 const infos = await api(`/v1/apps/${APP_ID}/appInfos`);

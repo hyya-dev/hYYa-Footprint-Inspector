@@ -1,0 +1,17 @@
+hYYa Footprint Inspector for Mac is a free privacy-education app. It reads the same information any sandboxed Mac App Store app can read and shows it ONLY to the person using the Mac, so they can see their own "fingerprint" and reduce it. Nothing is collected, stored off the device or transmitted: there is no account, no server, no analytics, no third-party SDK, and the app has no network entitlement. The App Privacy label is "Data Not Collected".
+
+No login is required. To review:
+1. Click "Start scan". Results appear in a few seconds.
+2. Click any clue to see what it reveals, why the system allows it, and how to fix it. Where a fix exists, "Open in System Settings" opens the matching System Settings page.
+3. Each permission category ("Seen once you allow it") asks for that permission only when the user clicks "Show me", and shows counts and summaries only.
+4. "Sensitive apps": the user picks categories, then clicks Check. Results are hidden until clicked, cleared when the app goes to the background, and never stored.
+5. "Check-up" walks through the Privacy & Security pages of System Settings.
+6. Settings opens in its own window (hYYa Footprint Inspector menu › Settings, or ⌘,).
+
+About device identifiers and personal information (5.1.1, 5.1.2): the app displays the Mac's serial number, hardware UUID, the user's full name, computer name, network hardware addresses, running apps and installed apps. It does this ONLY to show the user, on screen, that any app can read these without asking. None of these values are stored, logged, hashed for tracking or sent anywhere. Scan history keeps only salted one-way hashes, used to show "what changed since your last scan", and is excluded from backups.
+
+About the installed-app check: it reads the app names in /Applications and /System/Applications (readable by any sandboxed app) and, for a few apps, whether a URL scheme has a handler. It is user-initiated and results are never stored.
+
+About entitlements: camera (to list camera names only; no capture), Bluetooth, location, contacts, calendars/reminders and photos are each requested only when the user clicks "Show me" for that category. The app uses only Apple frameworks.
+
+The app has no CallKit and no pricing references in its screenshots.

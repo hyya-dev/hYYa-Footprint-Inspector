@@ -18,7 +18,7 @@ enum MacSources {
          ReinstallSource()]
     }
 
-    static let sections: [SignalSection] = [
+    nonisolated static let sections: [SignalSection] = [
         .person, .identity, .apps, .system, .storage, .display, .audio, .language, .accessibility,
         .clipboard, .network, .fontsVoices, .accountAndApp, .reinstall,
         .location, .camera, .bluetooth, .contacts, .photos, .calendars, .reminders,
