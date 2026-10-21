@@ -51,5 +51,5 @@ Tools
 
 ## Contact
 - Website: https://hyya.com
-- Email: (as the other hYYa apps' Play listings)
+- Email: h@hyya.com (as the other hYYa apps)
 - Privacy policy: https://hyya.com/privacypolicy/hyya-footprint-inspector.html
