@@ -13,7 +13,11 @@ import { createHash, createSign } from "node:crypto";
 import { join } from "node:path";
 
 const APP_ID = "6824033636";
-const SETS = {
+// IOS (default) or MAC_OS: which platform's editable version to fill.
+const PLATFORM = process.env.PLATFORM ?? "IOS";
+const SETS = (process.env.PLATFORM ?? "IOS") === "MAC_OS" ? {
+  mac: { dir: "store/slides/mac", type: "APP_DESKTOP" },
+} : {
   iphone: { dir: "store/slides/iphone-6.9", type: "APP_IPHONE_67" },
   ipad: { dir: "store/slides/ipad-13", type: "APP_IPAD_PRO_3GEN_129" },
 };
@@ -38,7 +42,7 @@ async function api(path, method = "GET", body) {
   return t ? JSON.parse(t) : null;
 }
 
-const versions = await api(`/v1/apps/${APP_ID}/appStoreVersions?filter[platform]=IOS&filter[appStoreState]=PREPARE_FOR_SUBMISSION,DEVELOPER_REJECTED,REJECTED,METADATA_REJECTED`);
+const versions = await api(`/v1/apps/${APP_ID}/appStoreVersions?filter[platform]=${PLATFORM}&filter[appStoreState]=PREPARE_FOR_SUBMISSION,DEVELOPER_REJECTED,REJECTED,METADATA_REJECTED`);
 const version = versions.data[0];
 const locs = await api(`/v1/appStoreVersions/${version.id}/appStoreVersionLocalizations`);
 const loc = locs.data.find((l) => l.attributes.locale === "en-US");

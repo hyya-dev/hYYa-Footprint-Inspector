@@ -16,6 +16,8 @@ import { readFileSync } from "node:fs";
 import { createSign } from "node:crypto";
 
 const APP_ID = "6824033636";
+// IOS (default) or MAC_OS: which platform's editable version to fill.
+const PLATFORM = process.env.PLATFORM ?? "IOS";
 const REVIEW_CONTACT_APP_ID = process.env.REVIEW_CONTACT_APP_ID ?? "6792328099";
 const DRY = process.argv.includes("--dry-run");
 const { ASC_ISSUER_ID, ASC_KEY_ID, ASC_PRIVATE_KEY_PATH } = process.env;
@@ -24,7 +26,7 @@ for (const [k, v] of Object.entries({ ASC_ISSUER_ID, ASC_KEY_ID, ASC_PRIVATE_KEY
 
 const key = readFileSync(ASC_PRIVATE_KEY_PATH, "utf8");
 const listing = JSON.parse(readFileSync(new URL("../store/listing-en-US.json", import.meta.url), "utf8"));
-const notes = readFileSync(new URL("../store/review-notes.txt", import.meta.url), "utf8").trim();
+const notes = readFileSync(new URL(PLATFORM === "MAC_OS" ? "../store/review-notes-mac.txt" : "../store/review-notes.txt", import.meta.url), "utf8").trim();
 
 function token() {
   const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
@@ -49,7 +51,7 @@ async function api(path, method = "GET", body) {
 const step = (msg) => console.log(`• ${msg}`);
 
 // Editable version and app info
-const versions = await api(`/v1/apps/${APP_ID}/appStoreVersions?filter[platform]=IOS&filter[appStoreState]=PREPARE_FOR_SUBMISSION,DEVELOPER_REJECTED,REJECTED,METADATA_REJECTED`);
+const versions = await api(`/v1/apps/${APP_ID}/appStoreVersions?filter[platform]=${PLATFORM}&filter[appStoreState]=PREPARE_FOR_SUBMISSION,DEVELOPER_REJECTED,REJECTED,METADATA_REJECTED`);
 const version = versions.data[0];
 if (!version) throw new Error("No editable iOS version");
 const infos = await api(`/v1/apps/${APP_ID}/appInfos`);
