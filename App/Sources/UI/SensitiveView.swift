@@ -19,6 +19,14 @@ struct SensitiveView: View {
         Set(storedChoice.split(separator: ",").map(String.init))
     }
 
+    #if os(macOS)
+    static let heroLine = "Any app on a Mac can list every app you've installed, without asking you. Pick the kinds to check."
+    static let limitLine = "On a Mac there's no limit: any app can see everything in your Applications folder. These are the apps that say the most about a person."
+    #else
+    static let heroLine = "Any app can ask whether certain apps are installed, one by one, without asking you. Pick the kinds to check."
+    static let limitLine = "The system lets each app ask about 25 apps at most, so I picked the ones that say the most about a person."
+    #endif
+
     private var foundCount: Int { results?.values.reduce(0) { $0 + $1.count } ?? 0 }
 
     var body: some View {
@@ -26,7 +34,7 @@ struct SensitiveView: View {
             Page {
                 HeroCard(eyebrow: "Sensitive apps",
                          title: "Which apps give you away?",
-                         subtitle: "Any app can ask whether certain apps are installed, one by one, without asking you. Pick the kinds to check.",
+                         subtitle: Self.heroLine,
                          mood: heroMood,
                          mascotSize: 104)
 
@@ -38,7 +46,7 @@ struct SensitiveView: View {
                         CategoryToggle(category: category, isOn: chosen.contains(category.id)) { toggle(category.id) }
                     }
                 }
-                Text("The system lets each app ask about 25 apps at most, so I picked the ones that say the most about a person.")
+                Text(Self.limitLine)
                     .font(.system(.footnote))
                     .foregroundStyle(Brand.textSubtle)
                     .padding(.horizontal, 4)
@@ -58,6 +66,9 @@ struct SensitiveView: View {
             .navigationTitle("Sensitive apps")
             .inlineTitle()
             .clearNavigationBar()
+            .task {
+                if let preset = LaunchOptions.value(after: "-sensitiveCategories") { storedChoice = preset }
+            }
             .onChange(of: scenePhase) { _, phase in
                 if phase != .active { results = nil; revealed = false }
             }
@@ -163,7 +174,7 @@ private struct CategoryToggle: View {
     var body: some View {
         Button(action: action) {
             RowCard(symbol: category.symbol, title: category.title,
-                    subtitle: category.apps.map(\.name).joined(separator: ", "),
+                    subtitle: category.checkedApps.map(\.name).joined(separator: ", "),
                     tileFG: isOn ? Brand.ink : Brand.textSubtle) {
                 Image(systemName: isOn ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
@@ -172,6 +183,6 @@ private struct CategoryToggle: View {
         }
         .buttonStyle(PressableCardStyle())
         .accessibilityAddTraits(isOn ? .isSelected : [])
-        .accessibilityLabel("\(category.title). \(category.apps.map(\.name).joined(separator: ", "))")
+        .accessibilityLabel("\(category.title). \(category.checkedApps.map(\.name).joined(separator: ", "))")
     }
 }

@@ -13,7 +13,7 @@ struct CatalogueTests {
     }
 
     @Test func everySectionHasADefinition() {
-        for section in SignalSection.allCases {
+        for section in SignalSection.onThisPlatform {
             #expect(!SignalCatalogue.definitions(in: section).isEmpty, "No definitions for \(section)")
         }
     }

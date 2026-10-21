@@ -436,7 +436,7 @@ struct MacAppsSource: SignalSource {
     var sections: [SignalSection] { [.apps] }
 
     func read() async -> [SignalReading] {
-        let installed = MacSample.on ? Self.sampleApps : Self.installedApps()
+        let installed = MacSample.on ? Self.sampleApps : Self.installedAppNames()
         let running = MacSample.on ? ["Finder", "Safari", "Mail", "Notes", "Music", "hYYa Footprint Inspector"]
             : NSWorkspace.shared.runningApplications.filter { $0.activationPolicy == .regular }.compactMap(\.localizedName).sorted()
         let background = MacSample.on ? 940 : Self.processCount()
@@ -452,7 +452,7 @@ struct MacAppsSource: SignalSource {
 
     /// Apps in /Applications (and its folders) and Apple's own in /System/Applications: the same
     /// list any sandboxed app can read.
-    private static func installedApps() -> [String] {
+    static func installedAppNames() -> [String] {
         let fm = FileManager.default
         var names: [String] = []
         for folder in ["/Applications", "/Applications/Utilities", "/System/Applications", "/System/Applications/Utilities"] {

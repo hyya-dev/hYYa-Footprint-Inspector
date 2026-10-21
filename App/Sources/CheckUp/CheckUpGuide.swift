@@ -16,10 +16,20 @@ struct CheckUpStep: Identifiable, Sendable {
     let path: String
     /// What to look for and the safest choice.
     let actions: [String]
+    /// Mac only: the System Settings page "Open in System Settings" goes to.
+    var pane: String? = nil
 }
 
 enum CheckUpGuide {
-    static let steps: [CheckUpStep] = [
+    static var steps: [CheckUpStep] {
+        #if os(macOS)
+        macSteps
+        #else
+        iosSteps
+        #endif
+    }
+
+    static let iosSteps: [CheckUpStep] = [
         .init(id: "safety-check", title: "Start with Safety Check", symbol: "checkmark.shield",
               why: "Apple's own review of who and what can reach your information. It covers people you share with and app permissions in one place.",
               path: "Settings › Privacy & Security › Safety Check",
@@ -70,5 +80,76 @@ enum CheckUpGuide {
               why: "Shows which apps actually used your location, camera, microphone and contacts in the last 7 days, and which websites they contacted.",
               path: "Settings › Privacy & Security › App Privacy Report",
               actions: ["Turn it on if it's off, then come back in a few days.", "Look for apps using things you didn't expect, and remove their access."]),
+    ]
+
+    private static func privacy(_ anchor: String) -> String { MacSignalCatalogue.Pane.privacy(anchor) }
+
+    /// The Mac's areas. Most System Settings pages open directly on a Mac.
+    static let macSteps: [CheckUpStep] = [
+        .init(id: "mac-location", title: "Location", symbol: "location",
+              why: "Your location shows where you live, work and spend time.",
+              path: "System Settings › Privacy & Security › Location Services",
+              actions: ["Turn off any app that doesn't need your location.", "Click Details next to System Services and turn off what you don't use."],
+              pane: privacy("Privacy_LocationServices")),
+        .init(id: "mac-contacts", title: "Contacts", symbol: "person.2",
+              why: "Your contacts include other people's numbers and addresses, not just yours.",
+              path: "System Settings › Privacy & Security › Contacts",
+              actions: ["Turn off any app that doesn't need your contacts."],
+              pane: privacy("Privacy_Contacts")),
+        .init(id: "mac-calendars", title: "Calendars and Reminders", symbol: "calendar",
+              why: "Calendars show your routine, and their account names often give away where you work.",
+              path: "System Settings › Privacy & Security › Calendars, then Reminders",
+              actions: ["Prefer Add Events Only for apps that just create events.", "Turn off access for apps you don't recognise."],
+              pane: privacy("Privacy_Calendars")),
+        .init(id: "mac-photos", title: "Photos", symbol: "photo.on.rectangle",
+              why: "Full Photos access lets an app see every picture and where each one was taken.",
+              path: "System Settings › Privacy & Security › Photos",
+              actions: ["Choose Limited Access, or None for apps that never need photos."],
+              pane: privacy("Privacy_Photos")),
+        .init(id: "mac-camera-mic", title: "Camera and Microphone", symbol: "camera",
+              why: "Only apps you use for calls, video or recording should have these.",
+              path: "System Settings › Privacy & Security › Camera, then Microphone",
+              actions: ["Turn off any app you don't use for calls, video or recording."],
+              pane: privacy("Privacy_Camera")),
+        .init(id: "mac-screen", title: "Screen and audio recording", symbol: "rectangle.dashed.badge.record",
+              why: "These apps can see everything on your screen, including other apps' windows and messages.",
+              path: "System Settings › Privacy & Security › Screen & System Audio Recording",
+              actions: ["Keep only apps you use for screen sharing or recording."],
+              pane: privacy("Privacy_ScreenCapture")),
+        .init(id: "mac-input", title: "Input monitoring", symbol: "keyboard",
+              why: "Apps here can see every key you press, in every app.",
+              path: "System Settings › Privacy & Security › Input Monitoring",
+              actions: ["Remove any app you don't recognise or no longer use."],
+              pane: privacy("Privacy_ListenEvent")),
+        .init(id: "mac-accessibility", title: "Accessibility control", symbol: "accessibility",
+              why: "Apps here can control your Mac and read what's on screen.",
+              path: "System Settings › Privacy & Security › Accessibility",
+              actions: ["Keep only apps you trust and actually use for this."],
+              pane: privacy("Privacy_Accessibility")),
+        .init(id: "mac-files", title: "Full Disk Access", symbol: "internaldrive",
+              why: "Apps here can read almost every file on your Mac, including mail and messages.",
+              path: "System Settings › Privacy & Security › Full Disk Access",
+              actions: ["Remove any app that doesn't truly need it, such as old backup or cleaning tools."],
+              pane: privacy("Privacy_AllFiles")),
+        .init(id: "mac-bluetooth", title: "Bluetooth", symbol: "dot.radiowaves.left.and.right",
+              why: "Bluetooth lets apps see devices around you, often named after their owners.",
+              path: "System Settings › Privacy & Security › Bluetooth",
+              actions: ["Turn off any app that doesn't connect to a device of yours."],
+              pane: privacy("Privacy_Bluetooth")),
+        .init(id: "mac-paste", title: "Pasting", symbol: "doc.on.clipboard",
+              why: "Apps can read what you copied, which may include passwords or addresses.",
+              path: "System Settings › Privacy & Security › Paste from Other Apps",
+              actions: ["Set Ask for apps you don't fully trust."],
+              pane: privacy("Privacy_Pasteboard")),
+        .init(id: "mac-sharing", title: "Your Mac's name", symbol: "laptopcomputer",
+              why: "Your Mac's name is visible to every app and to other devices on your network.",
+              path: "System Settings › General › Sharing",
+              actions: ["Change Computer name so it doesn't include yours.", "Edit Local hostname to match."],
+              pane: MacSignalCatalogue.Pane.sharing),
+        .init(id: "mac-login-items", title: "Login items", symbol: "power",
+              why: "These apps start every time you log in and can run in the background all day.",
+              path: "System Settings › General › Login Items & Extensions",
+              actions: ["Turn off anything you don't need running all the time."],
+              pane: "com.apple.LoginItems-Settings.extension"),
     ]
 }

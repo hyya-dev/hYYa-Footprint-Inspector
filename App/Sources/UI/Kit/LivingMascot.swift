@@ -57,6 +57,7 @@ struct LivingMascot: View {
     private var figure: some View {
         Button(action: poke) { animatedFigure }
             .buttonStyle(.plain)
+            .focusEffectDisabled()
             .frame(width: size, height: size * 1.06)
             .contentShape(Rectangle())
             .onChange(of: mood) { _, new in
