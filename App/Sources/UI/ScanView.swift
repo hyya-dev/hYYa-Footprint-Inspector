@@ -16,7 +16,7 @@ struct ScanView: View {
                 case .done: Results()
                 }
             }
-            .toolbar(.hidden, for: .navigationBar)
+            .hiddenNavigationBar()
             .sensoryFeedback(.impact(weight: .light, intensity: 0.4), trigger: Int(scanner.progress * 16))
             .sensoryFeedback(trigger: scanner.phase) { _, new in
                 guard new == .done else { return nil }
@@ -179,7 +179,7 @@ private struct Results: View {
     private func group(_ group: SignalGroup, title: String) -> some View {
         SectionTitle(title: title)
         Panel {
-            ForEach(SignalSection.allCases.filter { $0.group == group }) { section in
+            ForEach(SignalSection.onThisPlatform.filter { $0.group == group }) { section in
                 NavigationLink { SectionView(section: section) } label: { CategoryTile(section: section) }
                     .buttonStyle(PressableCardStyle())
             }
@@ -222,7 +222,7 @@ struct CategoryTile: View {
     }
 
     private func detail(_ findings: [Finding]) -> String {
-        if let kind = PermissionKind.allCases.first(where: { $0.section == section }) {
+        if let kind = PermissionKind.onThisPlatform.first(where: { $0.section == section }) {
             switch scanner.permissionStates[kind] {
             case .granted?, .limited?: break
             case .denied?: return "Off"
@@ -243,7 +243,7 @@ private struct FormulaSheet: View {
                 InfoCard { Text(FootprintScore.explanation).font(.body).foregroundStyle(Brand.textMuted).lineSpacing(3) }
             }
             .navigationTitle("How the score works")
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineTitle()
             .toolbar { Button("Done") { dismiss() } }
         }
         .presentationDetents([.large])

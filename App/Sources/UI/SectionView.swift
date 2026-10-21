@@ -9,7 +9,7 @@ struct SectionView: View {
     let section: SignalSection
 
     private var kind: PermissionKind? {
-        PermissionKind.allCases.first { $0.section == section }
+        PermissionKind.onThisPlatform.first { $0.section == section }
     }
 
     var body: some View {
@@ -46,7 +46,7 @@ struct SectionView: View {
             }
         }
         .navigationTitle(section.title)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineTitle()
     }
 
     private func heroLine(findings: [Finding], state: PermissionState?) -> String {

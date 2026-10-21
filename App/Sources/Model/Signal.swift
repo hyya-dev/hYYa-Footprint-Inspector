@@ -103,6 +103,15 @@ enum SignalSection: String, CaseIterable, Identifiable, Sendable {
 
     var id: String { rawValue }
 
+    /// The sections this platform's scan fills, in display order.
+    static var onThisPlatform: [SignalSection] {
+        #if os(iOS)
+        allCases
+        #else
+        MacSources.sections
+        #endif
+    }
+
     var title: String {
         switch self {
         case .identity: "Device identity"

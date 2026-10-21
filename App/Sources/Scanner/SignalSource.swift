@@ -10,6 +10,16 @@ enum PermissionKind: String, CaseIterable, Identifiable, Sendable {
 
     var id: String { rawValue }
 
+    /// The permissions this platform has. Macs have no motion history, and the music library API
+    /// is iPhone and iPad only.
+    static var onThisPlatform: [PermissionKind] {
+        #if os(iOS)
+        allCases
+        #else
+        allCases.filter { ![.motion, .music].contains($0) }
+        #endif
+    }
+
     var section: SignalSection {
         switch self {
         case .motion: .motion
@@ -54,6 +64,15 @@ extension SignalSource {
     var permission: PermissionKind? { nil }
     func permissionState() -> PermissionState { .granted }
     func requestPermission() async -> PermissionState { .granted }
+}
+
+/// Stands in for a permission this platform doesn't have. Never shown: `PermissionKind.onThisPlatform`
+/// leaves such kinds out.
+struct UnavailableSource: SignalSource {
+    var sections: [SignalSection] { [] }
+    func permissionState() -> PermissionState { .unavailable }
+    func requestPermission() async -> PermissionState { .unavailable }
+    func read() async -> [SignalReading] { [] }
 }
 
 // MARK: - Formatting helpers shared by sources

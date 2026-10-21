@@ -97,7 +97,7 @@ struct SettingsView: View {
                     PromoRow(imageName: "HyyaDev", title: "hYYa \u{2728}", tagline: "Companions you can trust.", url: hYYaLinks.website)
                 }
 
-                #if DEBUG
+                #if DEBUG && os(iOS)
                 SectionTitle(title: "Developer")
                 Panel {
                     NavigationLink { SettingsLinkLab() } label: { RowCard(symbol: "hammer", title: "Settings link lab") }
@@ -128,7 +128,7 @@ struct SettingsView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            .toolbar(.hidden, for: .navigationBar)
+            .hiddenNavigationBar()
             .confirmationDialog("Clear all saved scans?", isPresented: $confirmingClear, titleVisibility: .visible) {
                 Button("Clear history", role: .destructive) { history.clear(); Haptics.success() }
             } message: {

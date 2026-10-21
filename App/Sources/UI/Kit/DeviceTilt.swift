@@ -2,7 +2,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+#if os(iOS)
 import CoreMotion
+#endif
 import Observation
 import SwiftUI
 
@@ -20,10 +22,13 @@ final class DeviceTilt {
     private(set) var x: Double = 0
     private(set) var y: Double = 0
 
+    #if os(iOS)
     private let manager = CMMotionManager()
+    #endif
     private var watchers = 0
     private var baseline: (roll: Double, pitch: Double)?
 
+    #if os(iOS)
     func start() {
         watchers += 1
         guard watchers == 1, manager.isDeviceMotionAvailable, !UIAccessibility.isReduceMotionEnabled else { return }
@@ -50,6 +55,11 @@ final class DeviceTilt {
             y = 0
         }
     }
+    #else
+    /// A Mac doesn't tilt, so the parallax stays still.
+    func start() {}
+    func stop() {}
+    #endif
 }
 
 /// Tilts content in 3D with the phone.

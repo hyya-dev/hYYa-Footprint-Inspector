@@ -56,8 +56,8 @@ struct SensitiveView: View {
                     .disabled(chosen.isEmpty)
             }
             .navigationTitle("Sensitive apps")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.hidden, for: .navigationBar)
+            .inlineTitle()
+            .clearNavigationBar()
             .onChange(of: scenePhase) { _, phase in
                 if phase != .active { results = nil; revealed = false }
             }

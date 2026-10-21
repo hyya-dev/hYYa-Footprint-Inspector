@@ -38,12 +38,16 @@ final class Scanner {
         self.history = history
     }
 
+    #if os(iOS)
     let passiveSources: [any SignalSource] = [
         IdentitySource(), SystemSource(), StorageSource(), DisplaySource(), AudioSource(),
         LanguageSource(), AccessibilitySource(), ClipboardSource(), MotionSensorSource(),
         NetworkSource(), FontsVoicesSource(), AccountSource(), GraphicsSource(), SecuritySource(),
         WebFingerprintSource(), ReinstallSource(),
     ]
+    #else
+    let passiveSources: [any SignalSource] = MacSources.all
+    #endif
 
     /// Reads every passive and advanced signal, plus any permission category already granted.
     func scan() async {
@@ -56,7 +60,7 @@ final class Scanner {
         }
         readings.merge(fresh) { $1 }
         refreshPermissionStates()
-        for kind in PermissionKind.allCases where isReadable(permissionStates[kind]) {
+        for kind in PermissionKind.onThisPlatform where isReadable(permissionStates[kind]) {
             await readPermission(kind)
         }
         lastScan = Date()
@@ -70,7 +74,7 @@ final class Scanner {
     var score: FootprintScore { FootprintScore(findings: allFindings) }
 
     func refreshPermissionStates() {
-        for kind in PermissionKind.allCases {
+        for kind in PermissionKind.onThisPlatform {
             permissionStates[kind] = PermissionSources.source(for: kind).permissionState()
         }
     }
@@ -104,7 +108,7 @@ final class Scanner {
     }
 
     var allFindings: [Finding] {
-        SignalSection.allCases.flatMap(findings(in:))
+        SignalSection.onThisPlatform.flatMap(findings(in:))
     }
 
     /// What any app can read with no prompt: everything except findings from granted permissions.
