@@ -39,18 +39,18 @@ final class MotionSensorSource: SignalSource {
             "x \(Format.decimal(x)) · y \(Format.decimal(y)) · z \(Format.decimal(z))"
         }
         var items: [String] = []
-        if let a = manager.accelerometerData?.acceleration { items.append("Accelerometer: \(xyz(a.x, a.y, a.z))") }
-        if let g = manager.gyroData?.rotationRate { items.append("Gyroscope: \(xyz(g.x, g.y, g.z))") }
-        if let m = manager.magnetometerData?.magneticField { items.append("Magnetometer: \(xyz(m.x, m.y, m.z))") }
+        if let a = manager.accelerometerData?.acceleration { items.append("Movement: \(xyz(a.x, a.y, a.z))") }
+        if let g = manager.gyroData?.rotationRate { items.append("Turning: \(xyz(g.x, g.y, g.z))") }
+        if let m = manager.magnetometerData?.magneticField { items.append("Magnetic field (compass): \(xyz(m.x, m.y, m.z))") }
         var out: [SignalReading] = []
         if let motion = manager.deviceMotion {
             let att = motion.attitude
-            items.append("Tilt: roll \(Format.decimal(att.roll, digits: 2)), pitch \(Format.decimal(att.pitch, digits: 2))")
+            items.append("Tilt: side to side \(Format.decimal(att.roll, digits: 2)), front to back \(Format.decimal(att.pitch, digits: 2))")
             if frame == .xMagneticNorthZVertical, motion.heading >= 0 {
                 out.append(.init(id: "heading", value: "\(Int(motion.heading.rounded()))° from north"))
             }
         }
-        out.insert(.init(id: "motion-raw", value: items.isEmpty ? "No reading" : "\(items.count) sensors readable", items: items), at: 0)
+        out.insert(.init(id: "motion-raw", value: items.isEmpty ? "No reading" : "\(items.count) sensors can be read", items: items), at: 0)
         return out
     }
 }
@@ -69,12 +69,12 @@ final class NetworkSource: SignalSource {
             case .wifi: kinds.append("Wi-Fi")
             case .cellular: kinds.append("Mobile data")
             case .wiredEthernet: kinds.append("Wired")
-            default: kinds.append("Other (\(iface.name))")
+            default: kinds.append("Other")
             }
         }
         var items = ["Available: \(kinds.isEmpty ? "none" : kinds.joined(separator: ", "))"]
         if let path {
-            items.append("Expensive connection: \(Format.yesNo(path.isExpensive))")
+            items.append("Treated as costly data: \(Format.yesNo(path.isExpensive))")
             items.append("Low Data Mode: \(Format.onOff(path.isConstrained))")
         }
 
@@ -83,7 +83,7 @@ final class NetworkSource: SignalSource {
         return [
             .init(id: "connection", value: kinds.first ?? "Offline", items: items),
             .init(id: "vpn", value: tunnels.isEmpty ? "No VPN detected" : "VPN detected",
-                  items: tunnels.isEmpty ? [] : ["Tunnels: \(tunnels.joined(separator: ", "))"],
+                  items: [],
                   severityOverride: tunnels.isEmpty ? .low : nil),
             .init(id: "local-ip", value: "\(addresses.count) address\(addresses.count == 1 ? "" : "es")", items: addresses),
         ]

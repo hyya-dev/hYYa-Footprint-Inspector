@@ -70,10 +70,10 @@ final class CameraPermissionSource: SignalSource {
             return "\(side): \(device.localizedName)\(field)"
         }
         if devices.contains(where: { $0.deviceType == .builtInTrueDepthCamera }) {
-            items.append("Has a TrueDepth sensor for Face ID")
+            items.append("Has the 3D face sensor used by Face ID")
         }
         if devices.contains(where: { $0.deviceType == .builtInLiDARDepthCamera }) {
-            items.append("Has a LiDAR depth sensor, found only on Pro models")
+            items.append("Has a 3D depth scanner, found only on Pro models")
         }
         return [SignalReading(id: "cam-list", value: value, items: items)]
     }

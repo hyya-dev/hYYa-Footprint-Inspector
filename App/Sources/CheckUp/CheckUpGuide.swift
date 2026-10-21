@@ -43,7 +43,7 @@ enum CheckUpGuide {
               path: "Settings › Privacy & Security › Contacts",
               actions: ["Choose Limited Access, or turn access off for apps that don't need it."]),
         .init(id: "calendars", title: "Calendars and Reminders", symbol: "calendar",
-              why: "Calendars show your routine and often your employer's email domain.",
+              why: "Calendars show your routine, and their account names often give away where you work.",
               path: "Settings › Privacy & Security › Calendars, then Reminders",
               actions: ["Prefer Add Events Only for apps that just create events.", "Turn off access for apps you don't recognise."]),
         .init(id: "bluetooth-network", title: "Bluetooth and Local Network", symbol: "wifi.router",

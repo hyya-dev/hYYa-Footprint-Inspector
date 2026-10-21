@@ -19,7 +19,7 @@ struct AudioSource: SignalSource {
 
         var audio = SignalReading(id: "audio-route",
                                   value: route.outputs.first?.portName ?? "None",
-                                  items: outputs + route.inputs.map { "Input: \($0.portName)" })
+                                  items: outputs + route.inputs.map { "Microphone: \($0.portName)" })
         if let firstName {
             audio.severityOverride = .high
             audio.note = "This name suggests the owner is called \(firstName). Any app can read it."
@@ -95,7 +95,7 @@ struct LanguageSource: SignalSource {
                   severityOverride: keyboards.filter { $0 != "emoji" }.count <= 1 ? .low : nil),
             .init(id: "region", value: region, items: regionItems),
             .init(id: "timezone", value: tz.identifier.replacingOccurrences(of: "_", with: " "),
-                  items: ["UTC\(offset >= 0 ? "+" : "")\(offset)"]),
+                  items: ["GMT\(offset >= 0 ? "+" : "")\(offset)"]),
         ]
     }
 }

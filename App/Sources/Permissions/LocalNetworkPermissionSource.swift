@@ -111,7 +111,7 @@ final class LocalNetworkPermissionSource: SignalSource {
         case "_ipp._tcp", "_ipps._tcp", "_printer._tcp": "Printer"
         case "_scanner._tcp", "_uscan._tcp": "Scanner"
         case "_smb._tcp", "_afpovertcp._tcp": "File sharing"
-        case "_ssh._tcp", "_sftp-ssh._tcp": "Remote login"
+        case "_ssh._tcp", "_sftp-ssh._tcp": "Remote access"
         case "_rfb._tcp": "Screen sharing"
         case "_hue._tcp": "Philips Hue"
         case "_device-info._tcp": "Device info"

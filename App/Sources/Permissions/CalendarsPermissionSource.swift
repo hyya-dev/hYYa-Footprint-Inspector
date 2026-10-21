@@ -125,7 +125,7 @@ private struct CalendarSummary: Sendable {
     private static func label(_ type: EKCalendarType) -> String {
         switch type {
         case .local: "on this device"
-        case .calDAV: "CalDAV or iCloud"
+        case .calDAV: "Online calendar"
         case .exchange: "Exchange"
         case .subscription: "subscribed"
         case .birthday: "birthdays"

@@ -81,6 +81,30 @@ final class StoreScreenshotsUITests: XCTestCase {
         }
     }
 
+    /// Screens changed in the plain-language pass, attached as `review-…`.
+    func testCaptureReview() {
+        app.launch()
+        sleep(2)
+        tap("Start scan")
+        XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 20))
+        for group in ["Device identity", "Motion sensors", "Graphics and mobile network"] {
+            app.swipeDown(velocity: .fast); app.swipeDown(velocity: .fast)
+            let row = app.buttons.containing(NSPredicate(format: "label BEGINSWITH %@", group)).firstMatch
+            scrollTo(row, max: 16)
+            guard row.exists else { continue }
+            row.tap(); sleep(1)
+            shot("review-\(group)")
+            app.navigationBars.buttons.element(boundBy: 0).tap(); sleep(1)
+        }
+        tab("Sensitive apps"); sleep(1)
+        app.swipeUp(velocity: .fast); app.swipeUp(velocity: .fast); sleep(1)
+        shot("review-sensitive-bottom")
+        app.buttons.containing(NSPredicate(format: "label BEGINSWITH 'Check'")).firstMatch.tap()
+        sleep(2)
+        app.swipeDown(velocity: .fast); app.swipeDown(velocity: .fast); sleep(1)
+        shot("review-sensitive-result")
+    }
+
     func testCaptureSettings() {
         app.launch()
         sleep(2)

@@ -47,7 +47,7 @@ struct IdentitySource: SignalSource {
         out.append(.init(id: "os-build", value: build, items: [ProcessInfo.processInfo.operatingSystemVersionString]))
         let machine = Sysctl.string("hw.machine") ?? "Unknown"
         let board = Sysctl.string("hw.model")
-        out.append(.init(id: "model-id", value: machine, items: board.map { ["Board: \($0)"] } ?? []))
+        out.append(.init(id: "model-id", value: machine, items: board.map { ["Internal code name: \($0)"] } ?? []))
         if let kernel = Sysctl.string("kern.version") {
             out.append(.init(id: "kernel-version", value: kernel.components(separatedBy: ":").first ?? kernel, items: [kernel]))
         }
@@ -64,8 +64,8 @@ struct SystemSource: SignalSource {
         let info = ProcessInfo.processInfo
         var out: [SignalReading] = []
         out.append(.init(id: "cpu-ram",
-                         value: "\(info.processorCount) cores · \(Format.bytes(Int64(info.physicalMemory)))",
-                         items: ["Active cores: \(info.activeProcessorCount)",
+                         value: "\(info.processorCount) processor cores · \(Format.bytes(Int64(info.physicalMemory)))",
+                         items: ["Processor cores in use: \(info.activeProcessorCount)",
                                  "Memory: \(info.physicalMemory.formatted(.number)) bytes"]))
         if let boot = Sysctl.bootTime() {
             let up = Duration.seconds(info.systemUptime).formatted(.units(allowed: [.days, .hours, .minutes], width: .abbreviated))
@@ -119,7 +119,7 @@ struct StorageSource: SignalSource {
         if let free = values.volumeAvailableCapacity {
             var items: [String] = []
             if let important = values.volumeAvailableCapacityForImportantUsage {
-                items.append("Free if caches were cleared: \(Format.exactBytes(important))")
+                items.append("Free once the system clears temporary files: \(Format.exactBytes(important))")
             }
             out.append(.init(id: "disk-free", value: Format.exactBytes(Int64(free)), items: items))
         }
@@ -142,10 +142,10 @@ struct DisplaySource: SignalSource {
         if let screen = CurrentScene.scene?.screen {
             let px = screen.nativeBounds.size
             let zoomed = abs(screen.nativeScale - screen.scale) > 0.01
-            let gamut = traits.displayGamut == .P3 ? "Wide colour (P3)" : "Standard colour (sRGB)"
+            let gamut = traits.displayGamut == .P3 ? "Wide colour range" : "Standard colour range"
             out.append(.init(id: "screen",
-                             value: "\(Int(px.width)) × \(Int(px.height)) px · \(screen.maximumFramesPerSecond) Hz",
-                             items: ["Scale: @\(Int(screen.scale))x (native \(Format.decimal(screen.nativeScale, digits: 2)))",
+                             value: "\(Int(px.width)) × \(Int(px.height)) px · \(screen.maximumFramesPerSecond) refreshes a second",
+                             items: ["Pixel density: \(Int(screen.scale))×",
                                      "Display Zoom: \(zoomed ? "on" : "off")",
                                      gamut]))
             out.append(.init(id: "brightness", value: Format.percent(Double(screen.brightness))))
