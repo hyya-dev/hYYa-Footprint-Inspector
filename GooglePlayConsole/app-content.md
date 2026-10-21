@@ -57,5 +57,5 @@ App, category Tools. Contact h@hyya.com, website https://hyya.com.
   script rejects "phone"/"mobile" wording, because the listing serves tablets too.
 - Pushed with `scripts/play-push-listings.mjs --apply` (text, plus the English gallery for each new
   language, since Play does not inherit images). 🚨 `--apply` sends the change for Google's review:
-  Play refuses changesNotSentForReview now that the app is live. Not pushed yet (2026-10-21): it
-  waits for the owner's consent.
+  Play refuses changesNotSentForReview now that the app is live. Pushed and sent for review on
+  2026-10-21 with the owner's explicit consent (86 languages, gallery read back in order).
