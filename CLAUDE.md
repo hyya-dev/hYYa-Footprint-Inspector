@@ -74,8 +74,27 @@ look there first. They are read-only from here.
 - **Officially, an app can only open its own Settings page.** Deep links into other Settings
   panes are unofficial; see `docs/SETTINGS-LINKS.md` for what was tested.
 
+## macOS (built 2026-10-21; plan in `docs/MACOS-PLAN.md`)
+- **Native Mac target** sharing the model, scanner and screens. Same bundle id as iOS, so one App
+  Store record and one listing.
+- Mac-only readers are in `App/Sources/MacReaders/`, Mac findings in
+  `App/Sources/Model/MacSignalCatalogue.swift`, and platform switches use `#if os(macOS)`.
+- **A sandboxed Mac app can read, with no prompt:**
+  - the serial number and hardware ID (permanent)
+  - the full name
+  - every installed and running app (no 25-app limit)
+  - network hardware addresses, router and DNS
+  - drive, USB and sound device names
+- **Most System Settings panes open directly** (`x-apple.systempreferences:`), so Mac fixes carry
+  a pane id.
+- **No "What websites see" on Mac:** a web view needs the network entitlement, and the app holds
+  none. Also no Motion, Music or Local Network on Mac.
+- **Store screenshots: launch with `-sampleData`** (made-up name, serial number and apps). Never
+  publish the owner's real values. Other screenshot switches: `-autoScan`, `-startTab`,
+  `-openFinding`, `-sensitiveCategories`, `-openSettings`.
+
 ## Layout
 - `project.yml`: XcodeGen spec and the source of truth. The `.xcodeproj` is generated and
   gitignored.
-- `App/`: the iOS app.
+- `App/`: the app (iOS and macOS). `Tests/` iOS unit tests, `TestsMac/` Mac unit tests.
 - `docs/`: the plan, research and inventories.
