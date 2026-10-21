@@ -147,7 +147,7 @@ final class StoreScreenshotsUITests: XCTestCase {
         for name in ["Dating and LGBTQ+", "Health and fertility", "VPN, Tor and censorship tools"] {
             let row = app.buttons.containing(NSPredicate(format: "label BEGINSWITH %@", name)).firstMatch
             scrollTo(row, max: 4)
-            if row.exists { row.tap() }
+            if row.exists && !row.isSelected { row.tap() }
         }
         app.swipeDown(velocity: .fast)
         sleep(1)
