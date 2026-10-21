@@ -6,6 +6,10 @@ No login is required. To review:
 3. Each permission category ("Seen once you allow it") asks for that permission only when the user taps "Show me", and then shows counts and summaries (never contacts' names, numbers or event titles).
 4. "Sensitive apps" tab: the user picks categories, then taps Check.
 
+About CallKit (guideline 5, China): from build 5 the app no longer includes or links CallKit in any territory. The only use was a read-only "call in progress" display, which has been removed.
+
+About pricing in screenshots (2.3.7): all references to "free" have been removed from the screenshots and from the screen they show.
+
 About VPN (automated question, 2026-10-19): the app has NO VPN functionality. It has no Network Extension entitlement, creates no VPN configuration or tunnel, routes no traffic and makes no network connections of its own. It collects no user information through a VPN or otherwise (App Store privacy label: Data Not Collected), so nothing is shared with any third party or stored anywhere off the device. Two read-only checks mention VPNs: (1) one finding shows the user whether a VPN is currently on, read from the system proxy settings (CFNetworkCopySystemProxySettings), because any app can see this; (2) the user-initiated "Sensitive apps" check can test whether four VPN and censorship-circumvention apps are installed (URL schemes psiphon, onionhttp, protonvpn, nordvpn, declared in LSApplicationQueriesSchemes). Both results are only displayed on screen to the device owner and never stored or sent.
 
 About fingerprinting (5.1.2): the app does not fingerprint anyone. Every value is displayed to the device owner on screen and never leaves the device. Scan history keeps only salted one-way hashes, the score and the ids of notable findings, never the values, and is excluded from backups.
