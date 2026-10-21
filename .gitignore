@@ -22,3 +22,9 @@ hYYaFootprintInspector.xcodeproj/
 .env.local
 *.token
 secrets/
+
+# Android
+Android/local.properties
+Android/.gradle/
+Android/build/
+Android/app/build/
