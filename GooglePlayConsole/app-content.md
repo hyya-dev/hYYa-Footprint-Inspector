@@ -35,3 +35,27 @@ All functionality is available without special access. No login.
 
 ## Government apps / financial features / health
 None. Not a news app. No health features.
+
+## Advertising ID
+No (no AD_ID permission in the merged release manifest, no Play Services).
+
+## Store settings
+App, category Tools. Contact h@hyya.com, website https://hyya.com.
+
+## Closed testing (alpha) track
+- Testers: Google Groups `testers-community@googlegroups.com`, the same as hYYa Encrypted Folder in
+  this account. Feedback: h@hyya.com.
+- Countries / regions: all 178.
+- Release 1.0.0 (versionCode 1): sent for Google's review on 2026-10-21 with the owner's explicit
+  consent, together with the listing, store settings and app content (15 changes). Managed
+  publishing is off. Approved and live on 2026-10-21 (Play's "Your update is live" email).
+- Production access needs at least 12 opted-in testers for 14 days.
+
+## Localised listings
+- `GooglePlayConsole/localized/<Play code>.json`: 86 Play languages, from `scripts/gemini-localize-play.mjs`
+  (Gemini; the English variants, es-US, ms-MY and the fa variants are copies). Device-neutral: the
+  script rejects "phone"/"mobile" wording, because the listing serves tablets too.
+- Pushed with `scripts/play-push-listings.mjs --apply` (text, plus the English gallery for each new
+  language, since Play does not inherit images). 🚨 `--apply` sends the change for Google's review:
+  Play refuses changesNotSentForReview now that the app is live. Not pushed yet (2026-10-21): it
+  waits for the owner's consent.
