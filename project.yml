@@ -70,6 +70,8 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: "hYYa Footprint Inspector"
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+        # Export compliance: standard system encryption only (same answer as iOS).
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         INFOPLIST_KEY_NSHumanReadableCopyright: "© 2026 hYYa"
         CODE_SIGN_ENTITLEMENTS: App/macOS/FootprintInspectorMac.entitlements
         # Sand accent for system controls the SwiftUI tint doesn't reach (sidebar, menus, alerts).
