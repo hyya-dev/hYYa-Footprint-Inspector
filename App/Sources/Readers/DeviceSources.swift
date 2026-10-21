@@ -6,23 +6,6 @@
 
 import UIKit
 
-enum Sysctl {
-    static func string(_ name: String) -> String? {
-        var size = 0
-        guard sysctlbyname(name, nil, &size, nil, 0) == 0, size > 0 else { return nil }
-        var buffer = [CChar](repeating: 0, count: size)
-        guard sysctlbyname(name, &buffer, &size, nil, 0) == 0 else { return nil }
-        return String(cString: buffer)
-    }
-
-    static func bootTime() -> Date? {
-        var tv = timeval()
-        var size = MemoryLayout<timeval>.size
-        guard sysctlbyname("kern.boottime", &tv, &size, nil, 0) == 0 else { return nil }
-        return Date(timeIntervalSince1970: TimeInterval(tv.tv_sec) + TimeInterval(tv.tv_usec) / 1_000_000)
-    }
-}
-
 /// The window scene's screen and traits. iOS 26 deprecates `UIScreen.main`.
 @MainActor
 enum CurrentScene {

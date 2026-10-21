@@ -2,9 +2,23 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- Mac App Store apps must be sandboxed. Nothing else is granted yet: no network client,
-	     no file access. Each permission is added only when a reader needs it. -->
+	<!-- Mac App Store apps must be sandboxed. No network client and no file access: the app
+	     never connects anywhere and never opens files. -->
 	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<!-- Each of these only lets the app ASK. macOS still shows its own prompt, and the app asks
+	     only when the user clicks "Show me". The camera one also lets it list camera names. -->
+	<key>com.apple.security.device.camera</key>
+	<true/>
+	<key>com.apple.security.device.bluetooth</key>
+	<true/>
+	<key>com.apple.security.personal-information.location</key>
+	<true/>
+	<key>com.apple.security.personal-information.addressbook</key>
+	<true/>
+	<key>com.apple.security.personal-information.calendars</key>
+	<true/>
+	<key>com.apple.security.personal-information.photos-library</key>
 	<true/>
 </dict>
 </plist>

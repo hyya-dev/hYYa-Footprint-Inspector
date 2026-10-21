@@ -9,16 +9,25 @@ import Foundation
 /// Wording rules (CLAUDE.md): calm, plain English, "could" rather than "will". Every entry says
 /// what an app learns, why iOS allows it, how long it lasts and what the user can do.
 enum SignalCatalogue {
+    /// This platform's definitions, in display order.
+    static let list: [SignalDefinition] = {
+        #if os(macOS)
+        MacSignalCatalogue.list
+        #else
+        passive + advanced + permission
+        #endif
+    }()
+
     static let all: [String: SignalDefinition] = {
         var map: [String: SignalDefinition] = [:]
-        for d in passive + advanced + permission { map[d.id] = d }
+        for d in list { map[d.id] = d }
         return map
     }()
 
     static func definition(_ id: String) -> SignalDefinition? { all[id] }
 
     static func definitions(in section: SignalSection) -> [SignalDefinition] {
-        (passive + advanced + permission).filter { $0.section == section }
+        list.filter { $0.section == section }
     }
 }
 

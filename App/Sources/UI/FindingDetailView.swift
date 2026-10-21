@@ -111,7 +111,7 @@ struct FindingDetailView: View {
             if !def.fix.steps.isEmpty {
                 StepList(steps: def.fix.steps)
             }
-            if def.id == "clip-kinds" {
+            if def.id == "clip-kinds" || def.id == "mac-clipboard" {
                 Button(cleared ? "Clipboard cleared" : "Clear the clipboard now") {
                     #if os(iOS)
                     UIPasteboard.general.items = []
@@ -126,9 +126,20 @@ struct FindingDetailView: View {
                 .disabled(cleared)
             }
             if fixable {
+                #if os(macOS)
+                if let pane = def.fix.settingsPane {
+                    Button("Open in System Settings") { SettingsLink.open(pane: pane) }
+                        .buttonStyle(PrimaryCTAButtonStyle())
+                } else {
+                    Button("Open System Settings") { SettingsLink.openSettingsHome() }
+                        .buttonStyle(GhostButtonStyle())
+                        .frame(maxWidth: .infinity)
+                }
+                #else
                 Button("Open Settings") { SettingsLink.openSettingsHome() }
                     .buttonStyle(GhostButtonStyle())
                     .frame(maxWidth: .infinity)
+                #endif
             }
         }
         .padding(20)

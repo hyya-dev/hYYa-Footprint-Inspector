@@ -48,15 +48,6 @@ struct AudioSource: SignalSource {
     }
 }
 
-/// Spots a first name in device names such as "Sam's AirPods" or "Sam’s iPhone".
-enum OwnerName {
-    static func find(in name: String) -> String? {
-        let pattern = #/^([\p{L}][\p{L}\-]{1,20})['’]s\s/#
-        guard let match = name.firstMatch(of: pattern) else { return nil }
-        return String(match.1)
-    }
-}
-
 // MARK: - Language, region, time
 
 struct LanguageSource: SignalSource {
