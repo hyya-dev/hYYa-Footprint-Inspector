@@ -24,6 +24,9 @@ look there first. They are read-only from here.
 - **Free.** No IAP, no ads, no subscription, no analytics, no accounts, no server. Nothing leaves
   the phone.
 - **Platforms, in order:** iOS (and iPadOS) → macOS → Android. **Minimum iOS 26.**
+  - **Keep supporting iOS 26** (owner, 2026-10-21). Before each release, build and run the unit
+    tests and a launch check on an **iOS 26.0 Simulator** as well as the latest iOS, so those
+    users stay protected. The iOS 26.0 runtime is kept installed on this Mac for that.
 - **English only** at launch. Keep strings in String Catalogs so adding languages later is cheap.
 - **Scope:** sensitive checks included, plus everything an app can be granted permission to read,
   "to open the eyes of the user".
