@@ -34,9 +34,10 @@ always set to release automatically after approval.
   `innerText`. Read `textContent`, and click Material checkboxes with dispatched mouse events.
 
 ### Owed
-- **Owner:** get 12 testers opted in to the closed test, and keep them 14 days. Then apply for
-  production; the questionnaire needs owner answers.
-- **Owner:** forward the Apple review verdicts (iOS, macOS).
+- **Closed test:** 12+ testers opted in (dashboard ✓, 2026-10-21). The 14-day run ends around
+  **2026-11-04**; then "Apply for production" in the dashboard, whose questionnaire needs owner
+  answers. 🚨 The production release is a review submission: owner consent first.
+- **Owner:** will forward the Apple review verdicts (iOS, macOS) as they arrive.
 - **After Play production:** a hyya.com brief to add the Google Play badge/link to the app page.
 - **Device tests** still open from the original plan (see `docs/DEVICE-TEST-LOG.md`).
 - **Polish, not blocking:** a proper Icon Composer icon and PPO alternates; App Accessibility
