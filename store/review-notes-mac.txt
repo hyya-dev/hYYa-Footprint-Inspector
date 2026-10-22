@@ -15,3 +15,8 @@ About the installed-app check: it reads the app names in /Applications and /Syst
 About entitlements: camera (to list camera names only; no capture), Bluetooth, location, contacts, calendars/reminders and photos are each requested only when the user clicks "Show me" for that category. The app uses only Apple frameworks.
 
 The app has no CallKit and no pricing references in its screenshots.
+
+New in this build:
+- Tracker: lists the System Settings panes that show which apps can record the screen, use accessibility, monitor input or read all files, each opened with an x-apple.systempreferences link. The app reads none of these itself.
+- Re-scan reminder (Settings): optional, off by default. It schedules a local notification on the Mac (weekly or monthly) after asking the user for permission. There is no server and no push notification.
+- "Fix them with me": steps through the user's fixable findings one at a time and opens System Settings. The app never changes any setting itself.

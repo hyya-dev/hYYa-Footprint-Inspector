@@ -1,6 +1,6 @@
 # HANDOFF: where the work is
 
-## Now (2026-10-21): v1.0.0 is with the reviewers on every store
+## Now (2026-10-22): v1.0.0 build 13 is ready for the owner to reorder slides and submit
 
 | Store | What | State |
 | --- | --- | --- |
@@ -11,6 +11,14 @@
 
 🚨 Nothing goes to review (Apple or Google) without the owner's explicit consent. Releases are
 always set to release automatically after approval.
+
+### 2026-10-22: build 13 prepared, not submitted
+- iOS and macOS v1.0.0 were pulled from review by the owner for the new features (Tracker, Fix them
+  with me, rings, five-step flow, plain-language findings). Build 13 is attached to both, with the new
+  English copy, 49 translations, reviewer notes and slides (7 iPhone, 7 iPad, 6 Mac) uploaded.
+- 🚨 The owner reorders the slides in App Store Connect and submits both versions themselves.
+- Android: once the owner has submitted iOS, re-render the Android slides in the same order as the
+  owner's final iOS order, upload versionCode 7 and the listing, then ask before sending for review.
 
 ### Google Play facts (verified 2026-10-21)
 - Personal account "hYYa LLC", id 7244268045893720931, signed in at Play Console `u/1`. App id

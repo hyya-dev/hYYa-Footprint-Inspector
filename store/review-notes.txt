@@ -8,8 +8,6 @@ No login is required. To review:
 
 About CallKit (guideline 5, China): from build 5 the app no longer includes or links CallKit in any territory. The only use was a read-only "call in progress" display, which has been removed.
 
-About pricing in screenshots (2.3.7): all references to "free" have been removed from the screenshots and from the screen they show.
-
 About VPN (automated question, 2026-10-19): the app has NO VPN functionality. It has no Network Extension entitlement, creates no VPN configuration or tunnel, routes no traffic and makes no network connections of its own. It collects no user information through a VPN or otherwise (App Store privacy label: Data Not Collected), so nothing is shared with any third party or stored anywhere off the device. Two read-only checks mention VPNs: (1) one finding shows the user whether a VPN is currently on, read from the system proxy settings (CFNetworkCopySystemProxySettings), because any app can see this; (2) the user-initiated "Sensitive apps" check can test whether four VPN and censorship-circumvention apps are installed (URL schemes psiphon, onionhttp, protonvpn, nordvpn, declared in LSApplicationQueriesSchemes). Both results are only displayed on screen to the device owner and never stored or sent.
 
 About fingerprinting (5.1.2): the app does not fingerprint anyone. Every value is displayed to the device owner on screen and never leaves the device. Scan history keeps only salted one-way hashes, the score and the ids of notable findings, never the values, and is excluded from backups.
@@ -23,3 +21,8 @@ The keychain item the app writes holds only this app's own install dates, as an 
 Motion sensors are also used for a subtle tilt effect on the mascot. Nothing is recorded.
 
 The app uses only Apple frameworks. StoreKit and MusicKit are used to show the App Store country, the original download date and Apple Music subscription status to the user.
+
+New in this build:
+- Tracker: the user opens the App Privacy Report file they saved from Settings (Share › Save to Files) with the system file picker. It is read on the device only to explain which apps used private data and which ad or analytics companies they contacted; never stored or sent.
+- Re-scan reminder: optional local notification (weekly or monthly), asked for only when chosen. No server, no push.
+- "Fix them with me": walks through fixable findings and opens Settings; the app changes no setting itself.
