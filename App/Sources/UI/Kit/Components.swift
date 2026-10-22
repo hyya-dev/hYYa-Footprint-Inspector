@@ -178,7 +178,6 @@ struct SectionTitle: View {
     var trailing: String? = nil
     var body: some View {
         HStack(alignment: .center, spacing: 8) {
-            Capsule().fill(Brand.sand).frame(width: 3, height: 12)
             Text(Brand.brandUppercased(title))
                 .font(.caption.weight(.semibold))
                 .tracking(1)

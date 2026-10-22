@@ -79,10 +79,28 @@ struct PrivacyReport: Sendable {
         let domain: String
         let owner: String?
         let hits: Int
-        /// True when the app itself opened the connection (not a web page inside it).
+        /// True when the app itself opened the connection; false for content inside it (an
+        /// email's images, a web page), which the app's maker didn't choose.
         let byApp: Bool
         var id: String { domain }
-        var isTracker: Bool { Trackers.matches(domain) }
+    }
+
+    /// What one app did, judged plainly. Only sharing with outside advertising or analytics
+    /// companies is flagged; talking to its own servers, Apple, or sign-in and hosting services is
+    /// how apps work and is never called out.
+    enum Verdict: Int, Comparable, Sendable {
+        case sharesOutside = 0, contentTrackers, usedData, crashReports, normal
+        static func < (a: Verdict, b: Verdict) -> Bool { a.rawValue < b.rawValue }
+
+        var label: String {
+            switch self {
+            case .sharesOutside: "Shares with ad or analytics companies"
+            case .contentTrackers: "Content you opened had trackers"
+            case .usedData: "Used your data, no sharing seen"
+            case .crashReports: "Sends crash reports"
+            case .normal: "Nothing unusual"
+            }
+        }
     }
 
     struct AppActivity: Sendable, Identifiable {
@@ -92,30 +110,53 @@ struct PrivacyReport: Sendable {
         var sites: [String: Site] = [:]
         var id: String { bundleID }
 
-        var name: String { bundleID == Bundle.main.bundleIdentifier ? "hYYa Footprint Inspector (this app)" : AppNames.name(for: bundleID) }
-        /// This app shows up when the person tapped "Show me" on a permission.
         var isThisApp: Bool { bundleID == Bundle.main.bundleIdentifier }
+        var name: String { isThisApp ? "hYYa Footprint Inspector (this app)" : AppNames.name(for: bundleID) }
         var sortedUses: [(DataKind, Int)] { uses.sorted { $0.key < $1.key }.map { ($0.key, $0.value) } }
-        var sortedSites: [Site] {
-            sites.values.sorted { ($0.isTracker ? 0 : 1, -$0.hits, $0.domain) < ($1.isTracker ? 0 : 1, -$1.hits, $1.domain) }
+
+        func kind(of site: Site) -> SiteKind { SiteKind.of(site.domain, app: bundleID) }
+
+        /// Sites grouped by what they are, most telling first.
+        var groups: [(SiteKind, [Site])] {
+            Dictionary(grouping: sites.values) { kind(of: $0) }
+                .map { ($0.key, $0.value.sorted { ($1.hits, $0.domain) < ($0.hits, $1.domain) }) }
+                .sorted { $0.0 < $1.0 }
         }
-        var trackerCount: Int { sites.values.filter(\.isTracker).count }
-        /// Apps that used private data and also contacted tracking companies come first.
-        var weight: Int { uses.values.reduce(0, +) * 3 + trackerCount * 10 + sites.count }
+
+        /// Outside advertising or analytics companies this app itself contacted.
+        var outsideCompanies: [String] {
+            let names = sites.values.filter { $0.byApp && kind(of: $0).isOutsideTracking }
+                .map { SiteKind.company(for: $0.domain) ?? $0.owner ?? $0.domain }
+            return Array(Set(names)).sorted()
+        }
+
+        var verdict: Verdict {
+            if !outsideCompanies.isEmpty { return .sharesOutside }
+            if sites.values.contains(where: { !$0.byApp && kind(of: $0).isOutsideTracking }) { return .contentTrackers }
+            // Apple's own apps using the camera or photos is what they're for; not worth flagging.
+            if !uses.isEmpty && !isThisApp && !bundleID.hasPrefix("com.apple.") { return .usedData }
+            if sites.values.contains(where: { kind(of: $0) == .crashReports }) { return .crashReports }
+            return .normal
+        }
     }
 
     var apps: [AppActivity]
     var from: Date?
     var to: Date?
 
-    var appsUsingData: Int { apps.filter { !$0.uses.isEmpty }.count }
-    var appsContactingSites: Int { apps.filter { !$0.sites.isEmpty }.count }
-    var trackerSites: Int { Set(apps.flatMap { $0.sites.values.filter(\.isTracker).map(\.domain) }).count }
+    /// Most worth a look first, then by name.
+    var ranked: [AppActivity] { apps.sorted { ($0.verdict, $0.name) < ($1.verdict, $1.name) } }
+    var sharing: [AppActivity] { ranked.filter { $0.verdict == .sharesOutside } }
+    var appsUsingData: Int { apps.filter { !$0.uses.isEmpty && !$0.isThisApp }.count }
+    var days: Int {
+        guard let from, let to else { return 7 }
+        return max(1, Int((to.timeIntervalSince(from) / 86_400).rounded(.up)))
+    }
 
     enum ReadError: Error, LocalizedError {
         case notAReport
         var errorDescription: String? {
-            "This doesn't look like an App Privacy Report. In Settings › Privacy & Security › App Privacy Report, tap Save App Activity, then open the file it saves."
+            "This doesn't look like an App Privacy Report. In Settings › Privacy & Security › App Privacy Report, tap the Share button at the top right, save it to Files, then open it here."
         }
     }
 
@@ -165,30 +206,114 @@ struct PrivacyReport: Sendable {
             }
         }
         guard recognised > 0 else { throw ReadError.notAReport }
-        return PrivacyReport(apps: byApp.values.sorted { ($0.weight, $1.name) > ($1.weight, $0.name) }, from: first, to: last)
+        return PrivacyReport(apps: Array(byApp.values), from: first, to: last)
     }
 }
 
-/// Well-known advertising, analytics and tracking companies, matched by domain suffix. Used only
-/// to label sites in the report; no site is called malicious. Kept short and conservative.
-enum Trackers {
-    static let suffixes: [String] = [
-        "doubleclick.net", "googlesyndication.com", "googleadservices.com", "google-analytics.com",
-        "app-measurement.com", "firebaselogging-pa.googleapis.com", "crashlytics.com", "adservice.google.com",
-        "graph.facebook.com", "connect.facebook.net", "an.facebook.com",
-        "adjust.com", "adjust.io", "appsflyer.com", "appsflyersdk.com", "branch.io", "app.link", "kochava.com", "singular.net",
-        "onesignal.com", "amplitude.com", "mixpanel.com", "segment.io", "segment.com", "braze.com", "appboy.com",
-        "applovin.com", "applvn.com", "unityads.unity3d.com", "ironsrc.com", "ironsrc.mobi", "chartboost.com",
-        "adcolony.com", "vungle.com", "inmobi.com", "criteo.com", "criteo.net", "taboola.com", "outbrain.com",
-        "scorecardresearch.com", "moatads.com", "adnxs.com", "rubiconproject.com", "pubmatic.com", "smaato.net",
-        "ads.tiktok.com", "analytics.tiktok.com", "ads-api.twitter.com", "analytics.twitter.com", "sc-analytics.appspot.com",
-        "app-analytics-services.com", "crashlyticsreports-pa.googleapis.com", "googletagmanager.com", "awstrack.me",
-        "bugsnag.com", "sentry.io", "newrelic.com", "nr-data.net", "datadoghq.com", "instabug.com", "flurry.com",
-    ]
+/// What a site is, in plain words. Matched by domain; anything we don't know is "Other", never
+/// "suspicious": an unknown name is usually a company's own server or a content network.
+enum SiteKind: Int, Comparable, Sendable, CaseIterable {
+    case advertising, analytics, crashReports, ownServers, apple, cloud, other
 
-    static func matches(_ domain: String) -> Bool {
+    static func < (a: SiteKind, b: SiteKind) -> Bool { a.rawValue < b.rawValue }
+
+    var isOutsideTracking: Bool { self == .advertising || self == .analytics }
+
+    var title: String {
+        switch self {
+        case .advertising: "Advertising"
+        case .analytics: "Usage tracking and marketing"
+        case .crashReports: "Crash reports"
+        case .ownServers: "Its own service"
+        case .apple: "Apple"
+        case .cloud: "Sign-in and hosting"
+        case .other: "Other sites"
+        }
+    }
+
+    var meaning: String {
+        switch self {
+        case .advertising: "Ad companies that show and measure ads, and build profiles to target you."
+        case .analytics: "Companies that record how you use the app, so it can measure and market to you."
+        case .crashReports: "Error reports when the app crashes. Usually harmless."
+        case .ownServers: "The app maker's own servers. That's how the app works."
+        case .apple: "Apple's services: App Store, iCloud, purchases. Normal for every app."
+        case .cloud: "Sign-in, storage and hosting services the app is built on. Normal."
+        case .other: "Websites we can't name for sure, often the app's own content or images."
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .advertising: "megaphone"
+        case .analytics: "chart.line.uptrend.xyaxis"
+        case .crashReports: "ant"
+        case .ownServers: "building.2"
+        case .apple: "apple.logo"
+        case .cloud: "cloud"
+        case .other: "globe"
+        }
+    }
+
+    // Suffix lists. Kept conservative: a company is listed only when that's what it does.
+    static let adTable: [String: String] = [
+        "doubleclick.net": "Google Ads", "googlesyndication.com": "Google Ads", "googleadservices.com": "Google Ads",
+        "adservice.google.com": "Google Ads", "an.facebook.com": "Meta Ads", "applovin.com": "AppLovin", "applvn.com": "AppLovin",
+        "unityads.unity3d.com": "Unity Ads", "ironsrc.com": "ironSource", "ironsrc.mobi": "ironSource", "chartboost.com": "Chartboost",
+        "adcolony.com": "AdColony", "vungle.com": "Vungle", "inmobi.com": "InMobi", "criteo.com": "Criteo", "criteo.net": "Criteo",
+        "taboola.com": "Taboola", "outbrain.com": "Outbrain", "moatads.com": "Moat", "adnxs.com": "Xandr", "rubiconproject.com": "Magnite",
+        "pubmatic.com": "PubMatic", "smaato.net": "Smaato", "ads.tiktok.com": "TikTok Ads", "ads-api.twitter.com": "X Ads",
+    ]
+    static let analyticsTable: [String: String] = [
+        "google-analytics.com": "Google Analytics", "app-measurement.com": "Google Analytics", "app-analytics-services.com": "Google Analytics",
+        "firebaselogging-pa.googleapis.com": "Google Firebase", "googletagmanager.com": "Google Tag Manager",
+        "graph.facebook.com": "Meta", "connect.facebook.net": "Meta", "adjust.com": "Adjust", "adjust.io": "Adjust",
+        "appsflyer.com": "AppsFlyer", "appsflyersdk.com": "AppsFlyer", "branch.io": "Branch", "app.link": "Branch",
+        "kochava.com": "Kochava", "singular.net": "Singular", "onesignal.com": "OneSignal", "amplitude.com": "Amplitude",
+        "mixpanel.com": "Mixpanel", "segment.io": "Segment", "segment.com": "Segment", "braze.com": "Braze", "appboy.com": "Braze",
+        "analytics.tiktok.com": "TikTok", "analytics.twitter.com": "X", "scorecardresearch.com": "Comscore", "flurry.com": "Flurry",
+        "awstrack.me": "Email click tracking", "sc-analytics.appspot.com": "Snap",
+    ]
+    static let crashTable: [String: String] = [
+        "crashlytics.com": "Crashlytics", "crashlyticsreports-pa.googleapis.com": "Crashlytics", "sentry.io": "Sentry",
+        "bugsnag.com": "Bugsnag", "instabug.com": "Instabug", "newrelic.com": "New Relic", "nr-data.net": "New Relic", "datadoghq.com": "Datadog",
+    ]
+    static let appleSuffixes = ["apple.com", "icloud.com", "mzstatic.com", "apple-cloudkit.com", "apple-dns.net", "aaplimg.com", "cdn-apple.com", "icloud-content.com", "apple-mapkit.com"]
+    static let cloudSuffixes = ["googleapis.com", "gstatic.com", "googleusercontent.com", "firebaseio.com", "firebaseapp.com", "appspot.com",
+                                "cloudfront.net", "amazonaws.com", "akamaihd.net", "akamaiedge.net", "akamaized.net", "edgekey.net", "edgesuite.net",
+                                "fastly.net", "fastly.com", "cloudflare.com", "cloudflare.net", "azureedge.net", "azurewebsites.net", "windows.net",
+                                "msftauth.net", "live.com", "supabase.co", "supabase.in", "vercel.app", "netlify.app", "herokuapp.com",
+                                "digitaloceanspaces.com", "b-cdn.net", "googlevideo.com", "ytimg.com", "fbcdn.net", "whatsapp.net"]
+
+    private static func match(_ d: String, _ suffix: String) -> Bool { d == suffix || d.hasSuffix("." + suffix) }
+    private static func lookup(_ d: String, _ table: [String: String]) -> String? {
+        table.first { match(d, $0.key) }?.value
+    }
+
+    /// The company behind an advertising, analytics or crash site, when we know it.
+    static func company(for domain: String) -> String? {
         let d = domain.lowercased()
-        return suffixes.contains { d == $0 || d.hasSuffix("." + $0) }
+        return lookup(d, adTable) ?? lookup(d, analyticsTable) ?? lookup(d, crashTable)
+    }
+
+    static func of(_ domain: String, app bundleID: String) -> SiteKind {
+        let d = domain.lowercased()
+        let maker = Self.maker(of: bundleID)
+        // A company's own trackers aren't "outside" when the app is theirs (Google Maps → Google Analytics).
+        if lookup(d, crashTable) != nil { return .crashReports }
+        if let co = lookup(d, adTable) { return co.lowercased().hasPrefix(maker) && !maker.isEmpty ? .ownServers : .advertising }
+        if let co = lookup(d, analyticsTable) { return co.lowercased().hasPrefix(maker) && !maker.isEmpty ? .ownServers : .analytics }
+        if appleSuffixes.contains(where: { match(d, $0) }) { return bundleID.hasPrefix("com.apple.") ? .ownServers : .apple }
+        if !maker.isEmpty, d.split(separator: ".").contains(where: { $0.lowercased() == maker }) { return .ownServers }
+        if cloudSuffixes.contains(where: { match(d, $0) }) { return maker == "google" ? .ownServers : .cloud }
+        return .other
+    }
+
+    /// The maker's word from a bundle ID: "com.hyya.notes" → "hyya", "sa.com.stcbank" → "stcbank".
+    static func maker(of bundleID: String) -> String {
+        let parts = bundleID.lowercased().split(separator: ".").map(String.init)
+        let skip: Set<String> = ["com", "net", "org", "co", "io", "sa", "ae", "uk", "de", "app", "ios", "www"]
+        return parts.first { !skip.contains($0) } ?? ""
     }
 }
 
@@ -218,7 +343,7 @@ enum AppNames {
         "com.apple.Fitness": "Fitness", "com.apple.shortcuts": "Shortcuts", "com.apple.TestFlight": "TestFlight",
         "com.apple.mobiletimer": "Clock", "com.apple.Preferences": "Settings", "com.apple.podcasts": "Podcasts",
         // hYYa's apps.
-        "com.hyya.prayerpal": "hYYa PrayerPal", "com.hyya.encryptednotes": "hYYa Encrypted Notes",
+        "com.hyya.footprintinspector": "hYYa Footprint Inspector", "com.hyya.prayerpal": "hYYa PrayerPal", "com.hyya.encryptednotes": "hYYa Encrypted Notes",
         "com.hyya.encryptedfolder": "hYYa Encrypted Folder", "com.hyya.subscriptionstracker": "hYYa Subscriptions Tracker",
         "com.hyya.hyya-ai": "hYYa ai", "com.hyya.ink": "hYYa ink", "com.hyya.anarchybrowser": "hYYa Anarchy Browser",
         // Common apps whose IDs don't say their name.

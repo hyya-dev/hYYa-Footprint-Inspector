@@ -152,15 +152,6 @@ private fun Results(scanner: Scanner, nav: Nav) {
             color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
         Text("How the score works", color = Brand.sand, fontSize = 13.sp, modifier = Modifier.clickableNoRipple { nav.push(Route.ScoreRoute) })
         PrimaryButton("Scan again") { scanner.scan() }
-        // From what apps could read to what they actually did: Android keeps its own record.
-        val ctx = LocalContext.current
-        ToneCard(Tone.ALERT, "What your apps actually did", Icons.Outlined.VisibilityOff,
-            onClick = { openSettings(ctx, if (android.os.Build.VERSION.SDK_INT >= 33) android.content.Intent.ACTION_SAFETY_CENTER else android.provider.Settings.ACTION_PRIVACY_SETTINGS) },
-            trailing = { Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = Tone.ALERT.tint) }) {
-            Text("Android keeps a record of which apps used your location, camera and microphone. Open Privacy dashboard to see it, then turn off what you didn't expect.",
-                color = Brand.textMuted, fontSize = 14.sp, lineHeight = 20.sp)
-        }
-
         scanner.comparison?.let { cmp ->
             InfoCard("Since your last scan", Tone.CONTEXT, Icons.Outlined.History) {
                 Text("${cmp.previous.score} → ${cmp.current.score}", color = Brand.ink, fontSize = 18.sp)
@@ -174,7 +165,7 @@ private fun Results(scanner: Scanner, nav: Nav) {
             SectionTitle("Worth a look", concerning.size.toString())
             Panel { concerning.forEachIndexed { i, f -> ClueRow(f, nav, i < concerning.lastIndex) } }
         }
-        for ((group, title) in listOf(Group.WATCH to "Who can watch you", Group.PASSIVE to "Seen without asking", Group.ADVANCED to "Clever tricks", Group.PERMISSION to "Seen once you allow it")) {
+        for ((group, title) in listOf(Group.PASSIVE to "Seen without asking", Group.ADVANCED to "Clever tricks", Group.PERMISSION to "Seen once you allow it")) {
             val sections = Section.entries.filter { it.group == group }
             if (group == Group.WATCH) {
                 // The headline check: its findings sit right on the Scan screen, one tap from the fix.
@@ -197,6 +188,7 @@ private fun Results(scanner: Scanner, nav: Nav) {
                 }
             }
         }
+        NextStepCard(Tab.SENSITIVE)
     }
 }
 

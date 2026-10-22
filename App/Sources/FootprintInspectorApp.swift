@@ -50,20 +50,25 @@ struct FootprintInspectorApp: App {
 }
 
 struct RootView: View {
-    /// Screenshot runs can open on a given tab with `-startTab sensitive|checkup`.
-    @State private var tab: String? = LaunchOptions.value(after: "-startTab") ?? "scan"
+    /// Screenshot runs can open on a given tab with `-startTab footprint|sensitive|tracker|checkup|settings`.
+    @State private var tab: AppTab = LaunchOptions.value(after: "-startTab").flatMap(AppTab.init(launchName:)) ?? .footprint
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     #if os(macOS)
     @Environment(\.openSettings) private var openSettings
     #endif
+
+    private func go(_ t: AppTab) {
+        withAnimation(reduceMotion ? nil : .smooth(duration: 0.32)) { tab = t }
+    }
 
     var body: some View {
         #if os(macOS)
         // A sidebar on the Mac; Settings lives in its own window (⌘,).
         NavigationSplitView {
-            List(selection: $tab) {
-                Label("Scan", systemImage: "magnifyingglass").tag("scan")
-                Label("Sensitive apps", systemImage: "eye.slash").tag("sensitive")
-                Label("Check-up", systemImage: "checklist").tag("checkup")
+            List(selection: Binding<AppTab?>(get: { tab }, set: { if let t = $0 { go(t) } })) {
+                ForEach([AppTab.footprint, .sensitive, .tracker, .checkup]) { t in
+                    Label(t.title, systemImage: t.symbol).tag(t)
+                }
             }
             .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 280)
             .safeAreaInset(edge: .bottom) {
@@ -81,22 +86,39 @@ struct RootView: View {
                 .padding(.vertical, 12)
             }
         } detail: {
-            switch tab {
-            case "sensitive": SensitiveView()
-            case "checkup": CheckUpView()
-            default: ScanView()
+            Group {
+                switch tab {
+                case .sensitive: SensitiveView()
+                case .tracker: MacTrackerView()
+                case .checkup: CheckUpView()
+                default: ScanView()
+                }
             }
+            .modifier(TabSwitchTransition(tab: tab))
         }
+        .environment(\.goToTab, go)
         .task { if CommandLine.arguments.contains("-openSettings") { openSettings() } }
         #else
-        TabView {
-            Tab("Scan", systemImage: "magnifyingglass") { ScanView() }
-            Tab("Sensitive apps", systemImage: "eye.slash") { SensitiveView() }
-            Tab("Check-up", systemImage: "checklist") { CheckUpView() }
-            Tab("Settings", systemImage: "gearshape") { SettingsView() }
+        TabView(selection: Binding(get: { tab }, set: { t in go(t); Haptics.selection() })) {
+            ForEach(AppTab.allCases) { t in
+                Tab(t.title, systemImage: t.symbol, value: t) { page(t) }
+            }
         }
+        .environment(\.goToTab, go)
         #endif
     }
+
+    #if os(iOS)
+    @ViewBuilder private func page(_ t: AppTab) -> some View {
+        switch t {
+        case .footprint: ScanView()
+        case .sensitive: SensitiveView()
+        case .tracker: PrivacyReportView(onNext: { go(.checkup) })
+        case .checkup: CheckUpView()
+        case .settings: SettingsView()
+        }
+    }
+    #endif
 }
 
 /// Launch switches used only to take store screenshots without clicking through by hand.

@@ -114,6 +114,8 @@ private struct Results: View {
     @Environment(Scanner.self) private var scanner
     @State private var showingFormula = false
     @AppStorage("reviewCardDismissed") private var reviewCardDismissed = false
+    @Environment(\.goToTab) private var goToTab
+    @Namespace private var zoom
 
     var body: some View {
         let score = scanner.score
@@ -149,11 +151,6 @@ private struct Results: View {
         }
         .sheet(isPresented: $showingFormula) { FormulaSheet() }
 
-        #if os(iOS)
-        // The headline next step: from what apps could read to what they actually did.
-        NavigationLink { PrivacyReportView() } label: { WhatAppsDidCard() }
-            .buttonStyle(PressableCardStyle())
-        #endif
 
         SectionDivider()
 
@@ -165,8 +162,10 @@ private struct Results: View {
             SectionTitle(title: "Worth a look", trailing: "\(concerning.count)")
             Panel {
                 ForEach(concerning) { finding in
-                    NavigationLink { FindingDetailView(finding: finding) } label: { ClueRow(finding: finding) }
-                        .buttonStyle(PressableCardStyle())
+                    NavigationLink { FindingDetailView(finding: finding).zoomFrom(finding.id, in: zoom) } label: {
+                        ClueRow(finding: finding).zoomSource(finding.id, in: zoom)
+                    }
+                    .buttonStyle(PressableCardStyle())
                 }
             }
         }
@@ -190,6 +189,8 @@ private struct Results: View {
             }
             .buttonStyle(PressableCardStyle())
         }
+
+        NextStepCard(step: .sensitive) { goToTab(.sensitive) }
     }
 
     @ViewBuilder
@@ -197,8 +198,10 @@ private struct Results: View {
         SectionTitle(title: title)
         Panel {
             ForEach(SignalSection.onThisPlatform.filter { $0.group == group }) { section in
-                NavigationLink { SectionView(section: section) } label: { CategoryTile(section: section) }
-                    .buttonStyle(PressableCardStyle())
+                NavigationLink { SectionView(section: section).zoomFrom(section.id, in: zoom) } label: {
+                    CategoryTile(section: section).zoomSource(section.id, in: zoom)
+                }
+                .buttonStyle(PressableCardStyle())
             }
         }
     }
@@ -266,20 +269,3 @@ private struct FormulaSheet: View {
         .presentationDetents([.large])
     }
 }
-
-#if os(iOS)
-/// The way into the App Privacy Report page, shown under the score.
-struct WhatAppsDidCard: View {
-    var body: some View {
-        ToneCard(tone: .alert, title: "What your apps actually did", symbol: "eye.trianglebadge.exclamationmark") {
-            Image(systemName: "chevron.right").font(.subheadline.weight(.semibold)).foregroundStyle(Tone.alert.tint)
-        } content: {
-            Text("See which apps used your location, photos, contacts, camera or microphone this week, and which tracking companies they contacted.")
-                .font(.subheadline)
-                .foregroundStyle(Brand.textMuted)
-                .multilineTextAlignment(.leading)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-}
-#endif
