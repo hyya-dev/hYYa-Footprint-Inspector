@@ -17,8 +17,9 @@ always set to release automatically after approval.
   with me, rings, five-step flow, plain-language findings). Build 13 is attached to both, with the new
   English copy, 49 translations, reviewer notes and slides (7 iPhone, 7 iPad, 6 Mac) uploaded.
 - 🚨 The owner reorders the slides in App Store Connect and submits both versions themselves.
-- Android: once the owner has submitted iOS, re-render the Android slides in the same order as the
-  owner's final iOS order, upload versionCode 7 and the listing, then ask before sending for review.
+- 2026-10-22: the owner submitted iOS and macOS build 13 (waiting for review). Android versionCode 7,
+  the new listing (79 languages; fa ×4, hi-IN, my-MM, nl-NL and te-IN show English) and 7 slides
+  in the iOS order were sent for Google's review with the owner's consent (edit 00284048839385647342).
 
 ### Google Play facts (verified 2026-10-21)
 - Personal account "hYYa LLC", id 7244268045893720931, signed in at Play Console `u/1`. App id
