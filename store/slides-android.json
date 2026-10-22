@@ -6,6 +6,7 @@
     {"screen": "store-07-fix", "headline": "Fix it *step by step*", "highlights": ["One fix at a time", "Opens the exact setting", "Watch your score go up"]},
     {"screen": "store-04-finding", "headline": "Recognised *even after you delete it*", "highlights": ["Same code after reinstalling", "Only a reset changes it", "Explained in plain words"]},
     {"screen": "store-05-sensitive", "headline": "Which apps *give you away?*", "highlights": ["Dating, faith, health, VPN", "Banks can ask too", "Hidden, never saved"]},
+    {"screen": "store-06-checkup", "headline": "Take back *your private info*", "highlights": ["Notifications, location, photos", "One area at a time", "Opens each setting"]},
     {"screen": "store-01-home", "headline": "Private. Yours. *Open source.*", "highlights": ["No internet permission", "No account, no ads", "Made by hYYa"]}
   ]
 }
