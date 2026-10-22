@@ -23,7 +23,7 @@ struct PrivacyReportView: View {
 
     var body: some View {
         NavigationStack {
-            Page {
+            Page(resetOn: AnyHashable(opened)) {
                 HeroCard(eyebrow: "Tracker",
                          title: report == nil ? "What did your apps do?" : "Here's what they did",
                          subtitle: "Your device keeps a record of which apps used your private data and who they talked to. Open it here and I'll explain it plainly.",

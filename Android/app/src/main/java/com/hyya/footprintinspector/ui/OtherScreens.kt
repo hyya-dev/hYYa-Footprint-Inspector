@@ -97,7 +97,7 @@ fun SensitiveScreen() {
         onDispose { owner.lifecycle.removeObserver(obs) }
     }
 
-    Page {
+    Page(resetOn = "${results != null}-$revealed") {
         HeroCard("Sensitive apps", "Which apps give you away?",
             "Any app can ask whether certain apps are installed, one by one, without asking you. Pick the kinds to check.", 104)
         results?.let { r ->

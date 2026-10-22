@@ -37,7 +37,7 @@ struct SensitiveView: View {
 
     var body: some View {
         NavigationStack {
-            Page {
+            Page(resetOn: AnyHashable("\(checks)-\(results == nil)-\(revealed)")) {
                 HeroCard(eyebrow: "Sensitive apps",
                          title: "Which apps give you away?",
                          subtitle: Self.heroLine,

@@ -11,7 +11,7 @@ struct ScanView: View {
 
     var body: some View {
         NavigationStack {
-            Page {
+            Page(resetOn: AnyHashable("\(scanner.phase)")) {
                 switch scanner.phase {
                 case .idle: IdleHome()
                 case .scanning: ScanningView()
