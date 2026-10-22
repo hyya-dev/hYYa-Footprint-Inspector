@@ -3,8 +3,8 @@
   "slides": [
     {"screen": "mac-01-results", "headline": "See what any app can *learn about you*", "highlights": ["Your name, serial number, apps", "One calm score", "Nothing leaves your device"]},
     {"screen": "mac-05-checkup", "headline": "See which apps can reach *your private info*", "highlights": ["Screen, keyboard, files", "Opens each list", "Take access back"]},
-    {"screen": "mac-02-finding", "headline": "Some clues *never change*", "highlights": ["Serial number", "Hardware ID", "Even after erasing"]},
     {"screen": "mac-03-name", "headline": "Every clue explained. *One click* to fix.", "highlights": ["Why the system allows it", "Steps in plain words", "Opens the right setting"]},
+    {"screen": "mac-02-finding", "headline": "Some clues *never change*", "highlights": ["Serial number", "Hardware ID", "Even after erasing"]},
     {"screen": "mac-04-sensitive", "headline": "Which apps *give you away?*", "highlights": ["Dating, faith, health, VPN", "Banks can ask too", "Hidden, never saved"]},
     {"screen": "mac-06-home", "headline": "Private. Yours. *Open source.*", "highlights": ["No account, no ads", "No tracking, ever", "Made by hYYa"]}
   ]
