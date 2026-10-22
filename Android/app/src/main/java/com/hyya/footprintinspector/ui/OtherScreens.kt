@@ -20,6 +20,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Checklist
@@ -107,11 +110,12 @@ fun SensitiveScreen() {
             } else {
                 Text(if (found.size == 1) "1 app gives you away" else "${found.size} apps give you away",
                     color = Brand.ink, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                Box(contentAlignment = Alignment.Center) {
-                    Column(Modifier.blur(if (revealed) 0.dp else 14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        found.forEach { (c, app) -> FoundAppCard(c, app) }
-                    }
-                    if (!revealed) GhostButton("Tap to reveal", Modifier) { revealed = true }
+                // The names stay hidden until asked for, but the way to see them is always in view.
+                if (revealed) Column(verticalArrangement = Arrangement.spacedBy(12.dp)) { found.forEach { (c, app) -> FoundAppCard(c, app) } }
+                else InfoCard("Hidden for your privacy", Tone.ALERT, Icons.Outlined.VisibilityOff) {
+                    Text("The names stay hidden in case someone is looking over your shoulder. Show them when you're ready.",
+                        color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp)
+                    PrimaryButton("Show the apps") { revealed = true }
                 }
                 Text("Rarely, a different app answers to the same name.", color = Brand.textSubtle, fontSize = 12.sp)
             }
@@ -192,10 +196,14 @@ private fun ReminderRow() {
         if (granted) { ScanReminder.apply(context, want); choice = want; declined = false } else declined = true
         pending = null
     }
-    Box {
-        RowCard(Icons.Outlined.NotificationsNone, "Re-scan reminder",
-            if (declined) "Notifications are off. Allow them for this app in Settings, then choose again." else "A reminder on this device to check again.",
-            onClick = { open = true }) { Text(choice.title, color = Brand.textSubtle) }
+    // Title and line on top, the choice centred underneath.
+    RowCard(Icons.Outlined.NotificationsNone, "Re-scan reminder",
+        if (declined) "Notifications are off. Allow them for this app in Settings, then choose again." else "A reminder on this device to check again.",
+        showDivider = false)
+    Box(Modifier.fillMaxWidth().padding(bottom = 12.dp), contentAlignment = Alignment.Center) {
+        Text("${choice.title}  ▾", color = Brand.sand, fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.pressable { open = true }.clip(CircleShape).border(BorderStroke(1.dp, Brand.sandDeep), CircleShape)
+                .padding(horizontal = 22.dp, vertical = 9.dp))
         androidx.compose.material3.DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             ScanReminder.entries.forEach { r ->
                 androidx.compose.material3.DropdownMenuItem(text = { Text(r.title) }, onClick = {
@@ -268,14 +276,15 @@ fun CheckUpScreen(nav: Nav) {
     Page {
         HeroCard("Permission check-up", if (done.size == CheckUp.steps.size) "All checked!" else "${done.size} of ${CheckUp.steps.size} checked",
             "Android never tells one app which other apps can reach your location, contacts or notifications. Only Settings knows, so let's look together.")
-        SummaryRing(listOf(Slice("checked", done.size, Tone.FIX.tint), Slice("still to check", CheckUp.steps.size - done.size, Amber)),
-            centre = "${done.size}/${CheckUp.steps.size}")
+        LinearProgressIndicator(progress = { done.size.toFloat() / CheckUp.steps.size }, color = Tone.FIX.tint, trackColor = Brand.tile,
+            modifier = Modifier.fillMaxWidth())
         Panel {
             CheckUp.steps.forEachIndexed { i, s ->
                 RowCard(if (s.id in done) Icons.Outlined.CheckCircle else Icons.Outlined.Security, s.title, s.path.substringBefore(" (on Samsung").let { if (it.length > 60) "Permission manager › " + s.path.substringAfterLast("› ") else it },
                     tint = if (s.id in done) Brand.green else Brand.sand, showDivider = i < CheckUp.steps.lastIndex,
                     onClick = { nav.push(Route.CheckUpRoute(i)) }) {
-                    Text("${i + 1}", color = Brand.textSubtle, fontSize = 12.sp)
+                    Icon(if (s.id in done) Icons.Outlined.CheckCircle else Icons.AutoMirrored.Outlined.KeyboardArrowRight, null,
+                        tint = if (s.id in done) Tone.FIX.tint else Brand.textSubtle)
                 }
             }
         }
@@ -346,15 +355,22 @@ fun SettingsScreen(scanner: Scanner) {
                 context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, Links.SHARE), null)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             })
-            RowCard(Icons.Outlined.Star, "Rate the App", "Your reviews keep us smiling while coding.", onClick = { openUrl(context, Links.PLAY) })
             RowCard(Icons.Outlined.Email, "Contact hYYa", onClick = { openUrl(context, Links.CONTACT) }) { OutIcon() }
             RowCard(Icons.Outlined.PanTool, "Privacy Policy", onClick = { openUrl(context, Links.PRIVACY) }) { OutIcon() }
             RowCard(Icons.Outlined.Security, "Report a Security Issue", showDivider = false, onClick = { openUrl(context, Links.SECURITY) }) { OutIcon() }
         }
         SectionTitle("More from hYYa")
-        Panel {
-            PromoRow(R.drawable.promo_hyya_ai, "hYYa ai", "Two engines. Offline & Online.", true) { openUrl(context, Links.HYYA_AI) }
-            PromoRow(R.drawable.promo_hyya_dev, "hYYa ✨", "Companions you can trust.", false) { openUrl(context, Links.HYYA) }
+        // The hYYa website, laid out like the rating card at the top.
+        InfoCard("hYYa ✨", Tone.CONTEXT) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(R.drawable.promo_hyya_dev), null,
+                    modifier = Modifier.size(84.dp).clip(RoundedCornerShape(20.dp)), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+                Spacer(Modifier.width(14.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.weight(1f)) {
+                    Text("Companions you can trust: private apps that keep everything on your device.", color = Brand.textMuted, fontSize = 13.sp, lineHeight = 18.sp)
+                    PrimaryButton("Visit hyya.com", Modifier) { openUrl(context, Links.HYYA) }
+                }
+            }
         }
         Column(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Mascot(82)

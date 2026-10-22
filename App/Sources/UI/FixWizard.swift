@@ -13,10 +13,14 @@ import AppKit
 struct ScoreGuideCard: View {
     let score: FootprintScore
     let fixes: [Finding]
+    var all: [Finding] = []
     let onFix: () -> Void
 
-    private var gain: Int { fixes.reduce(0) { $0 + FootprintScore.points(for: $1) } }
-    private var reachable: Int { min(100, score.value + gain) }
+    /// The score if every one of these were fixed.
+    private var reachable: Int {
+        let ids = Set(fixes.map(\.id))
+        return FootprintScore(findings: all.filter { !ids.contains($0.id) }).value
+    }
 
     private var meaning: String {
         switch score.level {
@@ -55,6 +59,13 @@ struct ScoreGuideCard: View {
 /// The three bands on one line, with a marker where this device sits.
 private struct ScoreBands: View {
     let value: Int
+
+    private func band(_ name: String, _ range: String, _ color: Color, _ align: HorizontalAlignment) -> some View {
+        VStack(alignment: align, spacing: 1) {
+            Text(name).font(.caption.weight(.semibold)).foregroundStyle(color)
+            Text(range).font(.caption2).foregroundStyle(Brand.textSubtle)
+        }
+    }
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             GeometryReader { geo in
@@ -69,14 +80,13 @@ private struct ScoreBands: View {
                 }
             }
             .frame(height: 12)
-            HStack {
-                Text("Heavy · 0–49").foregroundStyle(Tone.alert.tint)
+            HStack(alignment: .top) {
+                band("Heavy", "under 50", Tone.alert.tint, .leading)
                 Spacer()
-                Text("Moderate · 50–74").foregroundStyle(Brand.sand)
+                band("Moderate", "50 to 74", Brand.sand, .center)
                 Spacer()
-                Text("Light · 75+").foregroundStyle(Tone.fix.tint)
+                band("Light", "75 and up", Tone.fix.tint, .trailing)
             }
-            .font(.caption2.weight(.semibold))
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Score \(value) out of 100. Heavy is below 50, moderate 50 to 74, light 75 and above.")

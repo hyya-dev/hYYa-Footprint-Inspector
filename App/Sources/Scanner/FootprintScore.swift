@@ -67,14 +67,22 @@ struct FootprintScore: Equatable, Sendable {
             if p > 0 { fixable += 1 }
             if !Self.isFixable(finding) && finding.severity == .high { apple += 1 }
         }
-        value = max(0, 100 - lost)
+        value = Self.value(lost: lost)
         reachable = 100 - value
         fixableCount = fixable
         onlyAppleCount = apple
     }
 
+    /// Every \(halfLife) points lost halve the score, so it falls quickly at first and never sits at
+    /// zero: a device with many clues still shows how much is left to win back. 10 points → 84,
+    /// 20 → 71, 40 → 50, 80 → 25.
+    static let halfLife = 40.0
+    static func value(lost: Int) -> Int {
+        Int((100 * pow(0.5, Double(lost) / halfLife)).rounded())
+    }
+
     static let explanation = """
-    Everyone starts at 100. Each detail worth a look that you can fix takes off \(highWeight) points, and each smaller one takes off \(mediumWeight). Settings left at their ordinary default don't count.
+    Everyone starts at 100, and higher is better. Each detail worth a look that you can fix counts \(highWeight) points against you, and each smaller one \(mediumWeight). Every 40 points against you halve the score, so the first fixes make the biggest difference, and the score never hits zero. Settings left at their ordinary default don't count.
 
     Things only Apple can fix aren't in the score, because they're the same on every device and nothing you do changes them. We list them separately and track Apple's progress in the privacy scoreboard.
 

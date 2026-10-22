@@ -30,8 +30,6 @@ enum hYYaLinks {
 struct SettingsView: View {
     @Environment(HistoryStore.self) private var history
     @Environment(\.openURL) private var openURL
-    @Environment(\.requestReview) private var requestReview
-    @AppStorage("reviewCardTapped") private var reviewTapped = false
     @State private var confirmingClear = false
     @AppStorage(ScanReminder.storageKey) private var reminder = ScanReminder.off.rawValue
     @State private var notificationsOff = false
@@ -58,22 +56,29 @@ struct SettingsView: View {
                         RowCard(symbol: "checkmark.seal", title: "Privacy scoreboard")
                     }
                     .buttonStyle(PressableCardStyle())
-                    Menu {
-                        ForEach(ScanReminder.allCases) { option in
-                            Button { choose(option) } label: {
-                                if option.rawValue == reminder { Label(option.title, systemImage: "checkmark") } else { Text(option.title) }
-                            }
-                        }
-                    } label: {
+                    // The reminder: title and line on top, the choice centred underneath.
+                    VStack(spacing: 10) {
                         RowCard(symbol: "bell", title: "Re-scan reminder",
-                                subtitle: "A reminder on this device to check again.") {
-                            HStack(spacing: 6) {
-                                Text(ScanReminder(rawValue: reminder)?.title ?? "Off")
-                                Image(systemName: "chevron.up.chevron.down")
+                                subtitle: "A reminder on this device to check again.") { EmptyView() }
+                        Menu {
+                            ForEach(ScanReminder.allCases) { option in
+                                Button { choose(option) } label: {
+                                    if option.rawValue == reminder { Label(option.title, systemImage: "checkmark") } else { Text(option.title) }
+                                }
                             }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Text(ScanReminder(rawValue: reminder)?.title ?? "Off").font(.body.weight(.semibold))
+                                Image(systemName: "chevron.up.chevron.down").font(.footnote)
+                            }
+                            .foregroundStyle(Brand.sand)
+                            .padding(.vertical, 9)
+                            .padding(.horizontal, 22)
+                            .overlay(Capsule().strokeBorder(Brand.sandDeep.opacity(0.8), lineWidth: 0.75))
                         }
+                        .frame(maxWidth: .infinity)
+                        .padding(.bottom, 12)
                     }
-                    .buttonStyle(PressableCardStyle())
                     Button { confirmingClear = true } label: {
                         RowCard(symbol: "trash", title: "Clear history", tileFG: Brand.concern) { EmptyView() }
                     }
@@ -91,10 +96,6 @@ struct SettingsView: View {
                         RowCard(symbol: "square.and.arrow.up", title: "Share", subtitle: "Help your friends take back their digital privacy.")
                     }
                     .buttonStyle(PressableCardStyle())
-                    Button { rate() } label: {
-                        RowCard(symbol: "star", title: "Rate the App", subtitle: "Your reviews keep us smiling while coding.")
-                    }
-                    .buttonStyle(PressableCardStyle())
                     Button { open(hYYaLinks.contact) } label: {
                         RowCard(symbol: "envelope", title: "Contact hYYa") { Image(systemName: "arrow.up.right") }
                     }
@@ -110,10 +111,7 @@ struct SettingsView: View {
                 }
 
                 SectionTitle(title: "More from hYYa")
-                Panel {
-                    PromoRow(imageName: "PromoHyyaAI", title: "hYYa ai", tagline: "Two engines. Offline & Online.", url: hYYaLinks.hyyaAIAppStore)
-                    PromoRow(imageName: "HyyaDev", title: "hYYa \u{2728}", tagline: "Companions you can trust.", url: hYYaLinks.website)
-                }
+                HyyaCard()
 
                 #if DEBUG && os(iOS)
                 SectionTitle(title: "Developer")
@@ -172,12 +170,6 @@ struct SettingsView: View {
         }
     }
 
-    /// Same behaviour as the rating card at the top.
-    private func rate() {
-        Haptics.selection()
-        reviewTapped = true
-        if let url = hYYaLinks.appStoreReview { openURL(url) } else { requestReview() }
-    }
 
     private func open(_ url: URL) {
         Haptics.selection()
@@ -223,44 +215,5 @@ struct SupportRow: View {
         }
         .padding(.vertical, 4)
         .contentShape(Rectangle())
-    }
-}
-
-struct PromoRow: View {
-    @Environment(\.openURL) private var openURL
-    let imageName: String
-    let title: String
-    let tagline: String
-    let url: URL
-
-    var body: some View {
-        Button { Haptics.selection(); openURL(url) } label: {
-            HStack(spacing: 13) {
-                Image(imageName)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 46, height: 46)
-                    .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 11, style: .continuous).strokeBorder(Color.white.opacity(0.14), lineWidth: 1))
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title).font(.subheadline.weight(.bold)).foregroundStyle(Brand.textPrimary)
-                    Text(tagline)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .font(.caption)
-                        .foregroundStyle(Brand.textSubtle)
-                }
-                Spacer(minLength: 8)
-                Image(systemName: "arrow.up.forward.app")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Brand.textSubtle)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .contentShape(Rectangle())
-            .overlay(alignment: .bottom) { Rectangle().fill(Brand.rule).frame(height: 0.5).padding(.leading, 75) }
-        }
-        .buttonStyle(PressableCardStyle())
-        .accessibilityLabel("\(title). \(tagline)")
-        .accessibilityHint((url.host()?.hasSuffix("apple.com") ?? false) ? "Opens the App Store" : "Opens in your browser")
     }
 }

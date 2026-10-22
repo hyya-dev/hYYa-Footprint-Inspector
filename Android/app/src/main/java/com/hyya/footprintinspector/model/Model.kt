@@ -119,6 +119,9 @@ data class FootprintScore(val value: Int, val fixableCount: Int, val onlyMakerCo
         const val HIGH_WEIGHT = 10
         const val MEDIUM_WEIGHT = 2
 
+        /** Every 40 points lost halve the score, as on iOS: never zero, first fixes count most. */
+        fun value(lost: Int): Int = Math.round(100.0 * Math.pow(0.5, lost / 40.0)).toInt()
+
         fun points(f: Finding): Int = if (!f.definition.fix.fixable) 0 else when (f.severity) {
             Severity.HIGH -> HIGH_WEIGHT
             Severity.MEDIUM -> MEDIUM_WEIGHT
@@ -133,11 +136,11 @@ data class FootprintScore(val value: Int, val fixableCount: Int, val onlyMakerCo
                 if (p > 0) fixable++
                 if (!f.definition.fix.fixable && f.severity == Severity.HIGH) maker++
             }
-            return FootprintScore(maxOf(0, 100 - lost), fixable, maker)
+            return FootprintScore(value(lost), fixable, maker)
         }
 
         val explanation = """
-            Everyone starts at 100. Each detail worth a look that you can fix takes off $HIGH_WEIGHT points, and each smaller one takes off $MEDIUM_WEIGHT. Settings left at their ordinary default don't count.
+            Everyone starts at 100, and higher is better. Each detail worth a look that you can fix counts $HIGH_WEIGHT points against you, and each smaller one $MEDIUM_WEIGHT. Every 40 points against you halve the score, so the first fixes make the biggest difference, and the score never hits zero. Settings left at their ordinary default don't count.
 
             Things only Google or your device's maker can fix aren't in the score, because nothing you do changes them. We list them separately.
 

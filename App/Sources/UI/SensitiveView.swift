@@ -116,23 +116,25 @@ struct SensitiveView: View {
                 Text(found.count == 1 ? "1 app gives you away" : "\(found.count) apps give you away")
                     .font(Brand.display(24))
                     .foregroundStyle(Brand.textPrimary)
-                ZStack {
+                // The names stay hidden until asked for, but the way to see them is always in view.
+                if revealed {
                     VStack(spacing: 12) {
                         ForEach(found, id: \.1.id) { category, app in
                             FoundAppCard(category: category, app: app)
                         }
                     }
-                    .blur(radius: revealed ? 0 : 14)
-                    .accessibilityHidden(!revealed)
-                    .allowsHitTesting(revealed)
-                    if !revealed {
+                    .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
+                } else {
+                    ToneCard(tone: .alert, title: "Hidden for your privacy", symbol: "eye.slash") {
+                        Text("The names stay hidden in case someone is looking over your shoulder. Show them when you're ready.")
+                            .font(.subheadline).foregroundStyle(Brand.textMuted).fixedSize(horizontal: false, vertical: true)
                         Button {
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) { revealed = true }
+                            withAnimation(reduceMotion ? nil : .spring(response: 0.4, dampingFraction: 0.85)) { revealed = true }
                             Haptics.soft()
                         } label: {
-                            Label("Tap to reveal", systemImage: "eye.fill")
+                            Label("Show the apps", systemImage: "eye.fill")
                         }
-                        .buttonStyle(GhostButtonStyle())
+                        .buttonStyle(PrimaryCTAButtonStyle())
                     }
                 }
                 Text("Rarely, a different app answers to the same name.")
