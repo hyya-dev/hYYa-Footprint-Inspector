@@ -18,6 +18,8 @@ final class StoreScreenshotsUITests: XCTestCase {
     override func setUp() {
         continueAfterFailure = true
         app = XCUIApplication()
+        // Made-up values only: never a real device's, and the Tracker shows its sample report.
+        app.launchArguments = ["-sampleData"]
     }
 
     private func shot(_ name: String) {
@@ -158,6 +160,24 @@ final class StoreScreenshotsUITests: XCTestCase {
         tab("Check-up")
         sleep(1)
         shot("store-06-checkup")
+
+        tab("Tracker")
+        sleep(2)
+        shot("store-08-tracker")
+
+        // The score explained, with "Fix them with me", then the first fix step.
+        tab("Footprint")
+        let fix = app.buttons["Fix them with me"]
+        scrollTo(fix, max: 6)
+        if fix.exists {
+            app.swipeUp(velocity: .slow)
+            sleep(1)
+            shot("store-10-score")
+            fix.tap()
+            sleep(2)
+            shot("store-09-fix")
+            app.buttons["Close"].firstMatch.tap()
+        }
 
         tab("Footprint")
         let board = app.buttons.containing(NSPredicate(format: "label CONTAINS 'Privacy scoreboard'")).firstMatch

@@ -1,11 +1,11 @@
 {
   "_note": "Mac marketing slides (English only), 2880x1800. Same rules as the iOS slides: mascot and full name, a benefit headline with one sand phrase, three highlights, and the real app window (sample data, never the owner's). Words in *asterisks* are sand.",
   "slides": [
-    {"screen": "mac-01-results", "headline": "See what any app can *learn about you*", "highlights": ["Your name, serial number, apps", "One calm score", "Nothing leaves your device"]},
-    {"screen": "mac-05-checkup", "headline": "See which apps can reach *your private info*", "highlights": ["Screen, keyboard, files", "Opens each list", "Take access back"]},
-    {"screen": "mac-03-name", "headline": "Every clue explained. *One click* to fix.", "highlights": ["Why the system allows it", "Steps in plain words", "Opens the right setting"]},
+    {"screen": "mac-01-results", "headline": "See what any app can *learn about you*", "highlights": ["Your name, serial number, apps", "One score out of 100", "Nothing leaves your device"]},
+    {"screen": "mac-07-fix", "headline": "Fix it *step by step*", "highlights": ["One fix at a time", "Opens the right setting", "Watch your score go up"]},
     {"screen": "mac-02-finding", "headline": "Some clues *never change*", "highlights": ["Serial number", "Hardware ID", "Even after erasing"]},
     {"screen": "mac-04-sensitive", "headline": "Which apps *give you away?*", "highlights": ["Dating, faith, health, VPN", "Banks can ask too", "Hidden, never saved"]},
+    {"screen": "mac-05-checkup", "headline": "Take back *your private info*", "highlights": ["Screen, keyboard, files", "Opens each list", "Tick off as you go"]},
     {"screen": "mac-06-home", "headline": "Private. Yours. *Open source.*", "highlights": ["No account, no ads", "No tracking, ever", "Made by hYYa"]}
   ]
 }

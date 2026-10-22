@@ -165,6 +165,7 @@ private struct Results: View {
         .sheet(isPresented: $fixing) { FixWizard(fixes: fixes) { Task { await scanner.scan() } } }
 
         ScoreGuideCard(score: score, fixes: fixes, all: scanner.allFindings) { fixing = true }
+            .task { if CommandLine.arguments.contains("-openFix") && !fixes.isEmpty { fixing = true } }
 
 
         SectionDivider()

@@ -384,7 +384,7 @@ private fun ScoreGuide(scanner: Scanner, nav: Nav) {
 @Composable
 fun FixScreen(scanner: Scanner, nav: Nav) {
     val context = LocalContext.current
-    val fixes = remember { fixesOf(scanner) }
+    val fixes = remember(scanner.findings.size) { fixesOf(scanner) }
     var index by remember { mutableStateOf(0) }
     var done by remember { mutableStateOf(0) }
     Page {

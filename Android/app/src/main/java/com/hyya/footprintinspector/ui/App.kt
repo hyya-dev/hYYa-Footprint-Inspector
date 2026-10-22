@@ -66,10 +66,10 @@ class Nav {
 }
 
 @Composable
-fun App(startTab: Tab = Tab.SCAN, autoScan: Boolean = false, openFinding: String? = null) {
+fun App(startTab: Tab = Tab.SCAN, autoScan: Boolean = false, openFinding: String? = null, openFix: Boolean = false) {
     val scanner: Scanner = viewModel()
     var tab by rememberSaveable { mutableStateOf(startTab) }
-    val nav = remember { Nav().also { n -> openFinding?.let { n.push(Route.FindingRoute(it)) } } }
+    val nav = remember { Nav().also { n -> openFinding?.let { n.push(Route.FindingRoute(it)) }; if (openFix) n.push(Route.FixRoute) } }
     if (autoScan && scanner.findings.isEmpty()) androidx.compose.runtime.LaunchedEffect(Unit) { scanner.scan() }
 
     BackHandler(enabled = nav.stack.isNotEmpty()) { nav.pop() }
