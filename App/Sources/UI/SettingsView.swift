@@ -33,6 +33,8 @@ struct SettingsView: View {
     @Environment(\.requestReview) private var requestReview
     @AppStorage("reviewCardTapped") private var reviewTapped = false
     @State private var confirmingClear = false
+    @AppStorage(ScanReminder.storageKey) private var reminder = ScanReminder.off.rawValue
+    @State private var notificationsOff = false
 
     static let shareMessage = "hYYa Footprint Inspector shows what any app can learn about your device, and how to fix it. Free, open source, nothing leaves your device."
 
@@ -54,6 +56,22 @@ struct SettingsView: View {
                     .buttonStyle(PressableCardStyle())
                     NavigationLink { ScoreboardView() } label: {
                         RowCard(symbol: "checkmark.seal", title: "Privacy scoreboard")
+                    }
+                    .buttonStyle(PressableCardStyle())
+                    Menu {
+                        ForEach(ScanReminder.allCases) { option in
+                            Button { choose(option) } label: {
+                                if option.rawValue == reminder { Label(option.title, systemImage: "checkmark") } else { Text(option.title) }
+                            }
+                        }
+                    } label: {
+                        RowCard(symbol: "bell", title: "Re-scan reminder",
+                                subtitle: "A reminder on this device to check again.") {
+                            HStack(spacing: 6) {
+                                Text(ScanReminder(rawValue: reminder)?.title ?? "Off")
+                                Image(systemName: "chevron.up.chevron.down")
+                            }
+                        }
                     }
                     .buttonStyle(PressableCardStyle())
                     Button { confirmingClear = true } label: {
@@ -129,10 +147,27 @@ struct SettingsView: View {
                 .frame(maxWidth: .infinity)
             }
             .hiddenNavigationBar()
+            .alert("Notifications are off", isPresented: $notificationsOff) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("To get a re-scan reminder, allow notifications for hYYa Footprint Inspector in Settings, then choose a reminder again.")
+            }
             .confirmationDialog("Clear all saved scans?", isPresented: $confirmingClear, titleVisibility: .visible) {
                 Button("Clear history", role: .destructive) { history.clear(); Haptics.success() }
             } message: {
                 Text("Your score history and before/after comparisons start over.")
+            }
+        }
+    }
+
+    /// Picking a reminder schedules it at once; if notifications are declined it returns to Off.
+    private func choose(_ choice: ScanReminder) {
+        reminder = choice.rawValue
+        Haptics.selection()
+        Task {
+            if await !choice.apply() {
+                reminder = ScanReminder.off.rawValue
+                notificationsOff = true
             }
         }
     }

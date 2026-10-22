@@ -34,6 +34,19 @@ class CatalogueTest {
         }
     }
 
+    /** Store rules: we show who holds the access, never claim to detect spying (docs/WATCHERS-RESEARCH.md). */
+    @Test fun watchCopyMakesNoDetectionClaims() {
+        val watch = Catalogue.list.filter { it.section == com.hyya.footprintinspector.model.Section.WATCH }
+        assertEquals(setOf("watch-screen", "watch-notifications", "watch-admin", "watch-several"), watch.map { it.id }.toSet())
+        val claims = Regex("(?i)\\b(spy\\w*|malware|virus|threat|detect\\w*|infected)\\b")
+        val texts = watch.flatMap { listOf(it.title, it.reveals, it.why, it.fix.summary) + it.fix.steps } +
+            Sensitive.OTHERS_LINE + Sensitive.WEBSITE_LINE
+        val offenders = texts.filter { claims.containsMatchIn(it) }
+        assertTrue("Detection claim in copy: $offenders", offenders.isEmpty())
+        // No organisation is named as doing the check: we can't see which apps do.
+        assertTrue(Regex("(?i)bank of|HSBC|Chase|gov\\.").find(Sensitive.OTHERS_LINE) == null)
+    }
+
     @Test fun copyIsDeviceNeutralAndNamesNoAppleProduct() {
         val bad = Regex("\\b(iPhone|iPad|iOS|Pixel|Galaxy)\\b")
         val texts = Catalogue.list.flatMap { d -> listOf(d.title, d.reveals, d.why, d.fix.summary) + d.fix.steps } +

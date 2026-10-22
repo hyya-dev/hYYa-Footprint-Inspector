@@ -122,7 +122,9 @@ final class StoreScreenshotsUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 20))
         // Second scan so the "since your last scan" card appears.
         app.buttons["Scan again"].tap()
-        sleep(5)
+        sleep(1)
+        XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 20))
+        sleep(2)
         shot("store-02-results")
 
         // The "Worth a look" list, with the comparison card's top edge just below the status bar,

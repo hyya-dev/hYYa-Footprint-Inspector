@@ -24,7 +24,9 @@ data class SensitiveCategory(
 )
 
 object Sensitive {
-    const val DELETE_STEP = "To delete an app: touch and hold its icon, then tap Uninstall. Hiding it doesn't help, but Private space (Android 15 and later) or Secure Folder does."
+    const val OTHERS_LINE = "Any app on this device can run this same check, including banking, government, employer and ID apps."
+    const val WEBSITE_LINE = "If you'd rather an organisation couldn't, use its website in your browser instead of its app. A website can't see which apps you have."
+    const val DELETE_STEP ="To delete an app: touch and hold its icon, then tap Uninstall. Hiding it doesn't help, but Private space (Android 15 and later) or Secure Folder does."
 
     val categories = listOf(
         SensitiveCategory("dating", "Dating and LGBTQ+",

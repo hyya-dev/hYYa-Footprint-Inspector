@@ -376,7 +376,7 @@ struct SeverityDot: View {
 @MainActor enum System {
     #if os(iOS)
     static var name: String { UIDevice.current.systemName }
-    static var version: String { System.version }
+    static var version: String { UIDevice.current.systemVersion }
     #else
     static let name = "macOS"
     static var version: String {
