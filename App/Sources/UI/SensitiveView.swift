@@ -54,6 +54,7 @@ struct SensitiveView: View {
                     }
                     .buttonStyle(GhostButtonStyle())
                     .frame(maxWidth: .infinity)
+                    NextStepCard(step: .tracker) { goToTab(.tracker) }
                 } else {
                     SectionTitle(title: "Kinds of apps", trailing: "\(chosen.count) on")
                     Panel {
@@ -80,7 +81,6 @@ struct SensitiveView: View {
                         .disabled(chosen.isEmpty)
                 }
 
-                NextStepCard(step: .tracker) { goToTab(.tracker) }
             }
             .navigationTitle("Sensitive apps")
             .inlineTitle()
@@ -104,7 +104,12 @@ struct SensitiveView: View {
         let found: [(SensitiveCategory, SensitiveApp)] = SensitiveCatalogue.categories.flatMap { category in
             (results[category.id] ?? []).map { (category, $0) }
         }
+        let checked = SensitiveCatalogue.categories.filter { chosen.contains($0.id) }.reduce(0) { $0 + $1.checkedApps.count }
         return VStack(alignment: .leading, spacing: 12) {
+            SummaryRing(slices: [
+                .alert(found.count, found.count == 1 ? "app any app can spot" : "apps any app can spot"),
+                .fine(max(0, checked - found.count), "not on this device"),
+            ], caption: "checked")
             if found.isEmpty {
                 MascotSays(line: "None of these apps answered. Any app asking the same would find nothing.", mood: .happy, size: 76, tone: .fix)
             } else {

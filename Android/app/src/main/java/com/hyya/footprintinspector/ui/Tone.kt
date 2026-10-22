@@ -182,3 +182,51 @@ fun NextStepCard(step: Tab) {
         Icon(androidx.compose.material.icons.Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = Brand.sand)
     }
 }
+
+/** A ring chart summing up a page, as on iOS: coral worth a look, amber worth knowing, green fine. */
+data class Slice(val label: String, val count: Int, val color: Color)
+val Amber = Color(0xFFF2C27A)
+
+@Composable
+fun SummaryRing(slices: List<Slice>, caption: String? = null, centre: String? = null) {
+    val total = slices.sumOf { it.count }.coerceAtLeast(1)
+    val progress = androidx.compose.runtime.remember { androidx.compose.animation.core.Animatable(0f) }
+    androidx.compose.runtime.LaunchedEffect(slices) { progress.snapTo(0f); progress.animateTo(1f, androidx.compose.animation.core.tween(800)) }
+    val shape = RoundedCornerShape(18.dp)
+    Row(
+        Modifier.fillMaxWidth().clip(shape).background(Brand.surface).border(BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)), shape).padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.size(100.dp), contentAlignment = Alignment.Center) {
+            androidx.compose.foundation.Canvas(Modifier.size(100.dp)) {
+                val stroke = 14.dp.toPx()
+                val inset = stroke / 2
+                val arcSize = androidx.compose.ui.geometry.Size(size.width - stroke, size.height - stroke)
+                val tl = androidx.compose.ui.geometry.Offset(inset, inset)
+                drawArc(Color.White.copy(alpha = 0.06f), 0f, 360f, false, tl, arcSize, style = androidx.compose.ui.graphics.drawscope.Stroke(stroke))
+                var start = -90f
+                slices.forEach { s ->
+                    val sweep = 360f * s.count / total * progress.value
+                    if (sweep > 0f) drawArc(s.color, start, (sweep - 1.5f).coerceAtLeast(0.5f), false, tl, arcSize, style = androidx.compose.ui.graphics.drawscope.Stroke(stroke))
+                    start += 360f * s.count / total * progress.value
+                }
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(centre ?: "${slices.sumOf { it.count }}", color = Brand.ink, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                if (caption != null) Text(caption, color = Brand.textSubtle, fontSize = 10.sp)
+            }
+        }
+        Spacer(Modifier.width(18.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            slices.forEach { s ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.size(10.dp).clip(CircleShape).background(s.color))
+                    Spacer(Modifier.width(8.dp))
+                    Text("${s.count}", color = Brand.ink, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.width(6.dp))
+                    Text(s.label, color = Brand.textMuted, fontSize = 14.sp)
+                }
+            }
+        }
+    }
+}

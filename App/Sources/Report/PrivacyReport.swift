@@ -213,7 +213,7 @@ struct PrivacyReport: Sendable {
 /// What a site is, in plain words. Matched by domain; anything we don't know is "Other", never
 /// "suspicious": an unknown name is usually a company's own server or a content network.
 enum SiteKind: Int, Comparable, Sendable, CaseIterable {
-    case advertising, analytics, crashReports, ownServers, apple, cloud, other
+    case advertising, analytics, crashReports, publicData, ownServers, apple, cloud, other
 
     static func < (a: SiteKind, b: SiteKind) -> Bool { a.rawValue < b.rawValue }
 
@@ -224,6 +224,7 @@ enum SiteKind: Int, Comparable, Sendable, CaseIterable {
         case .advertising: "Advertising"
         case .analytics: "Usage tracking and marketing"
         case .crashReports: "Crash reports"
+        case .publicData: "Public data services"
         case .ownServers: "Its own service"
         case .apple: "Apple"
         case .cloud: "Sign-in and hosting"
@@ -236,6 +237,7 @@ enum SiteKind: Int, Comparable, Sendable, CaseIterable {
         case .advertising: "Ad companies that show and measure ads, and build profiles to target you."
         case .analytics: "Companies that record how you use the app, so it can measure and market to you."
         case .crashReports: "Error reports when the app crashes. Usually harmless."
+        case .publicData: "Free services for weather, place names, maps or time zones. They get the location they answer for, but don't track you."
         case .ownServers: "The app maker's own servers. That's how the app works."
         case .apple: "Apple's services: App Store, iCloud, purchases. Normal for every app."
         case .cloud: "Sign-in, storage and hosting services the app is built on. Normal."
@@ -248,6 +250,7 @@ enum SiteKind: Int, Comparable, Sendable, CaseIterable {
         case .advertising: "megaphone"
         case .analytics: "chart.line.uptrend.xyaxis"
         case .crashReports: "ant"
+        case .publicData: "cloud.sun"
         case .ownServers: "building.2"
         case .apple: "apple.logo"
         case .cloud: "cloud"
@@ -278,6 +281,16 @@ enum SiteKind: Int, Comparable, Sendable, CaseIterable {
         "crashlytics.com": "Crashlytics", "crashlyticsreports-pa.googleapis.com": "Crashlytics", "sentry.io": "Sentry",
         "bugsnag.com": "Bugsnag", "instabug.com": "Instabug", "newrelic.com": "New Relic", "nr-data.net": "New Relic", "datadoghq.com": "Datadog",
     ]
+    /// Free public services an app asks for facts. Named so the person sees what each is for.
+    static let publicTable: [String: String] = [
+        "open-meteo.com": "Weather (Open-Meteo)", "openweathermap.org": "Weather (OpenWeather)", "weatherapi.com": "Weather (WeatherAPI)",
+        "api.met.no": "Weather (Norwegian Met Office)", "tomorrow.io": "Weather (Tomorrow.io)",
+        "nominatim.openstreetmap.org": "Place names (OpenStreetMap)", "tile.openstreetmap.org": "Maps (OpenStreetMap)",
+        "openstreetmap.org": "Maps (OpenStreetMap)", "photon.komoot.io": "Place names (Photon)", "geocode.maps.co": "Place names",
+        "timeapi.io": "Time zone (TimeAPI)", "worldtimeapi.org": "Time zone (WorldTimeAPI)", "timezonedb.com": "Time zone (TimeZoneDB)",
+        "api.aladhan.com": "Prayer times (AlAdhan)", "ipapi.co": "Rough location from your network", "ip-api.com": "Rough location from your network",
+        "ipinfo.io": "Rough location from your network", "exchangerate-api.com": "Exchange rates", "frankfurter.app": "Exchange rates",
+    ]
     static let appleSuffixes = ["apple.com", "icloud.com", "mzstatic.com", "apple-cloudkit.com", "apple-dns.net", "aaplimg.com", "cdn-apple.com", "icloud-content.com", "apple-mapkit.com"]
     static let cloudSuffixes = ["googleapis.com", "gstatic.com", "googleusercontent.com", "firebaseio.com", "firebaseapp.com", "appspot.com",
                                 "cloudfront.net", "amazonaws.com", "akamaihd.net", "akamaiedge.net", "akamaized.net", "edgekey.net", "edgesuite.net",
@@ -287,13 +300,14 @@ enum SiteKind: Int, Comparable, Sendable, CaseIterable {
 
     private static func match(_ d: String, _ suffix: String) -> Bool { d == suffix || d.hasSuffix("." + suffix) }
     private static func lookup(_ d: String, _ table: [String: String]) -> String? {
-        table.first { match(d, $0.key) }?.value
+        // The most specific match wins ("nominatim.openstreetmap.org" over "openstreetmap.org").
+        table.filter { match(d, $0.key) }.max { $0.key.count < $1.key.count }?.value
     }
 
     /// The company behind an advertising, analytics or crash site, when we know it.
     static func company(for domain: String) -> String? {
         let d = domain.lowercased()
-        return lookup(d, adTable) ?? lookup(d, analyticsTable) ?? lookup(d, crashTable)
+        return lookup(d, adTable) ?? lookup(d, analyticsTable) ?? lookup(d, crashTable) ?? lookup(d, publicTable)
     }
 
     static func of(_ domain: String, app bundleID: String) -> SiteKind {
@@ -301,6 +315,7 @@ enum SiteKind: Int, Comparable, Sendable, CaseIterable {
         let maker = Self.maker(of: bundleID)
         // A company's own trackers aren't "outside" when the app is theirs (Google Maps → Google Analytics).
         if lookup(d, crashTable) != nil { return .crashReports }
+        if lookup(d, publicTable) != nil { return .publicData }
         if let co = lookup(d, adTable) { return co.lowercased().hasPrefix(maker) && !maker.isEmpty ? .ownServers : .advertising }
         if let co = lookup(d, analyticsTable) { return co.lowercased().hasPrefix(maker) && !maker.isEmpty ? .ownServers : .analytics }
         if appleSuffixes.contains(where: { match(d, $0) }) { return bundleID.hasPrefix("com.apple.") ? .ownServers : .apple }

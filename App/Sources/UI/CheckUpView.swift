@@ -25,11 +25,11 @@ struct CheckUpView: View {
                          subtitle: Self.introLine,
                          mood: done.count == total ? .happy : .idle,
                          mascotSize: 104) {
-                    ProgressView(value: Double(done.count), total: Double(total))
-                        .tint(Brand.sunflower)
-                        .padding(.top, 6)
-                        .animation(.spring, value: done.count)
+                    EmptyView()
                 }
+                SummaryRing(slices: [.fine(done.count, "checked"), .amber(total - done.count, "still to check")],
+                            centre: "\(done.count)/\(total)")
+                    .animation(.spring, value: done.count)
 
                 Panel {
                     ForEach(Array(CheckUpGuide.steps.enumerated()), id: \.element.id) { index, step in

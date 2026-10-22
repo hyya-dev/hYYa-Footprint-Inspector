@@ -88,6 +88,8 @@ struct CatalogueTests {
         #expect(SiteKind.of("app-analytics-services.com", app: "com.example.game") == .analytics)
         #expect(SiteKind.of("firebase-settings.crashlytics.com", app: "com.example.game") == .crashReports)
         #expect(SiteKind.of("d3abc.cloudfront.net", app: "com.czzhao.binance") == .cloud)
+        #expect(SiteKind.of("api.open-meteo.com", app: "com.hyya.prayerpal") == .publicData)
+        #expect(SiteKind.company(for: "nominatim.openstreetmap.org") == "Place names (OpenStreetMap)")
 
         let mail = PrivacyReport.AppActivity(bundleID: "com.apple.mobilemail", sites: [
             "x.r.us-east-1.awstrack.me": .init(domain: "x.r.us-east-1.awstrack.me", owner: nil, hits: 1, byApp: false)])

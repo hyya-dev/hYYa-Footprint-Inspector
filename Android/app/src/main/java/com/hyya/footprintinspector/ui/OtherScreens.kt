@@ -99,6 +99,9 @@ fun SensitiveScreen() {
             "Any app can ask whether certain apps are installed, one by one, without asking you. Pick the kinds to check.", 104)
         results?.let { r ->
             val found = Sensitive.categories.flatMap { c -> (r[c.id] ?: emptyList()).map { c to it } }
+            val checked = Sensitive.categories.filter { it.id in chosen }.sumOf { it.apps.size }
+            SummaryRing(listOf(Slice(if (found.size == 1) "app any app can spot" else "apps any app can spot", found.size, Tone.ALERT.tint),
+                Slice("not on this device", (checked - found.size).coerceAtLeast(0), Tone.FIX.tint)), "checked")
             if (found.isEmpty()) {
                 MascotSays("None of these apps answered. Any app asking the same would find nothing.", tone = Tone.FIX)
             } else {
@@ -117,6 +120,7 @@ fun SensitiveScreen() {
         if (results != null) {
             // The result replaces the set-up: one thing on screen, then the way forward.
             GhostButton("Check different kinds") { results = null; revealed = false }
+            NextStepCard(Tab.TRACKER)
         } else {
             SectionTitle("Kinds of apps", "${chosen.size} on")
             Panel {
@@ -146,7 +150,6 @@ fun SensitiveScreen() {
                 if (chosen.isNotEmpty()) { results = Sensitive.scan(context, chosen); revealed = false }
             }
         }
-        NextStepCard(Tab.TRACKER)
     }
 }
 
@@ -224,6 +227,11 @@ fun TrackerScreen(scanner: com.hyya.footprintinspector.scan.Scanner, nav: Nav) {
                 PrimaryButton("Start scan") { scanner.scan() }
             }
         } else {
+            SummaryRing(listOf(
+                Slice("worth a look", watch.count { it.isConcerning }, Tone.ALERT.tint),
+                Slice("worth knowing", watch.count { it.severity == com.hyya.footprintinspector.model.Severity.MEDIUM }, Amber),
+                Slice("all clear", watch.count { it.severity == com.hyya.footprintinspector.model.Severity.LOW }, Tone.FIX.tint),
+            ), "checks")
             SectionTitle("Who can watch you", watch.count { it.isConcerning }.takeIf { it > 0 }?.toString())
             Panel { watch.forEachIndexed { i, f -> TrackerRow(f, nav, i < watch.lastIndex) } }
             Text("Apps built into your device, like Google's and the home screen, are listed but not counted. Parental-control and work apps hold this access too.",
@@ -238,7 +246,7 @@ fun TrackerScreen(scanner: com.hyya.footprintinspector.scan.Scanner, nav: Nav) {
                 openSettings(context, if (android.os.Build.VERSION.SDK_INT >= 31) "android.intent.action.REVIEW_PERMISSION_USAGE" else android.provider.Settings.ACTION_PRIVACY_SETTINGS)
             }
         }
-        NextStepCard(Tab.CHECKUP)
+        if (watch.isNotEmpty()) NextStepCard(Tab.CHECKUP)
     }
 }
 
@@ -260,8 +268,8 @@ fun CheckUpScreen(nav: Nav) {
     Page {
         HeroCard("Permission check-up", if (done.size == CheckUp.steps.size) "All checked!" else "${done.size} of ${CheckUp.steps.size} checked",
             "Android never tells one app which other apps can reach your location, contacts or notifications. Only Settings knows, so let's look together.")
-        LinearProgressIndicator(progress = { done.size.toFloat() / CheckUp.steps.size }, color = Brand.sand, trackColor = Brand.tile,
-            modifier = Modifier.fillMaxWidth())
+        SummaryRing(listOf(Slice("checked", done.size, Tone.FIX.tint), Slice("still to check", CheckUp.steps.size - done.size, Amber)),
+            centre = "${done.size}/${CheckUp.steps.size}")
         Panel {
             CheckUp.steps.forEachIndexed { i, s ->
                 RowCard(if (s.id in done) Icons.Outlined.CheckCircle else Icons.Outlined.Security, s.title, s.path.substringBefore(" (on Samsung").let { if (it.length > 60) "Permission manager › " + s.path.substringAfterLast("› ") else it },

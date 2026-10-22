@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.VisibilityOff
@@ -151,7 +153,14 @@ private fun Results(scanner: Scanner, nav: Nav) {
             if (concerning.isEmpty()) "Nothing stands out." else "${concerning.size} are worth a look.",
             color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
         Text("How the score works", color = Brand.sand, fontSize = 13.sp, modifier = Modifier.clickableNoRipple { nav.push(Route.ScoreRoute) })
+        val seen = scanner.findingsWithoutAsking
+        SummaryRing(listOf(
+            Slice("worth a look", seen.count { it.severity == Severity.HIGH }, Tone.ALERT.tint),
+            Slice("worth knowing", seen.count { it.severity == Severity.MEDIUM }, Amber),
+            Slice("minor", seen.count { it.severity == Severity.LOW }, Tone.FIX.tint),
+        ), "clues")
         PrimaryButton("Scan again") { scanner.scan() }
+        ScoreGuide(scanner, nav)
         scanner.comparison?.let { cmp ->
             InfoCard("Since your last scan", Tone.CONTEXT, Icons.Outlined.History) {
                 Text("${cmp.previous.score} → ${cmp.current.score}", color = Brand.ink, fontSize = 18.sp)
@@ -327,5 +336,74 @@ fun ScoreScreen(nav: Nav) {
         BackBar("How the score works", nav)
         MascotSays("No secret maths. Here's exactly how I score.", tone = Tone.CONTEXT)
         Text(FootprintScore.explanation, color = Brand.textMuted, fontSize = 15.sp, lineHeight = 22.sp)
+    }
+}
+
+/** The clues you can fix, most points first. */
+private fun fixesOf(scanner: Scanner) =
+    scanner.concerning.filter { FootprintScore.points(it) > 0 }.sortedByDescending { FootprintScore.points(it) }
+
+/** What the score means and how to raise it, as on iOS. */
+@Composable
+private fun ScoreGuide(scanner: Scanner, nav: Nav) {
+    val score = scanner.score
+    val fixes = fixesOf(scanner)
+    val reach = minOf(100, score.value + fixes.sumOf { FootprintScore.points(it) })
+    val meaning = when (score.level) {
+        FootprintScore.Level.LIGHT -> "Higher is better, and you're in good shape: apps learn little that could single out this device."
+        FootprintScore.Level.MODERATE -> "Higher is better. You're in the middle: a few clues together could single out this device."
+        FootprintScore.Level.HEAVY -> "Higher is better. A low score means apps can easily tell this device apart from others and recognise you."
+    }
+    ToneCard(if (fixes.isEmpty()) Tone.FIX else Tone.CONTEXT, "What your score means", Icons.Outlined.Speed) {
+        Text(meaning, color = Brand.ink, fontSize = 14.sp, lineHeight = 20.sp)
+        Row(Modifier.fillMaxWidth().height(10.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            Box(Modifier.weight(50f).fillMaxHeight().clip(CircleShape).background(Tone.ALERT.tint.copy(alpha = if (score.value < 50) 0.9f else 0.35f)))
+            Box(Modifier.weight(25f).fillMaxHeight().clip(CircleShape).background(Brand.sand.copy(alpha = if (score.value in 50..74) 0.9f else 0.35f)))
+            Box(Modifier.weight(25f).fillMaxHeight().clip(CircleShape).background(Tone.FIX.tint.copy(alpha = if (score.value >= 75) 0.9f else 0.35f)))
+        }
+        Row(Modifier.fillMaxWidth()) {
+            Text("Heavy · 0–49", color = Tone.ALERT.tint, fontSize = 11.sp, modifier = Modifier.weight(1f))
+            Text("Moderate · 50–74", color = Brand.sand, fontSize = 11.sp, modifier = Modifier.weight(1f))
+            Text("Light · 75+", color = Tone.FIX.tint, fontSize = 11.sp)
+        }
+        if (fixes.isEmpty()) {
+            Text("Nothing left that you can fix. What remains is up to Google or the device maker.", color = Tone.FIX.tint, fontSize = 14.sp, lineHeight = 19.sp)
+        } else {
+            Text("Fix ${if (fixes.size == 1) "this one thing" else "these ${fixes.size} things"} and your score could reach $reach:",
+                color = Brand.ink, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, lineHeight = 19.sp)
+            fixes.take(5).forEach { f ->
+                Row { Text("+${FootprintScore.points(f)}", color = Tone.FIX.tint, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(38.dp))
+                    Text(f.definition.title, color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp) }
+            }
+            PrimaryButton("Fix them with me") { nav.push(Route.FixRoute) }
+        }
+    }
+}
+
+/** "Fix them with me": one clue at a time, each with a button to the exact Settings page. */
+@Composable
+fun FixScreen(scanner: Scanner, nav: Nav) {
+    val context = LocalContext.current
+    val fixes = remember { fixesOf(scanner) }
+    var index by remember { mutableStateOf(0) }
+    var done by remember { mutableStateOf(0) }
+    Page {
+        BackBar(if (index < fixes.size) "Fix ${index + 1} of ${fixes.size}" else "All done", nav)
+        if (index < fixes.size) {
+            val f = fixes[index]
+            androidx.compose.material3.LinearProgressIndicator(progress = { index.toFloat() / fixes.size }, color = Tone.FIX.tint, trackColor = Brand.tile, modifier = Modifier.fillMaxWidth())
+            Text("Apps can't change these settings for you, so I'll open each page. Come back here after each change.", color = Brand.textSubtle, fontSize = 12.sp, lineHeight = 16.sp)
+            ToneCard(Tone.FIX, f.definition.title, Icons.Outlined.Build, trailing = { ToneBadge("+${FootprintScore.points(f)} points", Tone.FIX) }) {
+                Text(f.definition.fix.summary, color = Brand.ink, fontSize = 15.sp, lineHeight = 21.sp)
+                if (f.definition.fix.steps.isNotEmpty()) StepList(f.definition.fix.steps, Tone.FIX.tint)
+                GhostButton("Open Settings") { openSettings(context, f.definition.fix.settingsAction) }
+            }
+            PrimaryButton("Done, next", fill = Tone.FIX.tint) { done++; index++ }
+            GhostButton("Skip this one") { index++ }
+        } else {
+            MascotNote(if (done == 0) "No changes this time. You can come back whenever you like."
+                else "Nice work: you changed $done setting${if (done == 1) "" else "s"}. Scan again to see your new score.", Tone.FIX)
+            PrimaryButton("Scan again") { nav.pop(); scanner.scan() }
+        }
     }
 }

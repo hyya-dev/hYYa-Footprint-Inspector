@@ -113,6 +113,12 @@ private struct ScanningView: View {
 private struct Results: View {
     @Environment(Scanner.self) private var scanner
     @State private var showingFormula = false
+    @State private var fixing = false
+    /// The clues you can fix, most points first.
+    private var fixes: [Finding] {
+        scanner.concerning.filter { FootprintScore.isFixable($0) && FootprintScore.points(for: $0) > 0 }
+            .sorted { FootprintScore.points(for: $0) > FootprintScore.points(for: $1) }
+    }
     @AppStorage("reviewCardDismissed") private var reviewCardDismissed = false
     @Environment(\.goToTab) private var goToTab
     @Namespace private var zoom
@@ -143,6 +149,12 @@ private struct Results: View {
                     .foregroundStyle(Brand.textSubtle)
                     .padding(.top, 2)
             }
+            let seen = scanner.findingsWithoutAsking
+            SummaryRing(slices: [
+                .alert(seen.filter { $0.severity == .high }.count, "worth a look"),
+                .amber(seen.filter { $0.severity == .medium }.count, "worth knowing"),
+                .fine(seen.filter { $0.severity == .low }.count, "minor"),
+            ], caption: "clues")
             HStack(spacing: 12) {
                 Button("Scan again") { Task { await scanner.scan() } }
                     .buttonStyle(PrimaryCTAButtonStyle())
@@ -150,6 +162,9 @@ private struct Results: View {
             }
         }
         .sheet(isPresented: $showingFormula) { FormulaSheet() }
+        .sheet(isPresented: $fixing) { FixWizard(fixes: fixes) { Task { await scanner.scan() } } }
+
+        ScoreGuideCard(score: score, fixes: fixes) { fixing = true }
 
 
         SectionDivider()

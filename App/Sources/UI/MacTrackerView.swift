@@ -9,6 +9,7 @@ import SwiftUI
 /// which access, so this page lists the places that do show it, each one click away.
 struct MacTrackerView: View {
     @Environment(\.goToTab) private var goToTab
+    @State private var openedOne = false
 
     private struct Place: Identifiable {
         let id: String
@@ -49,11 +50,11 @@ struct MacTrackerView: View {
                 ForEach(places) { place in
                     ToneCard(tone: place.tone, title: place.title, symbol: place.symbol) {
                         Text(place.why).font(.body).foregroundStyle(Brand.textMuted).fixedSize(horizontal: false, vertical: true)
-                        Button("Open in System Settings") { SettingsLink.open(pane: place.pane); Haptics.selection() }
+                        Button("Open in System Settings") { SettingsLink.open(pane: place.pane); Haptics.selection(); withAnimation(.smooth) { openedOne = true } }
                             .buttonStyle(GhostButtonStyle())
                     }
                 }
-                NextStepCard(step: .checkup) { goToTab(.checkup) }
+                if openedOne { NextStepCard(step: .checkup) { goToTab(.checkup) } }
             }
             .navigationTitle("Tracker")
         }
