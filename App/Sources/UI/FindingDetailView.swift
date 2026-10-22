@@ -108,7 +108,8 @@ struct FindingDetailView: View {
                 }
             }
         }
-        .navigationTitle(def.title)
+        // The card carries the full title; a bar title would only repeat it, cut short.
+        .navigationTitle("")
         .inlineTitle()
     }
 

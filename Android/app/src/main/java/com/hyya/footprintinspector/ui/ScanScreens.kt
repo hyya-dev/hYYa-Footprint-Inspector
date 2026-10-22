@@ -14,6 +14,26 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.material.icons.outlined.PanTool
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.Build
+import androidx.compose.material.icons.outlined.HelpOutline
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
+import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Accessibility
@@ -130,9 +150,17 @@ private fun Results(scanner: Scanner, nav: Nav) {
             color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
         Text("How the score works", color = Brand.sand, fontSize = 13.sp, modifier = Modifier.clickableNoRipple { nav.push(Route.ScoreRoute) })
         PrimaryButton("Scan again") { scanner.scan() }
+        // From what apps could read to what they actually did: Android keeps its own record.
+        val ctx = LocalContext.current
+        ToneCard(Tone.ALERT, "What your apps actually did", Icons.Outlined.VisibilityOff,
+            onClick = { openSettings(ctx, if (android.os.Build.VERSION.SDK_INT >= 33) android.content.Intent.ACTION_SAFETY_CENTER else android.provider.Settings.ACTION_PRIVACY_SETTINGS) },
+            trailing = { Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = Tone.ALERT.tint) }) {
+            Text("Android keeps a record of which apps used your location, camera and microphone. Open Privacy dashboard to see it, then turn off what you didn't expect.",
+                color = Brand.textMuted, fontSize = 14.sp, lineHeight = 20.sp)
+        }
 
         scanner.comparison?.let { cmp ->
-            InfoCard("Since your last scan") {
+            InfoCard("Since your last scan", Tone.CONTEXT, Icons.Outlined.History) {
                 Text("${cmp.previous.score} → ${cmp.current.score}", color = Brand.ink, fontSize = 18.sp)
                 val changed = cmp.changedIds.mapNotNull { Catalogue.byId[it]?.title }
                 Text(if (changed.isEmpty()) "Nothing changed." else "${changed.size} changed, such as ${changed.take(3).joinToString(", ")}.",
@@ -197,7 +225,7 @@ fun SectionScreen(scanner: Scanner, section: Section, nav: Nav) {
                 else -> "${findings.size} clue${if (findings.size == 1) "" else "s"}, ${findings.count { it.isConcerning }.let { if (it == 0) "nothing alarming" else "$it worth a look" }}."
             })
         if (kind != null && !kind.granted(context)) {
-            InfoCard("See it for yourself") {
+            InfoCard("See it for yourself", Tone.EXPLAIN, Icons.Outlined.PanTool) {
                 Text("Tap below and I'll ask for the same permission an app would, then show you exactly what it gets. Nothing is saved or sent.",
                     color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp)
                 PrimaryButton("Show me") { launcher.launch(kind.permissions.toTypedArray()) }
@@ -230,29 +258,51 @@ fun FindingScreen(scanner: Scanner, id: String, nav: Nav) {
     val context = LocalContext.current
     val f = scanner.findings.firstOrNull { it.id == id } ?: return
     val d = f.definition
+    val head = if (f.isConcerning) Tone.ALERT else Tone.CONTEXT
+    var showDetails by remember { mutableStateOf(false) }
     Page {
         BackBar(d.title, nav)
-        if (f.isConcerning) Pill("Worth a look", Brand.concern, Brand.concernSoft)
-        Text(d.title, color = Brand.ink, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-        Text("On your device", color = Brand.textSubtle, fontSize = 12.sp)
-        Text(f.reading.value, color = Brand.ink, fontSize = 18.sp)
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Pill(d.persistence.label)
-            Pill(if (d.section.group == Group.PERMISSION) "Needs permission" else "No permission needed")
-        }
-        f.reading.note?.let { Text(it, color = Brand.concern, fontSize = 13.sp) }
-        MascotSays(d.reveals)
-        if (f.reading.items.isNotEmpty()) InfoCard("All the details (${f.reading.items.size})") {
-            f.reading.items.take(60).forEach { Text(it, color = Brand.textMuted, fontSize = 13.sp) }
-        }
-        InfoCard("Why the system allows it") { Text(d.why, color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp) }
-        InfoCard(if (d.fix.fixable) "How to fix it" else "Only Google or the device maker can fix this") {
-            Text(d.fix.summary, color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp)
-            if (d.fix.steps.isNotEmpty()) StepList(d.fix.steps)
-            if (d.fix.fixable) {
-                if (d.fix.settingsAction != null) PrimaryButton("Open Settings") { openSettings(context, d.fix.settingsAction) }
-                else GhostButton("Open Settings") { openSettings(context, null) }
+        // The clue itself.
+        ToneCard(head) {
+            ToneBadge(if (f.isConcerning) "Worth a look" else f.severity.label, head, Icons.Outlined.ErrorOutline)
+            Text(d.title, color = Brand.ink, fontSize = 28.sp, fontWeight = FontWeight.Bold, lineHeight = 33.sp)
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(Brand.upper("On your device"), color = Brand.textSubtle, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.3.sp)
+                Text(f.reading.value, color = Brand.ink, fontSize = 20.sp, fontWeight = FontWeight.Light, lineHeight = 26.sp)
             }
+            f.reading.note?.let { Text(it, color = if (f.isConcerning) Tone.ALERT.tint else Brand.textMuted, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, lineHeight = 19.sp) }
+            BadgeRow {
+                ToneBadge(d.persistence.label, Tone.LIMIT, Icons.Outlined.Schedule)
+                ToneBadge(if (d.section.group == Group.PERMISSION) "Needs permission" else "No permission needed", Tone.LIMIT, Icons.Outlined.Visibility)
+            }
+            if (f.reading.items.isNotEmpty()) {
+                androidx.compose.material3.HorizontalDivider(color = head.tint.copy(alpha = 0.2f), thickness = 0.5.dp)
+                Row(Modifier.fillMaxWidth().pressable { showDetails = !showDetails }, verticalAlignment = Alignment.CenterVertically) {
+                    Text("All the details (${f.reading.items.size})", color = head.tint, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                    Icon(if (showDetails) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore, null, tint = head.tint)
+                }
+                if (showDetails) Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    f.reading.items.take(60).forEach { item ->
+                        Row(verticalAlignment = Alignment.Top) {
+                            Box(Modifier.padding(top = 7.dp).size(5.dp).clip(CircleShape).background(head.tint.copy(alpha = 0.7f)))
+                            Spacer(Modifier.width(8.dp))
+                            Text(item, color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp)
+                        }
+                    }
+                }
+            }
+        }
+        MascotNote(d.reveals, Tone.EXPLAIN, "What it tells an app", Icons.Outlined.ChatBubbleOutline)
+        InfoCard("Why the system allows it", Tone.CONTEXT, Icons.Outlined.HelpOutline) {
+            Text(d.why, color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
+        }
+        val fixTone = if (d.fix.fixable) Tone.FIX else Tone.LIMIT
+        ToneCard(fixTone, if (d.fix.fixable) "How to fix it" else "Only Google or the device maker can fix this",
+            if (d.fix.fixable) Icons.Outlined.Build else Icons.Outlined.Lock,
+            trailing = if (d.fix.fixable && f.isConcerning) ({ ToneBadge("+${FootprintScore.HIGH_WEIGHT} points", Tone.FIX) }) else null) {
+            Text(d.fix.summary, color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
+            if (d.fix.steps.isNotEmpty()) StepList(d.fix.steps, fixTone.tint)
+            if (d.fix.fixable) PrimaryButton("Open Settings") { openSettings(context, d.fix.settingsAction) }
         }
     }
 }
@@ -261,7 +311,7 @@ fun FindingScreen(scanner: Scanner, id: String, nav: Nav) {
 fun ScoreScreen(nav: Nav) {
     Page {
         BackBar("How the score works", nav)
-        MascotSays("No secret maths. Here's exactly how I score.")
+        MascotSays("No secret maths. Here's exactly how I score.", tone = Tone.CONTEXT)
         Text(FootprintScore.explanation, color = Brand.textMuted, fontSize = 15.sp, lineHeight = 22.sp)
     }
 }
