@@ -50,6 +50,12 @@ look there first. They are read-only from here.
 - **🚨 Never submit for review without the owner's explicit consent** (Apple or Google; a
   version, a build, a custom product page or a PPO test). Prepare everything up to the submit
   button, then ask, naming exactly what would be submitted.
+- **Clean up after every submission** (owner, 2026-10-22): each time a version goes to review
+  (Apple or Google), finish by removing local clutter: `build/`, `Android/app/build`,
+  `Android/build`, `Android/.gradle`, this project's DerivedData, `.DS_Store` files, scratch
+  captures, and the app's test copies on shared Simulators and the borrowed emulator (also clear
+  status-bar overrides and emulator demo mode). Keep `.env`, `Android/local.properties`, the
+  generated `.xcodeproj` and the `fi-ios26-iPhone17Pro` Simulator. Report the before/after size.
 - **Store growth:** use App Store Connect's Custom Product Pages, Asset Library and Product Page
   Optimization wherever possible. Plan: `docs/STORE-GROWTH-PLAN.md`.
 - **App Store record:** Apple ID 6824033636, SKU `hyya-footprint-inspector`, created
