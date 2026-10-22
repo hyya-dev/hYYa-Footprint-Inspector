@@ -20,6 +20,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Checklist
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.AccountBalance
+import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.CheckCircle
@@ -94,7 +98,7 @@ fun SensitiveScreen() {
         results?.let { r ->
             val found = Sensitive.categories.flatMap { c -> (r[c.id] ?: emptyList()).map { c to it } }
             if (found.isEmpty()) {
-                MascotSays("None of these apps answered. Any app asking the same would find nothing.")
+                MascotSays("None of these apps answered. Any app asking the same would find nothing.", tone = Tone.FIX)
             } else {
                 Text(if (found.size == 1) "1 app gives you away" else "${found.size} apps give you away",
                     color = Brand.ink, fontSize = 24.sp, fontWeight = FontWeight.Bold)
@@ -140,7 +144,7 @@ fun SensitiveScreen() {
 
 @Composable
 private fun FoundAppCard(c: SensitiveCategory, app: SensitiveApp) {
-    InfoCard("Any app can see you have ${app.name}") {
+    InfoCard("Any app can see you have ${app.name}", Tone.ALERT, Icons.Outlined.ErrorOutline) {
         Pill("Worth a look", Brand.concern, Brand.concernSoft)
         Text(listOfNotNull(c.tells, c.risk).joinToString(" "), color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp)
         Eyebrow("What to do")
@@ -154,7 +158,7 @@ private fun FoundAppCard(c: SensitiveCategory, app: SensitiveApp) {
  */
 @Composable
 private fun OthersCanCheckCard() {
-    InfoCard("Who else can check this?") {
+    InfoCard("Who else can check this?", Tone.CONTEXT, Icons.Outlined.AccountBalance) {
         Text(Sensitive.OTHERS_LINE, color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp)
         Text(Sensitive.WEBSITE_LINE, color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp)
     }
@@ -224,8 +228,8 @@ fun CheckUpStepScreen(index: Int, nav: Nav) {
     Page {
         BackBar(step.title, nav)
         HeroCard("Step ${index + 1}", step.title, step.why)
-        InfoCard("Where to go") { Text(step.path, color = Brand.sand, fontSize = 15.sp, fontWeight = FontWeight.SemiBold) }
-        InfoCard("What to do") { StepList(step.actions) }
+        InfoCard("Where to go", Tone.CONTEXT, Icons.Outlined.Settings) { Text(step.path, color = Tone.CONTEXT.tint, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, lineHeight = 20.sp) }
+        InfoCard("What to do", Tone.FIX, Icons.Outlined.Checklist) { StepList(step.actions, Tone.FIX.tint) }
         GhostButton("Open Settings") { openSettings(context, step.action) }
         PrimaryButton(if (done) "Checked ✓" else "I've checked this", fill = if (done) Brand.green else androidx.compose.ui.graphics.Color.White) {
             done = !done

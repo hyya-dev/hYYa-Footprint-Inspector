@@ -172,7 +172,7 @@ fun RowCard(
 ) {
     Column {
         Row(
-            (if (onClick != null) Modifier.clickable(role = Role.Button, onClick = onClick) else Modifier)
+            (if (onClick != null) Modifier.pressable(onClick) else Modifier)
                 .fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -204,7 +204,7 @@ fun Pill(text: String, fg: Color = Brand.textMuted, bg: Color = Color.White.copy
 fun PrimaryButton(text: String, modifier: Modifier = Modifier.fillMaxWidth(), fill: Color = Color.White, onClick: () -> Unit) {
     Text(
         text, color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center,
-        modifier = modifier.clip(CircleShape).background(fill).clickable(role = Role.Button, onClick = onClick)
+        modifier = modifier.pressable(onClick).clip(CircleShape).background(fill)
             .padding(vertical = 15.dp, horizontal = 22.dp),
     )
 }
@@ -214,31 +214,25 @@ fun PrimaryButton(text: String, modifier: Modifier = Modifier.fillMaxWidth(), fi
 fun GhostButton(text: String, modifier: Modifier = Modifier.fillMaxWidth(), onClick: () -> Unit) {
     Text(
         text, color = Brand.sand, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center,
-        modifier = modifier.clip(CircleShape).border(BorderStroke(1.dp, Brand.sandDeep), CircleShape)
-            .clickable(role = Role.Button, onClick = onClick).padding(vertical = 13.dp, horizontal = 20.dp),
+        modifier = modifier.pressable(onClick).clip(CircleShape).border(BorderStroke(1.dp, Brand.sandDeep), CircleShape)
+            .padding(vertical = 13.dp, horizontal = 20.dp),
     )
 }
 
+/** Kept for call sites that just want a titled card; it's a context-role ToneCard. */
 @Composable
-fun InfoCard(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Column(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Brand.surface)
-            .border(BorderStroke(0.5.dp, Brand.rule), RoundedCornerShape(16.dp)).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Text(title, color = Brand.ink, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-        content()
-    }
+fun InfoCard(title: String, tone: Tone = Tone.CONTEXT, icon: ImageVector? = null, content: @Composable ColumnScope.() -> Unit) {
+    ToneCard(tone, title, icon, content = content)
 }
 
 @Composable
-fun StepList(steps: List<String>) {
+fun StepList(steps: List<String>, tint: Color = Brand.sand) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         steps.forEachIndexed { i, s ->
             Row {
-                Box(Modifier.size(22.dp).clip(CircleShape).border(BorderStroke(1.dp, Brand.sandDeep), CircleShape),
+                Box(Modifier.size(22.dp).clip(CircleShape).background(tint.copy(alpha = 0.10f)).border(BorderStroke(1.dp, tint.copy(alpha = 0.5f)), CircleShape),
                     contentAlignment = Alignment.Center) {
-                    Text("${i + 1}", color = Brand.sand, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                    Text("${i + 1}", color = tint, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
                 }
                 Spacer(Modifier.width(10.dp))
                 Text(s, color = Brand.ink, fontSize = 15.sp, lineHeight = 20.sp)
@@ -248,13 +242,8 @@ fun StepList(steps: List<String>) {
 }
 
 @Composable
-fun MascotSays(line: String, mascotSize: Int = 72) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Mascot(mascotSize)
-        Spacer(Modifier.width(10.dp))
-        Text(line, color = Brand.ink, fontSize = 14.sp, lineHeight = 19.sp,
-            modifier = Modifier.clip(RoundedCornerShape(14.dp)).background(Brand.surface).padding(12.dp))
-    }
+fun MascotSays(line: String, mascotSize: Int = 72, tone: Tone = Tone.EXPLAIN) {
+    MascotNote(line, tone)
 }
 
 @Composable
