@@ -3,8 +3,8 @@
   "slides": [
     {"screen": "store-02-results", "headline": "See what *every app* can learn about you", "highlights": ["Nearly 50 details checked", "One calm score", "Nothing leaves your device"], "mascot": "right"},
     {"screen": "store-06-checkup", "headline": "See which apps can reach *your private info*", "highlights": ["Health, location, photos", "Straight to each list", "Take access back"], "mascot": "left"},
-    {"screen": "store-03-clues", "headline": "Spot the *clues* that give you away", "highlights": ["What stands out, first", "You can fix vs Apple's job", "Grouped by what apps see"], "mascot": "right"},
-    {"screen": "store-04-finding", "headline": "Every clue explained. *Every fix* shown.", "highlights": ["Why the system allows it", "How long it lasts", "Step-by-step fixes"], "mascot": "left"},
+    {"screen": "store-04-finding", "headline": "Every clue explained. *Every fix* shown.", "highlights": ["Why the system allows it", "How long it lasts", "Step-by-step fixes"], "mascot": "right"},
+    {"screen": "store-03-clues", "headline": "Spot the *clues* that give you away", "highlights": ["What stands out, first", "You can fix vs Apple's job", "Grouped by what apps see"], "mascot": "left"},
     {"screen": "store-05-sensitive", "headline": "Which apps *give you away?*", "highlights": ["Dating, faith, health, VPN", "Banks can ask too", "Hidden, never saved"], "mascot": "right"},
     {"screen": "store-07-scoreboard", "headline": "Know what *Apple* has fixed", "highlights": ["Latest release changes", "Leaks still open", "Updated each release"], "mascot": "left"},
     {"screen": "store-01-home", "headline": "Private. Yours. *Open source.*", "highlights": ["No account, no ads", "No tracking, ever", "Made by hYYa"], "mascot": "right"}
