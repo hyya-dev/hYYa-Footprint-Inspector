@@ -107,7 +107,9 @@ look there first. They are read-only from here.
 ## Android (built 2026-10-21; project in `Android/`)
 - Kotlin + Jetpack Compose, Quiet Noir ported. minSdk 33, targetSdk 36, compileSdk 37. Build with
   Android Studio's JBR as `JAVA_HOME`. Upload keystore and its passwords are in the Keys Wallet
-  (`hYYa Footprint Inspector Keys/android-signing/`), read by `app/build.gradle.kts`.
+  (`H-iCloud Drive/hYYa HD/Keys Wallet/hYYa Footprint Inspector Keys/android-signing/`), read by
+  `app/build.gradle.kts`. The Play service-account key is shared with the other hYYa apps, in
+  `Keys Wallet/Shared Keys/play-service-account.json`.
 - **No INTERNET permission**, no AD_ID, no QUERY_ALL_PACKAGES, no Photos permission (Play
   policy). Sensitive apps use named `<queries>` packages. `allowBackup=false`.
 - An Android app reads `ANDROID_ID` (per signing key, survives reinstall), device name and boot

@@ -10,7 +10,7 @@ plugins {
  * sibling hYYa apps. Nothing secret is committed. Without them the release builds unsigned.
  */
 val keystoreFile: File = File(
-    "/Users/hyya/Library/Mobile Documents/com~apple~CloudDocs/H-iCloud Drive/*Keys Wallet/hYYa Footprint Inspector Keys/android-signing/keystore.properties",
+    "/Users/hyya/Library/Mobile Documents/com~apple~CloudDocs/H-iCloud Drive/hYYa HD/Keys Wallet/hYYa Footprint Inspector Keys/android-signing/keystore.properties",
 )
 val keystoreProps = Properties().apply {
     if (keystoreFile.isFile) keystoreFile.inputStream().use { load(it) }

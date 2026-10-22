@@ -30,7 +30,8 @@ always set to release automatically after approval.
 - Personal account "hYYa LLC", id 7244268045893720931, signed in at Play Console `u/1`. App id
   4973134500799616661, package `com.hyya.footprintinspector`.
 - Service account `play-supply-hyya@…` has Admin on the app. Key:
-  `H-iCloud Drive/*Keys Wallet/keystores/play*.json` → `PLAY_SERVICE_ACCOUNT_JSON`.
+  `H-iCloud Drive/hYYa HD/Keys Wallet/Shared Keys/play-service-account.json` → `PLAY_SERVICE_ACCOUNT_JSON`
+  (shared with the other hYYa apps).
 - **Closed test:** Google Group `testers-community@googlegroups.com` (the same group as hYYa
   Encrypted Folder), feedback to h@hyya.com, all 178 countries/regions.
   - Testers join at https://play.google.com/apps/testing/com.hyya.footprintinspector
