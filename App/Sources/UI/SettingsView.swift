@@ -212,8 +212,7 @@ struct SupportRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(.subheadline.weight(.bold)).foregroundStyle(Brand.textPrimary)
                 Text(tagline)
-                    .lineLimit(1)
-                    .minimumScaleFactor(Brand.shrinkToFitFloor)
+                    .fixedSize(horizontal: false, vertical: true)
                     .font(.caption)
                     .foregroundStyle(Brand.textSubtle)
             }
@@ -246,8 +245,7 @@ struct PromoRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title).font(.subheadline.weight(.bold)).foregroundStyle(Brand.textPrimary)
                     Text(tagline)
-                        .lineLimit(1)
-                        .minimumScaleFactor(Brand.shrinkToFitFloor)
+                        .fixedSize(horizontal: false, vertical: true)
                         .font(.caption)
                         .foregroundStyle(Brand.textSubtle)
                 }

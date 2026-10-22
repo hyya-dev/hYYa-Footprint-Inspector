@@ -94,7 +94,7 @@ fun ScanScreen(scanner: Scanner, nav: Nav) {
             Eyebrow("hYYa Footprint Inspector")
             AccentRule()
             Text("What do your apps know about you?", color = Brand.ink, fontSize = 30.sp, fontWeight = FontWeight.Bold, lineHeight = 34.sp)
-            Text("A scan reads exactly what any app on this device can read, then shows you how to hide what matters.",
+            Text("A scan reads exactly what any app on this device can read, then shows you how to fix what matters.",
                 color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
             PrimaryButton("Start scan") { scanner.scan() }
             Text("Nothing leaves your device · Open source", color = Brand.textSubtle, fontSize = 12.sp,

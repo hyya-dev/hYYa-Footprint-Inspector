@@ -72,10 +72,11 @@ struct SectionView: View {
         let loading = scanner.loadingPermissions.contains(kind)
         switch state {
         case .notAsked:
-            InfoCard {
+            ToneCard(tone: .explain, title: "See it for yourself", symbol: "hand.raised") {
                 Text("Tap below and I'll ask the system for the same permission an app would, then show you exactly what it gets. Nothing is saved or sent.")
                     .font(.system(.subheadline))
                     .foregroundStyle(Brand.textMuted)
+                    .fixedSize(horizontal: false, vertical: true)
                 Button {
                     Task { await scanner.reveal(kind) }
                 } label: {
@@ -86,7 +87,7 @@ struct SectionView: View {
             }
         case .granted, .limited:
             if loading {
-                InfoCard { HStack { ProgressView(); Text("Reading…").font(.system(.subheadline)) } }
+                ToneCard(tone: .explain) { HStack { ProgressView(); Text("Reading…").font(.system(.subheadline)) } }
             } else if !hasFindings {
                 Button("Show me") { Task { await scanner.reveal(kind) } }
                     .buttonStyle(PrimaryCTAButtonStyle())

@@ -141,12 +141,13 @@ struct RowCard<Accessory: View>: View {
                     .font(.body)
                     .foregroundStyle(Brand.ink)
                     .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
                 if let subtitle {
                     Text(subtitle)
                         .font(.footnote)
                         .foregroundStyle(Brand.textSubtle)
-                        .lineLimit(2)
                         .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             Spacer(minLength: 8)
@@ -197,49 +198,29 @@ struct SectionTitle: View {
     }
 }
 
-/// A panel with an optional heading and free content.
-struct InfoCard<Content: View>: View {
-    var title: String? = nil
-    var symbol: String? = nil
-    var glow: Color? = nil
-    @ViewBuilder var content: Content
-
-    var body: some View {
-        let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
-        VStack(alignment: .leading, spacing: 10) {
-            if let title {
-                HStack(spacing: 8) {
-                    if let symbol {
-                        Image(systemName: symbol).font(.subheadline).foregroundStyle(glow ?? Brand.sand)
-                    }
-                    Text(title)
-                        .font(.headline)
-                        .foregroundStyle(Brand.ink)
-                }
-                Rectangle().fill(Brand.rule).frame(height: 0.5)
-            }
-            content
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(18)
-        .background(
-            shape.fill(Brand.surface)
-                .overlay(shape.fill(LinearGradient(colors: [(glow ?? Brand.sand).opacity(0.06), .clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.4))))
-        )
-        .overlay(shape.strokeBorder(LinearGradient(colors: [(glow ?? Brand.sandDeep).opacity(0.7), Brand.sandDeep.opacity(0.18)], startPoint: .top, endPoint: .bottom), lineWidth: 0.75))
-    }
-}
-
 // MARK: - Mascot that talks on a page
 
+/// The mascot with something to say, inside its own card: the text gets the card's full width
+/// instead of a narrow bubble beside the mascot.
 struct MascotSays: View {
     var line: String
     var mood: LivingMascot.Mood = .idle
     var size: CGFloat = 72
+    var title: String? = nil
+    var tone: Tone = .explain
 
     var body: some View {
-        LivingMascot(mood: mood, size: size, line: line)
-            .frame(maxWidth: .infinity, alignment: .leading)
+        ToneCard(tone: tone, title: title, symbol: title == nil ? nil : "text.bubble") {
+            HStack(alignment: .top, spacing: 14) {
+                LivingMascot(mood: mood, size: min(size, 64))
+                    .accessibilityHidden(true)
+                Text(line)
+                    .font(.body)
+                    .foregroundStyle(Brand.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
     }
 }
 
@@ -291,7 +272,7 @@ struct Pill: View {
     var body: some View {
         HStack(spacing: 4) {
             if let symbol { Image(systemName: symbol).font(.caption2) }
-            Text(text).lineLimit(1).minimumScaleFactor(0.75)
+            Text(text).lineLimit(2).fixedSize(horizontal: false, vertical: true)
         }
         .font(.caption.weight(.medium))
         .foregroundStyle(fg)

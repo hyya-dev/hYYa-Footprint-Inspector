@@ -20,71 +20,89 @@ struct FindingDetailView: View {
     private var def: SignalDefinition { finding.definition }
     private var fixable: Bool { def.fix.level != .onlyApple }
 
+    private var headerTone: Tone { finding.severity == .high ? .alert : .context }
+
     var body: some View {
         Page {
-            // The clue itself, on a 3D card.
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
-                    Pill(text: finding.severity == .high ? "Worth a look" : finding.severity.label,
-                         fg: finding.severity == .high ? Brand.concern : Brand.accent,
-                         bg: Brand.fill(for: finding.severity))
-                    Spacer()
+            // The clue itself.
+            ToneCard(tone: headerTone) {
+                HStack(alignment: .center) {
+                    ToneBadge(text: finding.severity == .high ? "Worth a look" : finding.severity.label,
+                              symbol: finding.severity == .high ? "exclamationmark.circle.fill" : "circle.fill", tone: headerTone)
+                    Spacer(minLength: 8)
                     StatusBadge(status: def.status)
                 }
                 Text(def.title)
-                    .font(.system(size: 30, weight: .bold))
+                    .font(.system(.title, weight: .bold))
                     .foregroundStyle(Brand.textPrimary)
-                Text("On your device")
-                    .font(.system(.caption).weight(.bold))
-                    .foregroundStyle(Brand.textSubtle)
-                Text(finding.reading.value)
-                    .font(.title2.weight(.light).monospacedDigit())
-                    .foregroundStyle(Brand.ink)
-                    .textSelection(.enabled)
-                if let note = finding.reading.note {
-                    Text(note)
-                        .font(.system(.subheadline).weight(.semibold))
-                        .foregroundStyle(finding.severity == .high ? Brand.concern : Brand.textMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(Brand.brandUppercased("On your device"))
+                        .font(.caption.weight(.semibold))
+                        .tracking(1.1)
+                        .foregroundStyle(Brand.textSubtle)
+                    Text(finding.reading.value)
+                        .font(.title2.weight(.light).monospacedDigit())
+                        .foregroundStyle(Brand.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .textSelection(.enabled)
                 }
-                HStack(spacing: 8) {
-                    Pill(text: def.persistence.label, symbol: "clock", fg: Brand.textMuted, bg: Brand.surfaceRaised)
-                    Pill(text: def.section.group == .permission ? "Needs permission" : "No permission needed",
-                         symbol: def.section.group == .permission ? "hand.raised" : "eye", fg: Brand.textMuted, bg: Brand.surfaceRaised)
+                if let note = finding.reading.note {
+                    Label {
+                        Text(note).fixedSize(horizontal: false, vertical: true)
+                    } icon: {
+                        Image(systemName: finding.severity == .high ? "exclamationmark.triangle.fill" : "info.circle")
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(finding.severity == .high ? Tone.alert.tint : Brand.textMuted)
+                }
+                FlowRow {
+                    ToneBadge(text: def.persistence.label, symbol: "clock", tone: .limit)
+                    ToneBadge(text: def.section.group == .permission ? "Needs permission" : "No permission needed",
+                              symbol: def.section.group == .permission ? "hand.raised" : "eye", tone: .limit)
                 }
                 if !finding.reading.items.isEmpty {
+                    Rectangle().fill(headerTone.tint.opacity(0.2)).frame(height: 0.5)
                     DisclosureGroup(isExpanded: $showDetails) {
-                        VStack(alignment: .leading, spacing: 6) {
+                        VStack(alignment: .leading, spacing: 8) {
                             ForEach(Array(finding.reading.items.enumerated()), id: \.offset) { _, item in
-                                Text(item)
-                                    .font(.footnote.monospaced())
-                                    .foregroundStyle(Brand.textMuted)
-                                    .textSelection(.enabled)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                                    Circle().fill(headerTone.tint.opacity(0.7)).frame(width: 5, height: 5)
+                                    Text(item)
+                                        .font(.subheadline)
+                                        .foregroundStyle(Brand.textMuted)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                        .textSelection(.enabled)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
                             }
                         }
-                        .padding(.top, 6)
+                        .padding(.top, 8)
                     } label: {
                         Text("All the details (\(finding.reading.items.count))")
-                            .font(.system(.subheadline).weight(.bold))
-                            .foregroundStyle(Brand.accent)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(headerTone.tint)
                     }
+                    .tint(headerTone.tint)
                     .sensoryFeedback(.selection, trigger: showDetails)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.top, 8)
 
-            MascotSays(line: def.reveals, mood: finding.severity == .high ? .concerned : .thinking, size: 78)
+            MascotSays(line: def.reveals, mood: finding.severity == .high ? .concerned : .thinking, size: 64,
+                       title: "What it tells an app", tone: .explain)
 
-            InfoCard(title: "Why the system allows it", symbol: "questionmark.circle") {
-                Text(def.why).font(.system(.body)).foregroundStyle(Brand.textMuted)
+            ToneCard(tone: .context, title: "Why the system allows it", symbol: "questionmark.circle") {
+                Text(def.why)
+                    .font(.body)
+                    .foregroundStyle(Brand.textMuted)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             fixCard
 
             if showSuggestions, let suggestion = HyyaSuggestions.suggestion(for: def.id) {
-                InfoCard(title: "From the makers of this app", symbol: "sparkles") {
-                    Text(suggestion.reason).font(.system(.body))
+                ToneCard(tone: .context, title: "From the makers of this app", symbol: "sparkles") {
+                    Text(suggestion.reason).font(.body).foregroundStyle(Brand.textMuted)
                     Button("Open \(suggestion.appName)") { openURL(suggestion.url) }
                         .buttonStyle(GhostButtonStyle())
                 }
@@ -95,21 +113,19 @@ struct FindingDetailView: View {
     }
 
     private var fixCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text(fixable ? "How to fix it" : "Only Apple can fix this")
-                    .font(Brand.display(22))
-                    .foregroundStyle(Brand.ink)
-                Spacer()
-                if fixable && finding.severity == .high {
-                    Pill(text: "+\(FootprintScore.highWeight)", fg: Brand.orange, bg: Brand.sunflowerSoft)
-                }
+        ToneCard(tone: fixable ? .fix : .limit,
+                 title: fixable ? "How to fix it" : "Only Apple can fix this",
+                 symbol: fixable ? "wrench.and.screwdriver" : "lock") {
+            if fixable && finding.severity == .high {
+                ToneBadge(text: "+\(FootprintScore.highWeight) points", tone: .fix)
             }
+        } content: {
             Text(def.fix.summary)
-                .font(.system(.body))
+                .font(.body)
                 .foregroundStyle(Brand.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
             if !def.fix.steps.isEmpty {
-                StepList(steps: def.fix.steps)
+                StepList(steps: def.fix.steps, tint: fixable ? Tone.fix.tint : Tone.limit.tint)
             }
             if def.id == "clip-kinds" || def.id == "mac-clipboard" {
                 Button(cleared ? "Clipboard cleared" : "Clear the clipboard now") {
@@ -137,13 +153,9 @@ struct FindingDetailView: View {
                 }
                 #else
                 Button("Open Settings") { SettingsLink.openSettingsHome() }
-                    .buttonStyle(GhostButtonStyle())
-                    .frame(maxWidth: .infinity)
+                    .buttonStyle(PrimaryCTAButtonStyle())
                 #endif
             }
         }
-        .padding(20)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Brand.surface))
     }
 }

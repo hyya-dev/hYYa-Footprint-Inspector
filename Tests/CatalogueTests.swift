@@ -63,6 +63,28 @@ struct CatalogueTests {
         #expect(System.version.split(separator: ".").count >= 2)
     }
 
+    /// Reads both App Privacy Report layouts; counts each use once; flags tracking companies.
+    @Test func privacyReportReadsBothLayouts() throws {
+        let r = PrivacyReport.sample
+        #expect(r.apps.count == 3)
+        let photo = try #require(r.apps.first { $0.bundleID == "com.example.photoeditor" })
+        #expect(photo.uses[.photos] == 1)          // begin/end pair counted once
+        #expect(photo.uses[.location] == 1)
+        #expect(photo.trackerCount == 2)           // graph.facebook.com, app-measurement.com
+        #expect(r.apps.first?.bundleID == "com.example.photoeditor")   // most worth a look first
+        #expect(r.trackerSites == 3)
+
+        let older = """
+        {"stream":"com.apple.privacy.accounting.stream.tcc","accessor":{"identifier":"com.example.old","identifierType":"bundleID"},"tccService":"kTCCServiceAddressBook","identifier":"X","kind":"event","timestamp":"2021-09-01T10:00:00.000Z","version":3}
+        """
+        let o = try PrivacyReport.read(Data(older.utf8))
+        #expect(o.apps.first?.uses[.contacts] == 1)
+
+        #expect(throws: PrivacyReport.ReadError.self) { try PrivacyReport.read(Data("hello\nworld".utf8)) }
+        #expect(AppNames.name(for: "com.example.notes") == "Notes")
+        #expect(Trackers.matches("api.appsflyer.com") && !Trackers.matches("appsflyer.com.example.org"))
+    }
+
     @Test func noCustomURLSchemeOfOurOwn() {
         // docs/HYYA-APPS-DETECTABILITY.md: other apps must not be able to detect this one.
         #expect(Bundle.main.object(forInfoDictionaryKey: "CFBundleURLTypes") == nil)
