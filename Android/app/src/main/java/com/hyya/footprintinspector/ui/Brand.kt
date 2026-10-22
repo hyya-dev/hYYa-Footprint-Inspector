@@ -85,10 +85,13 @@ fun FootprintTheme(content: @Composable () -> Unit) {
 
 /** A black scrolling page with a 720dp column, like the iOS Page. */
 @Composable
-fun Page(content: @Composable ColumnScope.() -> Unit) {
+fun Page(resetOn: Any? = null, content: @Composable ColumnScope.() -> Unit) {
+    // When a result appears, go back to the top so it's the first thing seen.
+    val scroll = rememberScrollState()
+    androidx.compose.runtime.LaunchedEffect(resetOn) { if (resetOn != null) scroll.animateScrollTo(0) }
     Box(Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.TopCenter) {
         Column(
-            Modifier.widthIn(max = 720.dp).fillMaxWidth().verticalScroll(rememberScrollState())
+            Modifier.widthIn(max = 720.dp).fillMaxWidth().verticalScroll(scroll)
                 .statusBarsPadding().padding(horizontal = 20.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp),
             content = content,

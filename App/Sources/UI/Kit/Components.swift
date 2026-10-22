@@ -9,11 +9,17 @@ import SwiftUI
 /// Every screen: black ground, one generous column, room for the tab bar.
 struct Page<Content: View>: View {
     var spacing: CGFloat = 24
+    /// When this changes (a result appears, a report opens), the page goes back to the top so the
+    /// person sees the result first, never the bottom of it.
+    var resetOn: AnyHashable? = nil
     @ViewBuilder var content: Content
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
+        ScrollViewReader { proxy in
         ScrollView {
             VStack(alignment: .leading, spacing: spacing) {
+                Color.clear.frame(height: 0).id("page-top")
                 content
             }
             // A comfortable reading width on iPad; full width on iPhone.
@@ -24,6 +30,9 @@ struct Page<Content: View>: View {
             .frame(maxWidth: .infinity)
         }
         .scrollIndicators(.hidden)
+        .onChange(of: resetOn) { _, _ in
+            withAnimation(reduceMotion ? nil : .smooth(duration: 0.35)) { proxy.scrollTo("page-top", anchor: .top) }
+        }
         .background(BrandBackground())
         // Content fades out under the status bar instead of colliding with the clock.
         .overlay(alignment: .top) {
@@ -31,6 +40,7 @@ struct Page<Content: View>: View {
                 .frame(height: 64)
                 .ignoresSafeArea(edges: .top)
                 .allowsHitTesting(false)
+        }
         }
     }
 }
