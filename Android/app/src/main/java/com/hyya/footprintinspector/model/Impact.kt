@@ -6,7 +6,7 @@ package com.hyya.footprintinspector.model
 
 /** How serious a finding is, said plainly, as on iOS (App/Sources/Model/SignalImpact.swift). */
 object Impact {
-    fun level(s: Severity) = when (s) { Severity.HIGH -> "Serious"; Severity.MEDIUM -> "Worth knowing"; Severity.LOW -> "Minor" }
+    fun level(s: Severity) = when (s) { Severity.HIGH -> "Worth a look"; Severity.MEDIUM -> "Worth knowing"; Severity.LOW -> "Minor" }
 
     fun reach(s: Severity) = when (s) {
         Severity.HIGH -> "Enough on its own to tell this device apart from almost every other, so apps and the companies behind them can recognise you."

@@ -6,7 +6,7 @@ package com.hyya.footprintinspector.model
 
 /** Mirrors the iOS model (App/Sources/Model/Signal.swift) so wording rules and the score match. */
 
-enum class Severity(val label: String) { LOW("Low"), MEDIUM("Medium"), HIGH("Worth a look") }
+enum class Severity(val label: String) { LOW("Minor"), MEDIUM("Worth knowing"), HIGH("Worth a look") }
 
 /** How an app gets at a signal. */
 enum class Group { WATCH, PASSIVE, ADVANCED, PERMISSION }
