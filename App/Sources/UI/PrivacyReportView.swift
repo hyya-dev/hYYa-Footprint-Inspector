@@ -59,7 +59,7 @@ struct PrivacyReportView: View {
                         .frame(maxWidth: .infinity)
                 }
 
-                if let onNext { NextStepCard(step: .checkup, action: onNext) }
+                if let onNext, report != nil { NextStepCard(step: .checkup, action: onNext) }
             }
             .navigationTitle("Tracker")
             .inlineTitle()
@@ -89,6 +89,12 @@ struct PrivacyReportView: View {
         let worth = ranked.filter { $0.verdict == .sharesOutside || $0.verdict == .contentTrackers }
         let used = ranked.filter { $0.verdict == .usedData }
         let calm = ranked.filter { $0.verdict == .normal || $0.verdict == .crashReports }
+
+        SummaryRing(slices: [
+            .alert(worth.count, "worth a look"),
+            .amber(used.count, "used data, nothing shared"),
+            .fine(calm.count, "nothing unusual"),
+        ], caption: "apps")
 
         ToneCard(tone: r.sharing.isEmpty ? .fix : .alert, title: "In short", symbol: "text.magnifyingglass") {
             VStack(alignment: .leading, spacing: 10) {
@@ -220,6 +226,8 @@ private struct AppActivityCard: View {
             "Something you opened inside it, like an email's images or a web page, loaded a tracker. That's the sender's doing, not the app's."
         case .usedData:
             app.isThisApp ? "That's us: the moments you tapped Show me to see a permission for yourself."
+                : app.sites.values.contains(where: { app.kind(of: $0) == .publicData })
+                ? "It used your data and asked public services for answers, like the weather or a place name. They get the location they answer for, but don't track you. No advertising or analytics company was contacted."
                 : "It used private data, but didn't talk to any outside advertising or analytics company in this report."
         case .crashReports:
             "Besides its own service, it only sends error reports when it crashes. Usually harmless."

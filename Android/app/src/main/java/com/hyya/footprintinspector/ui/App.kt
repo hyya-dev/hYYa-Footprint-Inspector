@@ -56,6 +56,7 @@ sealed interface Route {
     data class FindingRoute(val id: String) : Route
     data class CheckUpRoute(val index: Int) : Route
     data object ScoreRoute : Route
+    data object FixRoute : Route
 }
 
 class Nav {
@@ -123,6 +124,7 @@ fun App(startTab: Tab = Tab.SCAN, autoScan: Boolean = false, openFinding: String
                         is Route.FindingRoute -> FindingScreen(scanner, top.id, nav)
                         is Route.CheckUpRoute -> CheckUpStepScreen(top.index, nav)
                         Route.ScoreRoute -> ScoreScreen(nav)
+                        Route.FixRoute -> FixScreen(scanner, nav)
                         null -> when (t) {
                             Tab.SCAN -> ScanScreen(scanner, nav)
                             Tab.SENSITIVE -> SensitiveScreen()

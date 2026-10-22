@@ -141,3 +141,61 @@ struct FlowRow: Layout {
         }
     }
 }
+
+/// A ring chart summing up a page at a glance, with a legend. Coral is worth a look, amber worth
+/// knowing, green fine: the same meaning on every page.
+struct SummaryRing: View {
+    struct Slice: Identifiable { let label: String; let count: Int; let color: Color; var id: String { label } }
+    let slices: [Slice]
+    var centre: String? = nil
+    var caption: String? = nil
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var shown = false
+
+    private var total: Int { max(1, slices.reduce(0) { $0 + $1.count }) }
+
+    var body: some View {
+        HStack(spacing: 18) {
+            ZStack {
+                Circle().stroke(Color.white.opacity(0.06), lineWidth: 14)
+                ForEach(Array(slices.enumerated()), id: \.offset) { i, s in
+                    let start = Double(slices.prefix(i).reduce(0) { $0 + $1.count }) / Double(total)
+                    let end = start + Double(s.count) / Double(total)
+                    Circle()
+                        .trim(from: start, to: shown ? max(start, end - (s.count > 0 ? 0.004 : 0)) : start)
+                        .stroke(s.color, style: StrokeStyle(lineWidth: 14, lineCap: .butt))
+                        .rotationEffect(.degrees(-90))
+                }
+                VStack(spacing: 0) {
+                    Text(centre ?? "\(slices.reduce(0) { $0 + $1.count })")
+                        .font(.title2.weight(.bold).monospacedDigit()).foregroundStyle(Brand.ink)
+                    if let caption { Text(caption).font(.caption2).foregroundStyle(Brand.textSubtle) }
+                }
+            }
+            .frame(width: 104, height: 104)
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(slices) { s in
+                    HStack(spacing: 8) {
+                        Circle().fill(s.color).frame(width: 10, height: 10)
+                        Text("\(s.count)").font(.subheadline.weight(.bold).monospacedDigit()).foregroundStyle(Brand.ink)
+                        Text(s.label).font(.subheadline).foregroundStyle(Brand.textMuted).fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Brand.surface))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Color.white.opacity(0.08), lineWidth: 1))
+        .onAppear { withAnimation(reduceMotion ? nil : .easeOut(duration: 0.8)) { shown = true } }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(slices.map { "\($0.count) \($0.label)" }.joined(separator: ", "))
+    }
+}
+
+extension SummaryRing.Slice {
+    static func alert(_ n: Int, _ label: String) -> Self { .init(label: label, count: n, color: Tone.alert.tint) }
+    static func amber(_ n: Int, _ label: String) -> Self { .init(label: label, count: n, color: Color(hex: 0xF2C27A)) }
+    static func fine(_ n: Int, _ label: String) -> Self { .init(label: label, count: n, color: Tone.fix.tint) }
+}
