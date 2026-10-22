@@ -28,6 +28,6 @@ class MainActivity : ComponentActivity() {
         }
         // Shows the re-scan reminder now, to check it without waiting a week.
         if (intent.getBooleanExtra("testReminder", false)) com.hyya.footprintinspector.remind.ScanReminder.post(this)
-        setContent { FootprintTheme { App(startTab, autoScan, intent.getStringExtra("openFinding")) } }
+        setContent { FootprintTheme { App(startTab, autoScan, intent.getStringExtra("openFinding"), intent.getBooleanExtra("openFix", false)) } }
     }
 }
