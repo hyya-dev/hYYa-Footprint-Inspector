@@ -55,7 +55,7 @@ private struct IdleHome: View {
                     .font(.system(size: 34, weight: .bold))
                     .foregroundStyle(Brand.ink)
                     .fixedSize(horizontal: false, vertical: true)
-                Text("A scan reads exactly what any app on this device can read, then shows you how to hide what matters.")
+                Text("A scan reads exactly what any app on this device can read, then shows you how to fix what matters.")
                     .font(.body)
                     .foregroundStyle(Brand.textMuted)
                     .lineSpacing(2)
@@ -149,10 +149,16 @@ private struct Results: View {
         }
         .sheet(isPresented: $showingFormula) { FormulaSheet() }
 
+        #if os(iOS)
+        // The headline next step: from what apps could read to what they actually did.
+        NavigationLink { PrivacyReportView() } label: { WhatAppsDidCard() }
+            .buttonStyle(PressableCardStyle())
+        #endif
+
         SectionDivider()
 
         if let comparison = scanner.comparison {
-            InfoCard { ComparisonCard(comparison: comparison) }
+            ToneCard(tone: .context) { ComparisonCard(comparison: comparison) }
         }
 
         if !concerning.isEmpty {
@@ -251,7 +257,7 @@ private struct FormulaSheet: View {
         NavigationStack {
             Page {
                 MascotSays(line: "No secret maths. Here's exactly how I score.", mood: .thinking)
-                InfoCard { Text(FootprintScore.explanation).font(.body).foregroundStyle(Brand.textMuted).lineSpacing(3) }
+                ToneCard(tone: .context, title: "How it adds up", symbol: "function") { Text(FootprintScore.explanation).font(.body).foregroundStyle(Brand.textMuted).lineSpacing(3).fixedSize(horizontal: false, vertical: true) }
             }
             .navigationTitle("How the score works")
             .inlineTitle()
@@ -260,3 +266,20 @@ private struct FormulaSheet: View {
         .presentationDetents([.large])
     }
 }
+
+#if os(iOS)
+/// The way into the App Privacy Report page, shown under the score.
+struct WhatAppsDidCard: View {
+    var body: some View {
+        ToneCard(tone: .alert, title: "What your apps actually did", symbol: "eye.trianglebadge.exclamationmark") {
+            Image(systemName: "chevron.right").font(.subheadline.weight(.semibold)).foregroundStyle(Tone.alert.tint)
+        } content: {
+            Text("See which apps used your location, photos, contacts, camera or microphone this week, and which tracking companies they contacted.")
+                .font(.subheadline)
+                .foregroundStyle(Brand.textMuted)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+#endif

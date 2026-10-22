@@ -85,15 +85,22 @@ struct CheckUpStepView: View {
             HeroCard(eyebrow: "Step \(number)", title: step.title, subtitle: step.why,
                      mood: isDone ? .happy : .thinking, mascotSize: 96)
 
-            InfoCard(title: "Where to go", symbol: "gearshape.fill") {
+            ToneCard(tone: .context, title: "Where to go", symbol: "gearshape") {
                 Text(step.path)
-                    .font(.system(.body).weight(.semibold))
-                    .foregroundStyle(Brand.accent)
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(Tone.context.tint)
+                    .fixedSize(horizontal: false, vertical: true)
                     .textSelection(.enabled)
             }
-            InfoCard(title: "What to do", symbol: "list.number") {
-                StepList(steps: step.actions)
+            ToneCard(tone: .fix, title: "What to do", symbol: "checklist") {
+                StepList(steps: step.actions, tint: Tone.fix.tint)
             }
+            #if os(iOS)
+            if step.id == "privacy-report" {
+                NavigationLink { PrivacyReportView() } label: { WhatAppsDidCard() }
+                    .buttonStyle(PressableCardStyle())
+            }
+            #endif
             #if os(macOS)
             Button("Open in System Settings") {
                 if let pane = step.pane { SettingsLink.open(pane: pane) } else { SettingsLink.openSettingsHome() }

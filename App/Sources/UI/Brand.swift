@@ -262,10 +262,11 @@ struct GhostButtonStyle: ButtonStyle {
 struct PressableCardStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 0.985 : 1)
-            .opacity(configuration.isPressed ? 0.7 : 1)
+            .scaleEffect(configuration.isPressed ? 0.975 : 1)
+            .rotation3DEffect(.degrees(configuration.isPressed ? 4 : 0), axis: (x: 1, y: 0, z: 0), perspective: 0.5)
+            .opacity(configuration.isPressed ? 0.8 : 1)
             .animation(.spring(response: 0.22, dampingFraction: 0.62), value: configuration.isPressed)
-            .sensoryFeedback(.selection, trigger: configuration.isPressed) { _, pressed in pressed }
+            .sensoryFeedback(.impact(weight: .light), trigger: configuration.isPressed) { _, pressed in pressed }
     }
 }
 

@@ -91,9 +91,7 @@ struct SensitiveView: View {
         }
         return VStack(alignment: .leading, spacing: 12) {
             if found.isEmpty {
-                MascotSays(line: "None of these apps answered. Any app asking the same would find nothing.", mood: .happy, size: 76)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .brandCard(padding: 18)
+                MascotSays(line: "None of these apps answered. Any app asking the same would find nothing.", mood: .happy, size: 76, tone: .fix)
             } else {
                 Text(found.count == 1 ? "1 app gives you away" : "\(found.count) apps give you away")
                     .font(Brand.display(24))
@@ -150,11 +148,8 @@ private struct FoundAppCard: View {
     let app: SensitiveApp
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Pill(text: "Worth a look", symbol: "exclamationmark.circle.fill", fg: Brand.concern, bg: Brand.sunflowerSoft)
-            Text("Any app can see you have \(app.name)")
-                .font(.headline)
-                .foregroundStyle(Brand.ink)
+        ToneCard(tone: .alert, title: "Any app can see you have \(app.name)", symbol: category.symbol) {
+            ToneBadge(text: "Worth a look", symbol: "exclamationmark.circle.fill", tone: .alert)
             Text([category.tells, category.risk].compactMap { $0 }.joined(separator: " "))
                 .font(.subheadline)
                 .foregroundStyle(Brand.textMuted)
@@ -162,12 +157,10 @@ private struct FoundAppCard: View {
             Text(Brand.brandUppercased("What to do"))
                 .font(.caption.weight(.semibold))
                 .tracking(1.1)
-                .foregroundStyle(Brand.sand)
+                .foregroundStyle(Tone.fix.tint)
                 .padding(.top, 4)
-            StepList(steps: category.steps + [SensitiveCatalogue.deleteStep])
+            StepList(steps: category.steps + [SensitiveCatalogue.deleteStep], tint: Tone.fix.tint)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .brandCard(padding: 16)
     }
 }
 
@@ -175,21 +168,19 @@ private struct FoundAppCard: View {
 /// identity, and the browser is the way out.
 private struct OthersCanCheckCard: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label("Who else can check this?", systemImage: "building.columns")
-                .font(.headline)
-                .foregroundStyle(Brand.ink)
+        ToneCard(tone: .context, title: "Who else can check this?", symbol: "building.columns") {
             Text(SensitiveView.othersLine)
                 .font(.subheadline)
                 .foregroundStyle(Brand.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
-            Text(SensitiveView.websiteLine)
-                .font(.subheadline)
-                .foregroundStyle(Brand.textMuted)
-                .fixedSize(horizontal: false, vertical: true)
+            Label {
+                Text(SensitiveView.websiteLine).fixedSize(horizontal: false, vertical: true)
+            } icon: {
+                Image(systemName: "safari").foregroundStyle(Tone.fix.tint)
+            }
+            .font(.subheadline)
+            .foregroundStyle(Brand.ink)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .brandCard(padding: 16)
     }
 }
 
