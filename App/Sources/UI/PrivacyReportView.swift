@@ -55,7 +55,7 @@ struct PrivacyReportView: View {
         ToneCard(tone: .explain, title: "Get your report", symbol: "doc.text.magnifyingglass") {
             StepList(steps: [
                 "Open Settings › Privacy & Security › App Privacy Report. If it's off, turn it on and come back in a few days.",
-                "Scroll to the bottom and tap Save App Activity, then Save to Files.",
+                "Tap the Share button at the top right, then Save to Files.",
                 "Come back here and tap Open my report.",
             ], tint: Tone.explain.tint)
             Button("Open Settings") { SettingsLink.openSettingsHome() }
@@ -76,6 +76,7 @@ struct PrivacyReportView: View {
                 ToneBadge(text: "\(r.trackerSites) tracking companies", symbol: "eye.trianglebadge.exclamationmark", tone: r.trackerSites > 0 ? .alert : .fix)
             }
         }
+        appListCard(r)
         SectionTitle(title: "App by app", trailing: "\(r.apps.count)")
         ForEach(r.apps) { app in AppActivityCard(app: app) }
         ToneCard(tone: .fix, title: "Take access back", symbol: "wrench.and.screwdriver") {
@@ -86,6 +87,30 @@ struct PrivacyReportView: View {
             ], tint: Tone.fix.tint)
             Button("Open Settings") { SettingsLink.openSettingsHome() }
                 .buttonStyle(PrimaryCTAButtonStyle())
+        }
+    }
+
+    /// The question people most want answered, answered honestly: nothing records it, but the
+    /// report does show where apps sent things, and that's where such details usually go.
+    private func appListCard(_ r: PrivacyReport) -> some View {
+        let senders = r.apps.filter { $0.trackerCount > 0 && $0.bundleID != Bundle.main.bundleIdentifier }
+        return ToneCard(tone: .explain, title: "Did any app send my list of apps?", symbol: "questionmark.app") {
+            Text("Nothing on your device records that. The system doesn't log when one app checks which other apps you have, and the report can't see inside what apps send.")
+                .font(.subheadline).foregroundStyle(Brand.textMuted).fixedSize(horizontal: false, vertical: true)
+            if senders.isEmpty {
+                Text("No app in this report talked to a known advertising or analytics company.")
+                    .font(.subheadline.weight(.semibold)).foregroundStyle(Tone.fix.tint).fixedSize(horizontal: false, vertical: true)
+            } else {
+                Text("What it does show: \(senders.count == 1 ? "this app" : "these \(senders.count) apps") talked to advertising or analytics companies, which is where details like that usually end up:")
+                    .font(.subheadline.weight(.semibold)).foregroundStyle(Brand.ink).fixedSize(horizontal: false, vertical: true)
+                FlowRow {
+                    ForEach(senders.prefix(12)) { app in ToneBadge(text: app.name, symbol: "eye.trianglebadge.exclamationmark", tone: .alert) }
+                }
+            }
+            Label {
+                Text("To see which of your apps any app can detect, open the Sensitive apps tab.").fixedSize(horizontal: false, vertical: true)
+            } icon: { Image(systemName: "eye.slash").foregroundStyle(Tone.explain.tint) }
+            .font(.subheadline).foregroundStyle(Brand.textMuted)
         }
     }
 
@@ -113,9 +138,10 @@ private struct AppActivityCard: View {
     var body: some View {
         ToneCard(tone: app.trackerCount > 0 ? .alert : (app.uses.isEmpty ? .context : .explain),
                  title: app.name, symbol: app.uses.isEmpty ? "network" : "app.badge") {
-            Text(app.bundleID)
-                .font(.caption.monospaced())
+            Text(app.isThisApp ? "That's us: these are the moments you tapped Show me to see a permission for yourself." : app.bundleID)
+                .font(app.isThisApp ? .footnote : .caption.monospaced())
                 .foregroundStyle(Brand.textSubtle)
+                .fixedSize(horizontal: false, vertical: true)
                 .textSelection(.enabled)
             if !app.uses.isEmpty {
                 Text(Brand.brandUppercased("Used"))
