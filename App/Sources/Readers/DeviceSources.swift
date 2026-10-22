@@ -24,7 +24,12 @@ struct IdentitySource: SignalSource {
         let device = UIDevice.current
         var out: [SignalReading] = []
         if let idfv = device.identifierForVendor?.uuidString {
-            out.append(.init(id: "idfv", value: idfv))
+            // An app only ever sees its own company's code, so the one we can show is hYYa's.
+            out.append(.init(id: "idfv", value: idfv, items: [
+                "Whose code: apps made by hYYa, the maker of this app.",
+                "Every company gets its own. Gmail, Google Maps and YouTube, for example, all share Google's code, and see only that one.",
+                "This app can't read any other company's code, and they can't read this one.",
+            ], note: "This is hYYa's code. Each company with apps on this device has its own, shared by all its apps."))
         }
         out.append(.init(id: "device-name", value: device.name))
         out.append(.init(id: "os-version", value: "\(device.systemName) \(device.systemVersion)"))

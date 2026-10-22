@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.background
@@ -292,6 +294,14 @@ fun FindingScreen(scanner: Scanner, id: String, nav: Nav) {
                 }
             }
         }
+        // How serious: a level, who can read it, how long it lasts and what it lets someone do.
+        val sTone = when (f.severity) { com.hyya.footprintinspector.model.Severity.HIGH -> Tone.ALERT; com.hyya.footprintinspector.model.Severity.MEDIUM -> Tone.CONTEXT; else -> Tone.LIMIT }
+        ToneCard(sTone, "How serious", Icons.Outlined.Speed, trailing = { ToneBadge(com.hyya.footprintinspector.model.Impact.level(f.severity), sTone) }) {
+            com.hyya.footprintinspector.model.Impact.inPractice[d.id]?.let { Text(it, color = Brand.ink, fontSize = 15.sp, fontWeight = FontWeight.Medium, lineHeight = 21.sp) }
+            ImpactRow(Icons.Outlined.Visibility, "Who can read it", if (d.section.group == Group.PERMISSION) "Only apps you've given this permission." else "Any app on this device, without asking you.")
+            ImpactRow(Icons.Outlined.Schedule, "How long it lasts", com.hyya.footprintinspector.model.Impact.lasting(d.persistence))
+            ImpactRow(Icons.Outlined.Link, "What it lets them do", com.hyya.footprintinspector.model.Impact.reach(f.severity))
+        }
         MascotNote(d.reveals, Tone.EXPLAIN, "What it tells an app", Icons.Outlined.ChatBubbleOutline)
         InfoCard("Why the system allows it", Tone.CONTEXT, Icons.Outlined.HelpOutline) {
             Text(d.why, color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
@@ -303,6 +313,18 @@ fun FindingScreen(scanner: Scanner, id: String, nav: Nav) {
             Text(d.fix.summary, color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
             if (d.fix.steps.isNotEmpty()) StepList(d.fix.steps, fixTone.tint)
             if (d.fix.fixable) PrimaryButton("Open Settings") { openSettings(context, d.fix.settingsAction) }
+        }
+    }
+}
+
+@Composable
+private fun ImpactRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, text: String) {
+    Row(verticalAlignment = Alignment.Top) {
+        Icon(icon, null, tint = Brand.textSubtle, modifier = Modifier.padding(top = 2.dp).size(18.dp))
+        Spacer(Modifier.width(10.dp))
+        Column(Modifier.weight(1f)) {
+            Text(title, color = Brand.ink, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+            Text(text, color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp)
         }
     }
 }

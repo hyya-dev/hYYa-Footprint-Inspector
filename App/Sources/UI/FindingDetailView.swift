@@ -88,6 +88,8 @@ struct FindingDetailView: View {
                 }
             }
 
+            seriousCard
+
             MascotSays(line: def.reveals, mood: finding.severity == .high ? .concerned : .thinking, size: 64,
                        title: "What it tells an app", tone: .explain)
 
@@ -111,6 +113,36 @@ struct FindingDetailView: View {
         // The card carries the full title; a bar title would only repeat it, cut short.
         .navigationTitle("")
         .inlineTitle()
+    }
+
+    /// How serious it is: a level, who can read it, how long it lasts and what it lets someone do.
+    private var seriousCard: some View {
+        let level = SignalImpact.level(finding.severity)
+        let tone: Tone = finding.severity == .high ? .alert : (finding.severity == .medium ? .context : .limit)
+        return ToneCard(tone: tone, title: "How serious", symbol: "gauge.with.dots.needle.67percent") {
+            ToneBadge(text: level.rawValue, tone: tone)
+        } content: {
+            if let line = SignalImpact.inPractice[def.id] {
+                Text(line)
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(Brand.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            impactRow("eye", "Who can read it",
+                      def.section.group == .permission ? "Only apps you've given this permission." : "Any app on this device, without asking you.")
+            impactRow("clock", "How long it lasts", SignalImpact.lasting(def.persistence))
+            impactRow("link", "What it lets them do", SignalImpact.reach(finding.severity))
+        }
+    }
+
+    private func impactRow(_ symbol: String, _ title: String, _ text: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            Image(systemName: symbol).font(.subheadline).foregroundStyle(Brand.textSubtle).frame(width: 20)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(Brand.ink)
+                Text(text).font(.subheadline).foregroundStyle(Brand.textMuted).fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 
     private var fixCard: some View {

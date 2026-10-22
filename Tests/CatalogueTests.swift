@@ -85,6 +85,14 @@ struct CatalogueTests {
         #expect(Trackers.matches("api.appsflyer.com") && !Trackers.matches("appsflyer.com.example.org"))
     }
 
+    /// Every clue worth a look says, in practice, what it lets someone do (iOS and Mac).
+    @Test func seriousFindingsSayWhatTheyMeanInPractice() {
+        let serious = (SignalCatalogue.passive + SignalCatalogue.advanced + SignalCatalogue.permission + MacSignalCatalogue.list)
+            .filter { $0.severity == .high }
+        let missing = serious.filter { SignalImpact.inPractice[$0.id] == nil }.map(\.id)
+        #expect(missing.isEmpty, "No 'in practice' line for: \(missing)")
+    }
+
     @Test func noCustomURLSchemeOfOurOwn() {
         // docs/HYYA-APPS-DETECTABILITY.md: other apps must not be able to detect this one.
         #expect(Bundle.main.object(forInfoDictionaryKey: "CFBundleURLTypes") == nil)

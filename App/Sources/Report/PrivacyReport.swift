@@ -92,7 +92,9 @@ struct PrivacyReport: Sendable {
         var sites: [String: Site] = [:]
         var id: String { bundleID }
 
-        var name: String { AppNames.name(for: bundleID) }
+        var name: String { bundleID == Bundle.main.bundleIdentifier ? "hYYa Footprint Inspector (this app)" : AppNames.name(for: bundleID) }
+        /// This app shows up when the person tapped "Show me" on a permission.
+        var isThisApp: Bool { bundleID == Bundle.main.bundleIdentifier }
         var sortedUses: [(DataKind, Int)] { uses.sorted { $0.key < $1.key }.map { ($0.key, $0.value) } }
         var sortedSites: [Site] {
             sites.values.sorted { ($0.isTracker ? 0 : 1, -$0.hits, $0.domain) < ($1.isTracker ? 0 : 1, -$1.hits, $1.domain) }
@@ -180,6 +182,7 @@ enum Trackers {
         "adcolony.com", "vungle.com", "inmobi.com", "criteo.com", "criteo.net", "taboola.com", "outbrain.com",
         "scorecardresearch.com", "moatads.com", "adnxs.com", "rubiconproject.com", "pubmatic.com", "smaato.net",
         "ads.tiktok.com", "analytics.tiktok.com", "ads-api.twitter.com", "analytics.twitter.com", "sc-analytics.appspot.com",
+        "app-analytics-services.com", "crashlyticsreports-pa.googleapis.com", "googletagmanager.com", "awstrack.me",
         "bugsnag.com", "sentry.io", "newrelic.com", "nr-data.net", "datadoghq.com", "instabug.com", "flurry.com",
     ]
 
@@ -207,11 +210,34 @@ enum AppNames {
         "com.apple.mobilesafari": "Safari", "com.apple.camera": "Camera", "com.apple.mobileslideshow": "Photos",
         "com.apple.Maps": "Maps", "com.apple.MobileSMS": "Messages", "com.apple.mobilemail": "Mail",
         "com.apple.weather": "Weather", "com.apple.Health": "Health", "com.apple.findmy": "Find My",
+        // Apple's own apps, whose IDs don't match their names.
+        "com.apple.mobilephone": "Phone", "com.apple.AppStore": "App Store", "com.apple.mobilecal": "Calendar",
+        "com.apple.SiriApp": "Siri", "com.apple.facetime": "FaceTime", "com.apple.Passbook": "Wallet",
+        "com.apple.Passwords": "Passwords", "com.apple.tv": "TV", "com.apple.MobileAddressBook": "Contacts",
+        "com.apple.mobilenotes": "Notes", "com.apple.reminders": "Reminders", "com.apple.Music": "Music",
+        "com.apple.Fitness": "Fitness", "com.apple.shortcuts": "Shortcuts", "com.apple.TestFlight": "TestFlight",
+        "com.apple.mobiletimer": "Clock", "com.apple.Preferences": "Settings", "com.apple.podcasts": "Podcasts",
+        // hYYa's apps.
+        "com.hyya.prayerpal": "hYYa PrayerPal", "com.hyya.encryptednotes": "hYYa Encrypted Notes",
+        "com.hyya.encryptedfolder": "hYYa Encrypted Folder", "com.hyya.subscriptionstracker": "hYYa Subscriptions Tracker",
+        "com.hyya.hyya-ai": "hYYa ai", "com.hyya.ink": "hYYa ink", "com.hyya.anarchybrowser": "hYYa Anarchy Browser",
+        // Common apps whose IDs don't say their name.
+        "com.yourcompany.PPClient": "PayPal", "com.appspot.scruffapp": "Scruff", "com.investing.app": "Investing.com",
+        "com.careem.mobile.app.icma": "Careem", "com.czzhao.binance": "Binance", "ch.protonmail.protonmail": "Proton Mail",
+        "com.google.Drive": "Google Drive", "com.google.tasks": "Google Tasks", "com.google.Authenticator": "Google Authenticator",
+        "com.google.gemini": "Gemini", "com.nordvpn.NordVPN": "NordVPN", "sa.com.STCBank": "STC Bank",
+        "com.hungerstation.ios.hungerstationapp": "HungerStation", "com.inomma.coinstats": "CoinStats",
+        "com.google.photos": "Google Photos", "com.google.Docs": "Google Docs", "com.microsoft.Office.Word": "Word",
+        "com.microsoft.Office.Excel": "Excel", "com.amazon.aiv.AIVApp": "Prime Video", "com.disney.disneyplus": "Disney+",
     ]
+
+    /// ID parts that never name the app.
+    private static let generic: Set<String> = ["app", "ios", "iphone", "mobile", "client", "application", "prod", "release", "icma"]
 
     static func name(for bundleID: String) -> String {
         if let n = known[bundleID] { return n }
-        let last = bundleID.split(separator: ".").last.map(String.init) ?? bundleID
+        let parts = bundleID.split(separator: ".").map(String.init)
+        let last = parts.reversed().first { !generic.contains($0.lowercased()) } ?? parts.last ?? bundleID
         let spaced = last.replacingOccurrences(of: "-", with: " ").replacingOccurrences(of: "_", with: " ")
         return spaced.prefix(1).uppercased() + spaced.dropFirst()
     }
