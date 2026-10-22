@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -154,5 +155,30 @@ fun MascotNote(line: String, tone: Tone = Tone.EXPLAIN, title: String? = null, i
             Spacer(Modifier.width(14.dp))
             Text(line, color = Brand.ink, fontSize = 15.sp, lineHeight = 21.sp, modifier = Modifier.weight(1f).padding(top = 2.dp))
         }
+    }
+}
+
+/** Lets any screen move the person to another tab (set by App). */
+val LocalGoTo = androidx.compose.runtime.staticCompositionLocalOf<(Tab) -> Unit> { {} }
+
+/** "Next: …" at the end of a page: the one obvious way forward, as on iOS. */
+@Composable
+fun NextStepCard(step: Tab) {
+    val go = LocalGoTo.current
+    val shape = RoundedCornerShape(18.dp)
+    Row(
+        Modifier.fillMaxWidth().pressable { go(step) }.clip(shape).background(Brand.sand.copy(alpha = 0.06f))
+            .border(BorderStroke(1.dp, Brand.sand.copy(alpha = 0.45f)), shape).padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.size(40.dp).clip(CircleShape).background(Brand.sand.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) {
+            Text("${step.step}", color = Brand.sand, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+        }
+        Spacer(Modifier.width(14.dp))
+        Column(Modifier.weight(1f)) {
+            Text(Brand.upper("Next: ${step.label}"), color = Brand.sand, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.3.sp)
+            Text(step.pitch, color = Brand.ink, fontSize = 14.sp, lineHeight = 19.sp)
+        }
+        Icon(androidx.compose.material.icons.Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = Brand.sand)
     }
 }

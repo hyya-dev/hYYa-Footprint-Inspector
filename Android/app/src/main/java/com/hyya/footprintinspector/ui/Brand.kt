@@ -130,8 +130,6 @@ fun HeroCard(eyebrow: String, title: String, subtitle: String, mascotSize: Int =
 @Composable
 fun SectionTitle(title: String, trailing: String? = null) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
-        Box(Modifier.width(2.dp).height(12.dp).background(Brand.sand))
-        Spacer(Modifier.width(8.dp))
         Text(Brand.upper(title), color = Brand.sand, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.3.sp)
         Spacer(Modifier.width(10.dp))
         HorizontalDivider(Modifier.weight(1f), color = Brand.rule, thickness = 0.5.dp)

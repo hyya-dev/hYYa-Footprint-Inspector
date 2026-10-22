@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.AccountBalance
@@ -112,33 +114,39 @@ fun SensitiveScreen() {
             }
             OthersCanCheckCard()
         }
-        SectionTitle("Kinds of apps", "${chosen.size} on")
-        Panel {
-            Sensitive.categories.forEachIndexed { i, c ->
-                val on = c.id in chosen
-                RowCard(Icons.Outlined.Visibility, c.title, c.apps.joinToString(", ") { it.name },
-                    tint = if (on) Brand.ink else Brand.textSubtle, showDivider = i < Sensitive.categories.lastIndex,
-                    onClick = {
-                        chosen = if (on) chosen - c.id else chosen + c.id
-                        prefs(context).edit().putStringSet("sensitiveCategories", chosen).apply()
-                        results = null; revealed = false
-                    }) {
-                    Icon(if (on) Icons.Outlined.CheckCircle else Icons.Outlined.RadioButtonUnchecked, null,
-                        tint = if (on) Brand.ink else Brand.textSubtle)
+        if (results != null) {
+            // The result replaces the set-up: one thing on screen, then the way forward.
+            GhostButton("Check different kinds") { results = null; revealed = false }
+        } else {
+            SectionTitle("Kinds of apps", "${chosen.size} on")
+            Panel {
+                Sensitive.categories.forEachIndexed { i, c ->
+                    val on = c.id in chosen
+                    RowCard(Icons.Outlined.Visibility, c.title, c.apps.joinToString(", ") { it.name },
+                        tint = if (on) Brand.ink else Brand.textSubtle, showDivider = i < Sensitive.categories.lastIndex,
+                        onClick = {
+                            chosen = if (on) chosen - c.id else chosen + c.id
+                            prefs(context).edit().putStringSet("sensitiveCategories", chosen).apply()
+                            results = null; revealed = false
+                        }) {
+                        Icon(if (on) Icons.Outlined.CheckCircle else Icons.Outlined.RadioButtonUnchecked, null,
+                            tint = if (on) Brand.ink else Brand.textSubtle)
+                    }
                 }
             }
-        }
-        Text("Android has no fixed limit: any app can list specific apps in its set-up and check for them. These are the ones that say the most about a person.",
-            color = Brand.textSubtle, fontSize = 12.sp, lineHeight = 16.sp)
-        Row(verticalAlignment = Alignment.Top) {
-            Icon(Icons.Outlined.Lock, null, tint = Brand.sand, modifier = Modifier.size(16.dp))
-            Spacer(Modifier.width(8.dp))
-            Text("Runs only on this device. The result stays hidden until you tap it, and is gone when you leave. Nothing is saved or sent.",
+            Text("Android has no fixed limit: any app can list specific apps in its set-up and check for them. These are the ones that say the most about a person.",
                 color = Brand.textSubtle, fontSize = 12.sp, lineHeight = 16.sp)
+            Row(verticalAlignment = Alignment.Top) {
+                Icon(Icons.Outlined.Lock, null, tint = Brand.sand, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Runs only on this device. The result stays hidden until you tap it, and is gone when you leave. Nothing is saved or sent.",
+                    color = Brand.textSubtle, fontSize = 12.sp, lineHeight = 16.sp)
+            }
+            PrimaryButton(if (chosen.isEmpty()) "Pick at least one kind" else "Check ${chosen.size} kind${if (chosen.size == 1) "" else "s"}") {
+                if (chosen.isNotEmpty()) { results = Sensitive.scan(context, chosen); revealed = false }
+            }
         }
-        PrimaryButton(if (chosen.isEmpty()) "Pick at least one kind" else "Check ${chosen.size} kind${if (chosen.size == 1) "" else "s"}") {
-            if (chosen.isNotEmpty()) { results = Sensitive.scan(context, chosen); revealed = false }
-        }
+        NextStepCard(Tab.TRACKER)
     }
 }
 
@@ -194,6 +202,52 @@ private fun ReminderRow() {
                 })
             }
         }
+    }
+}
+
+// MARK: Tracker
+
+/**
+ * Step 3 on Android: who holds the access watching someone needs (read with no permission, see
+ * WatchReaders), and the system's own record of what apps used, in Privacy dashboard.
+ */
+@Composable
+fun TrackerScreen(scanner: com.hyya.footprintinspector.scan.Scanner, nav: Nav) {
+    val context = LocalContext.current
+    val watch = scanner.findings(com.hyya.footprintinspector.model.Section.WATCH)
+    Page {
+        HeroCard("Tracker", "Who can watch you?",
+            "Some apps hold access that lets them read your screen, every notification, or lock your device. Here's who, and Android's own record of what apps used.", 96)
+        if (watch.isEmpty()) {
+            InfoCard("Run a scan first", Tone.EXPLAIN, Icons.Outlined.Search) {
+                Text("The Footprint scan checks who holds this access.", color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp)
+                PrimaryButton("Start scan") { scanner.scan() }
+            }
+        } else {
+            SectionTitle("Who can watch you", watch.count { it.isConcerning }.takeIf { it > 0 }?.toString())
+            Panel { watch.forEachIndexed { i, f -> TrackerRow(f, nav, i < watch.lastIndex) } }
+            Text("Apps built into your device, like Google's and the home screen, are listed but not counted. Parental-control and work apps hold this access too.",
+                color = Brand.textSubtle, fontSize = 12.sp, lineHeight = 16.sp)
+        }
+        InfoCard("What apps actually used", Tone.EXPLAIN, Icons.Outlined.VisibilityOff) {
+            Text("Android keeps a record of which apps used your location, camera and microphone. Open Privacy dashboard to see it, then turn off anything you didn't expect.",
+                color = Brand.textMuted, fontSize = 14.sp, lineHeight = 20.sp)
+            Text("It covers the last 24 hours to 7 days, depending on your device. Apps that only send things now and then may not appear.",
+                color = Brand.textSubtle, fontSize = 13.sp, lineHeight = 18.sp)
+            PrimaryButton("Open Privacy dashboard") {
+                openSettings(context, if (android.os.Build.VERSION.SDK_INT >= 31) "android.intent.action.REVIEW_PERMISSION_USAGE" else android.provider.Settings.ACTION_PRIVACY_SETTINGS)
+            }
+        }
+        NextStepCard(Tab.CHECKUP)
+    }
+}
+
+@Composable
+private fun TrackerRow(f: com.hyya.footprintinspector.model.Finding, nav: Nav, divider: Boolean) {
+    RowCard(Icons.Outlined.Visibility, f.definition.title, f.reading.value,
+        tint = if (f.isConcerning) Tone.ALERT.tint else Brand.sand, showDivider = divider,
+        onClick = { nav.push(Route.FindingRoute(f.id)) }) {
+        Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = Brand.textSubtle)
     }
 }
 

@@ -14,6 +14,8 @@ struct SensitiveView: View {
     @State private var results: [String: [SensitiveApp]]? = nil
     @State private var revealed = false
     @State private var checks = 0
+    @Environment(\.goToTab) private var goToTab
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var chosen: Set<String> {
         Set(storedChoice.split(separator: ",").map(String.init))
@@ -42,30 +44,43 @@ struct SensitiveView: View {
                          mood: heroMood,
                          mascotSize: 104)
 
-                if let results { resultCard(results) }
-
-                SectionTitle(title: "Kinds of apps", trailing: "\(chosen.count) on")
-                Panel {
-                    ForEach(SensitiveCatalogue.categories) { category in
-                        CategoryToggle(category: category, isOn: chosen.contains(category.id)) { toggle(category.id) }
+                if let results {
+                    // The result replaces the set-up: one thing on screen, then the way forward.
+                    resultCard(results)
+                        .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
+                    Button("Check different kinds") {
+                        withAnimation(reduceMotion ? nil : .smooth(duration: 0.3)) { self.results = nil; revealed = false }
+                        Haptics.selection()
                     }
-                }
-                Text(Self.limitLine)
-                    .font(.system(.footnote))
-                    .foregroundStyle(Brand.textSubtle)
+                    .buttonStyle(GhostButtonStyle())
+                    .frame(maxWidth: .infinity)
+                } else {
+                    SectionTitle(title: "Kinds of apps", trailing: "\(chosen.count) on")
+                    Panel {
+                        ForEach(SensitiveCatalogue.categories) { category in
+                            CategoryToggle(category: category, isOn: chosen.contains(category.id)) { toggle(category.id) }
+                        }
+                    }
+                    Text(Self.limitLine)
+                        .font(.system(.footnote))
+                        .foregroundStyle(Brand.textSubtle)
+                        .padding(.horizontal, 4)
+
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: "lock.fill").foregroundStyle(Brand.sand)
+                        Text("Runs only on this device. The result stays hidden until you tap it, and is gone when you leave. Nothing is saved or sent.")
+                            .font(.footnote)
+                            .foregroundStyle(Brand.textSubtle)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                     .padding(.horizontal, 4)
 
-                HStack(alignment: .top, spacing: 8) {
-                    Image(systemName: "lock.fill").foregroundStyle(Brand.sand)
-                    Text("Runs only on this device. The result stays hidden until you tap it, and is gone when you leave. Nothing is saved or sent.")
-                        .font(.footnote)
-                        .foregroundStyle(Brand.textSubtle)
+                    Button(chosen.isEmpty ? "Pick at least one kind" : "Check \(chosen.count) kind\(chosen.count == 1 ? "" : "s")") { runCheck() }
+                        .buttonStyle(PrimaryCTAButtonStyle())
+                        .disabled(chosen.isEmpty)
                 }
-                .padding(.horizontal, 4)
 
-                Button(chosen.isEmpty ? "Pick at least one kind" : "Check \(chosen.count) kind\(chosen.count == 1 ? "" : "s")") { runCheck() }
-                    .buttonStyle(PrimaryCTAButtonStyle())
-                    .disabled(chosen.isEmpty)
+                NextStepCard(step: .tracker) { goToTab(.tracker) }
             }
             .navigationTitle("Sensitive apps")
             .inlineTitle()
@@ -135,7 +150,7 @@ struct SensitiveView: View {
 
     private func runCheck() {
         revealed = false
-        withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
+        withAnimation(reduceMotion ? nil : .spring(response: 0.45, dampingFraction: 0.85)) {
             results = SensitiveCatalogue.scan(chosen)
         }
         checks += 1

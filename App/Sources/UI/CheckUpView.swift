@@ -79,6 +79,7 @@ struct CheckUpStepView: View {
     var number: Int = 1
     @Binding var isDone: Bool
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.goToTab) private var goToTab
 
     var body: some View {
         Page {
@@ -97,8 +98,7 @@ struct CheckUpStepView: View {
             }
             #if os(iOS)
             if step.id == "privacy-report" {
-                NavigationLink { PrivacyReportView() } label: { WhatAppsDidCard() }
-                    .buttonStyle(PressableCardStyle())
+                NextStepCard(step: .tracker) { goToTab(.tracker) }
             }
             #endif
             #if os(macOS)

@@ -29,7 +29,8 @@ struct IdentitySource: SignalSource {
                 "Whose code: apps made by hYYa, the maker of this app.",
                 "Every company gets its own. Gmail, Google Maps and YouTube, for example, all share Google's code, and see only that one.",
                 "This app can't read any other company's code, and they can't read this one.",
-            ], note: "This is hYYa's code. Each company with apps on this device has its own, shared by all its apps."))
+            ], severityOverride: .medium,
+               note: "Shown here is hYYa's own code, which hYYa never collects. The risk is other companies: each reads its own code to link what you do across all its apps."))
         }
         out.append(.init(id: "device-name", value: device.name))
         out.append(.init(id: "os-version", value: "\(device.systemName) \(device.systemVersion)"))

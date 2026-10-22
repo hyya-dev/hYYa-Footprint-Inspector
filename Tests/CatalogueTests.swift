@@ -63,29 +63,38 @@ struct CatalogueTests {
         #expect(System.version.split(separator: ".").count >= 2)
     }
 
-    /// Reads both App Privacy Report layouts; counts each use once; flags tracking companies.
-    @Test func privacyReportReadsBothLayouts() throws {
+    /// Reads both App Privacy Report layouts and judges plainly: only sharing with outside
+    /// advertising or analytics companies is flagged; own servers, Apple, hosting and a company's
+    /// own analytics are not; trackers inside opened content are the sender's, not the app's.
+    @Test func privacyReportJudgesPlainly() throws {
         let r = PrivacyReport.sample
-        #expect(r.apps.count == 3)
         let photo = try #require(r.apps.first { $0.bundleID == "com.example.photoeditor" })
-        #expect(photo.uses[.photos] == 1)          // begin/end pair counted once
-        #expect(photo.uses[.location] == 1)
-        #expect(photo.trackerCount == 2)           // graph.facebook.com, app-measurement.com
-        #expect(r.apps.first?.bundleID == "com.example.photoeditor")   // most worth a look first
-        #expect(r.trackerSites == 3)
+        #expect(photo.uses[.photos] == 1)                       // begin/end pair counted once
+        #expect(photo.verdict == .sharesOutside)
+        #expect(photo.outsideCompanies.contains("Meta"))
+        #expect(r.ranked.first?.bundleID == "com.example.photoeditor")
 
         let older = """
         {"stream":"com.apple.privacy.accounting.stream.tcc","accessor":{"identifier":"com.example.old","identifierType":"bundleID"},"tccService":"kTCCServiceAddressBook","identifier":"X","kind":"event","timestamp":"2021-09-01T10:00:00.000Z","version":3}
         """
-        let o = try PrivacyReport.read(Data(older.utf8))
-        #expect(o.apps.first?.uses[.contacts] == 1)
-
+        #expect(try PrivacyReport.read(Data(older.utf8)).apps.first?.uses[.contacts] == 1)
         #expect(throws: PrivacyReport.ReadError.self) { try PrivacyReport.read(Data("hello\nworld".utf8)) }
+
+        #expect(SiteKind.of("api.hst.hyya.com", app: "com.hyya.encryptednotes") == .ownServers)
+        #expect(SiteKind.of("oauth2.googleapis.com", app: "com.hyya.encryptednotes") == .cloud)
+        #expect(SiteKind.of("amp-api.apps.apple.com", app: "com.hyya.encryptednotes") == .apple)
+        #expect(SiteKind.of("x.supabase.co", app: "com.hyya.subscriptionstracker") == .cloud)
+        #expect(SiteKind.of("app-analytics-services.com", app: "com.google.Maps") == .ownServers)
+        #expect(SiteKind.of("app-analytics-services.com", app: "com.example.game") == .analytics)
+        #expect(SiteKind.of("firebase-settings.crashlytics.com", app: "com.example.game") == .crashReports)
+        #expect(SiteKind.of("d3abc.cloudfront.net", app: "com.czzhao.binance") == .cloud)
+
+        let mail = PrivacyReport.AppActivity(bundleID: "com.apple.mobilemail", sites: [
+            "x.r.us-east-1.awstrack.me": .init(domain: "x.r.us-east-1.awstrack.me", owner: nil, hits: 1, byApp: false)])
+        #expect(mail.verdict == .contentTrackers)
         #expect(AppNames.name(for: "com.example.notes") == "Notes")
-        #expect(Trackers.matches("api.appsflyer.com") && !Trackers.matches("appsflyer.com.example.org"))
     }
 
-    /// Every clue worth a look says, in practice, what it lets someone do (iOS and Mac).
     @Test func seriousFindingsSayWhatTheyMeanInPractice() {
         let serious = (SignalCatalogue.passive + SignalCatalogue.advanced + SignalCatalogue.permission + MacSignalCatalogue.list)
             .filter { $0.severity == .high }
