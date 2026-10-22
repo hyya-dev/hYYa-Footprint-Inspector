@@ -21,6 +21,11 @@ always set to release automatically after approval.
   the new listing (79 languages; fa ×4, hi-IN, my-MM, nl-NL and te-IN show English) and 7 slides
   in the iOS order were sent for Google's review with the owner's consent (edit 00284048839385647342) and went live to closed testers the same day.
 
+- hyya.com: the four-steps update went live on 2026-10-22 (product page, home card, FAQ, use
+  cases, llms.txt, llms-full.txt, privacy policy section 4 and 7). 5 iPhone and 4 Mac screenshots,
+  no sensitive-apps, iPad or Android slides. Status stays "coming soon" until each review verdict.
+- Next build carries the unified severity words (Worth a look / Worth knowing / Minor).
+
 ### Google Play facts (verified 2026-10-21)
 - Personal account "hYYa LLC", id 7244268045893720931, signed in at Play Console `u/1`. App id
   4973134500799616661, package `com.hyya.footprintinspector`.
