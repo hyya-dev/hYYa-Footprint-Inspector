@@ -7,7 +7,7 @@ import Foundation
 /// How serious a finding is, said plainly: a level, what it lets someone do, and for the clues
 /// worth a look, a concrete "in practice" line. Calm and specific; never "spyware" or "hacked".
 enum SignalImpact {
-    enum Level: String { case serious = "Serious", worthKnowing = "Worth knowing", minor = "Minor" }
+    enum Level: String { case serious = "Worth a look", worthKnowing = "Worth knowing", minor = "Minor" }
 
     static func level(_ s: Severity) -> Level {
         switch s {

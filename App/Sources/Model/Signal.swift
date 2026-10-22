@@ -22,8 +22,8 @@ enum Severity: Int, Comparable, Sendable {
 
     var label: String {
         switch self {
-        case .low: "Low"
-        case .medium: "Medium"
+        case .low: "Minor"
+        case .medium: "Worth knowing"
         case .high: "Worth a look"
         }
     }
