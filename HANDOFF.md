@@ -19,7 +19,7 @@ always set to release automatically after approval.
 - 🚨 The owner reorders the slides in App Store Connect and submits both versions themselves.
 - 2026-10-22: the owner submitted iOS and macOS build 13 (waiting for review). Android versionCode 7,
   the new listing (79 languages; fa ×4, hi-IN, my-MM, nl-NL and te-IN show English) and 7 slides
-  in the iOS order were sent for Google's review with the owner's consent (edit 00284048839385647342).
+  in the iOS order were sent for Google's review with the owner's consent (edit 00284048839385647342) and went live to closed testers the same day.
 
 ### Google Play facts (verified 2026-10-21)
 - Personal account "hYYa LLC", id 7244268045893720931, signed in at Play Console `u/1`. App id
