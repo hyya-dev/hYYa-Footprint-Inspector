@@ -25,11 +25,11 @@ struct CheckUpView: View {
                          subtitle: Self.introLine,
                          mood: done.count == total ? .happy : .idle,
                          mascotSize: 104) {
-                    EmptyView()
+                    ProgressView(value: Double(done.count), total: Double(total))
+                        .tint(Tone.fix.tint)
+                        .padding(.top, 6)
+                        .animation(.spring, value: done.count)
                 }
-                SummaryRing(slices: [.fine(done.count, "checked"), .amber(total - done.count, "still to check")],
-                            centre: "\(done.count)/\(total)")
-                    .animation(.spring, value: done.count)
 
                 Panel {
                     ForEach(Array(CheckUpGuide.steps.enumerated()), id: \.element.id) { index, step in
@@ -41,9 +41,8 @@ struct CheckUpView: View {
                                     subtitle: step.path,
                                     tileFG: done.contains(step.id) ? .white : Brand.accent,
                                     tileBG: done.contains(step.id) ? Brand.mint : Brand.lilacSoft) {
-                                Text("\(index + 1)")
-                                    .font(.system(.footnote).weight(.heavy))
-                                    .foregroundStyle(Brand.textSubtle)
+                                Image(systemName: done.contains(step.id) ? "checkmark.circle.fill" : "chevron.right")
+                                    .foregroundStyle(done.contains(step.id) ? Tone.fix.tint : Brand.textSubtle)
                             }
                         }
                         .buttonStyle(PressableCardStyle())
@@ -83,7 +82,7 @@ struct CheckUpStepView: View {
 
     var body: some View {
         Page {
-            HeroCard(eyebrow: "Step \(number)", title: step.title, subtitle: step.why,
+            HeroCard(eyebrow: "Permission check-up", title: step.title, subtitle: step.why,
                      mood: isDone ? .happy : .thinking, mascotSize: 96)
 
             ToneCard(tone: .context, title: "Where to go", symbol: "gearshape") {

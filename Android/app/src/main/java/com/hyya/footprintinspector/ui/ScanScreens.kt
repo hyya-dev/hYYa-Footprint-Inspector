@@ -149,11 +149,11 @@ private fun Results(scanner: Scanner, nav: Nav) {
         }
         Text(score.level.title, color = Brand.ink, fontSize = 26.sp, fontWeight = FontWeight.Bold)
         AccentRule()
-        Text("Any app can read ${scanner.findingsWithoutAsking.size} things about this device. " +
-            if (concerning.isEmpty()) "Nothing stands out." else "${concerning.size} are worth a look.",
+        Text("This scan found ${scanner.findings.size} clues about this device. " +
+            (if (concerning.isEmpty()) "Nothing stands out." else "${concerning.size} are worth a look.") + " Higher scores are better.",
             color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
         Text("How the score works", color = Brand.sand, fontSize = 13.sp, modifier = Modifier.clickableNoRipple { nav.push(Route.ScoreRoute) })
-        val seen = scanner.findingsWithoutAsking
+        val seen = scanner.findings
         SummaryRing(listOf(
             Slice("worth a look", seen.count { it.severity == Severity.HIGH }, Tone.ALERT.tint),
             Slice("worth knowing", seen.count { it.severity == Severity.MEDIUM }, Amber),
@@ -348,7 +348,7 @@ private fun fixesOf(scanner: Scanner) =
 private fun ScoreGuide(scanner: Scanner, nav: Nav) {
     val score = scanner.score
     val fixes = fixesOf(scanner)
-    val reach = minOf(100, score.value + fixes.sumOf { FootprintScore.points(it) })
+    val reach = FootprintScore.of(scanner.findings.filter { f -> fixes.none { it.id == f.id } }).value
     val meaning = when (score.level) {
         FootprintScore.Level.LIGHT -> "Higher is better, and you're in good shape: apps learn little that could single out this device."
         FootprintScore.Level.MODERATE -> "Higher is better. You're in the middle: a few clues together could single out this device."

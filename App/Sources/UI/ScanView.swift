@@ -130,7 +130,7 @@ private struct Results: View {
         // Summary: score on the left, the detective on the right.
         VStack(alignment: .leading, spacing: 18) {
             HStack(alignment: .center) {
-                ScoreOrb(value: score.value, size: 128)
+                ScoreOrb(value: score.value, size: 128, tint: score.level == .light ? Tone.fix.tint : (score.level == .moderate ? Brand.sand : Tone.alert.tint))
                 Spacer()
                 LivingMascot(mood: concerning.isEmpty ? .happy : .concerned, size: 132)
             }
@@ -140,7 +140,7 @@ private struct Results: View {
                     .font(.system(size: 30, weight: .bold))
                     .foregroundStyle(Brand.ink)
                 AccentRule().padding(.vertical, 4)
-                Text("Any app can read \(scanner.findingsWithoutAsking.count) things about this device. \(concerning.isEmpty ? "Nothing stands out." : "\(concerning.count) are worth a look.")")
+                Text("This scan found \(scanner.allFindings.count) clues about this device. \(concerning.isEmpty ? "Nothing stands out." : "\(concerning.count) are worth a look.") Higher scores are better.")
                     .font(.body)
                     .foregroundStyle(Brand.textMuted)
                     .lineSpacing(2)
@@ -149,7 +149,7 @@ private struct Results: View {
                     .foregroundStyle(Brand.textSubtle)
                     .padding(.top, 2)
             }
-            let seen = scanner.findingsWithoutAsking
+            let seen = scanner.allFindings
             SummaryRing(slices: [
                 .alert(seen.filter { $0.severity == .high }.count, "worth a look"),
                 .amber(seen.filter { $0.severity == .medium }.count, "worth knowing"),
@@ -164,7 +164,7 @@ private struct Results: View {
         .sheet(isPresented: $showingFormula) { FormulaSheet() }
         .sheet(isPresented: $fixing) { FixWizard(fixes: fixes) { Task { await scanner.scan() } } }
 
-        ScoreGuideCard(score: score, fixes: fixes) { fixing = true }
+        ScoreGuideCard(score: score, fixes: fixes, all: scanner.allFindings) { fixing = true }
 
 
         SectionDivider()

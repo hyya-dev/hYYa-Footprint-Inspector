@@ -24,8 +24,8 @@ struct ScoreHistoryTests {
     @Test func onlyAppleIsListedNotScored() {
         // boot-time: high + guided (fixable) = 10; volume-created: high + only Apple = not scored.
         let score = FootprintScore(findings: [finding("boot-time"), finding("volume-created")])
-        #expect(score.value == 90)
-        #expect(score.reachable == 10)
+        #expect(score.value == 84)
+        #expect(score.reachable == 16)
         #expect(score.fixableCount == 1)
         #expect(score.onlyAppleCount == 1)
     }
@@ -35,9 +35,10 @@ struct ScoreHistoryTests {
         #expect(score.value == 100)
     }
 
-    @Test func scoreNeverGoesBelowZero() {
-        let many = Array(repeating: finding("boot-time"), count: 30)
-        #expect(FootprintScore(findings: many).value == 0)
+    @Test func scoreFallsSteeplyButNeverHitsZero() {
+        #expect(FootprintScore.value(lost: 40) == 50)
+        #expect(FootprintScore(findings: Array(repeating: finding("boot-time"), count: 11)).value == 15)
+        #expect(FootprintScore(findings: Array(repeating: finding("boot-time"), count: 30)).value > 0)
     }
 
     /// The history file must never contain a reading's value.

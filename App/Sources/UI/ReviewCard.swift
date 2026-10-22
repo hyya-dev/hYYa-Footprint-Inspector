@@ -64,3 +64,45 @@ struct ReviewCard: View {
         }
     }
 }
+
+/// "More from hYYa": the hYYa website, laid out like the rating card above it.
+struct HyyaCard: View {
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
+        Button { Haptics.selection(); openURL(hYYaLinks.website) } label: {
+            HStack(alignment: .center, spacing: 14) {
+                Image("HyyaDev")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 84, height: 84)
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Color.white.opacity(0.14), lineWidth: 1))
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("hYYa \u{2728}").font(.headline).foregroundStyle(Brand.ink)
+                    Text("Companions you can trust: private apps that keep everything on your device.")
+                        .font(.footnote)
+                        .foregroundStyle(Brand.textMuted)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("Visit hyya.com")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(Brand.onCTA)
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 20)
+                        .background(Capsule().fill(Brand.cta))
+                        .padding(.top, 2)
+                }
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                shape.fill(Brand.surface)
+                    .overlay(shape.fill(LinearGradient(colors: [Brand.sand.opacity(0.10), .clear], startPoint: .topLeading, endPoint: .bottomTrailing)))
+            )
+            .overlay(shape.strokeBorder(LinearGradient(colors: [Brand.sand.opacity(0.8), Brand.sandDeep.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 0.75))
+        }
+        .buttonStyle(PressableCardStyle())
+    }
+}
