@@ -9,7 +9,7 @@ package com.hyya.footprintinspector.model
 enum class Severity(val label: String) { LOW("Low"), MEDIUM("Medium"), HIGH("Worth a look") }
 
 /** How an app gets at a signal. */
-enum class Group { PASSIVE, ADVANCED, PERMISSION }
+enum class Group { WATCH, PASSIVE, ADVANCED, PERMISSION }
 
 enum class Persistence(val label: String) {
     UNTIL_RESTART("Until you restart"),
@@ -54,6 +54,7 @@ data class Fix(
 }
 
 enum class Section(val title: String, val group: Group) {
+    WATCH("Who can watch you", Group.WATCH),
     IDENTITY("This device", Group.PASSIVE),
     SYSTEM("System", Group.PASSIVE),
     STORAGE("Storage and memory", Group.PASSIVE),

@@ -26,6 +26,7 @@ import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.PanTool
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
@@ -58,6 +59,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.hyya.footprintinspector.BuildConfig
 import com.hyya.footprintinspector.R
+import com.hyya.footprintinspector.remind.ScanReminder
 import com.hyya.footprintinspector.catalogue.CheckUp
 import com.hyya.footprintinspector.catalogue.Sensitive
 import com.hyya.footprintinspector.catalogue.SensitiveApp
@@ -104,6 +106,7 @@ fun SensitiveScreen() {
                 }
                 Text("Rarely, a different app answers to the same name.", color = Brand.textSubtle, fontSize = 12.sp)
             }
+            OthersCanCheckCard()
         }
         SectionTitle("Kinds of apps", "${chosen.size} on")
         Panel {
@@ -142,6 +145,51 @@ private fun FoundAppCard(c: SensitiveCategory, app: SensitiveApp) {
         Text(listOfNotNull(c.tells, c.risk).joinToString(" "), color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp)
         Eyebrow("What to do")
         StepList(c.steps + Sensitive.DELETE_STEP)
+    }
+}
+
+/**
+ * Shown after every check: apps people trust with their identity can ask the same question, and
+ * the browser is the way out. No organisation is named: we can't see which apps check.
+ */
+@Composable
+private fun OthersCanCheckCard() {
+    InfoCard("Who else can check this?") {
+        Text(Sensitive.OTHERS_LINE, color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp)
+        Text(Sensitive.WEBSITE_LINE, color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp)
+    }
+}
+
+/**
+ * Off, weekly or monthly. Choosing one asks for notification permission first; if declined it
+ * stays Off and says how to allow it.
+ */
+@Composable
+private fun ReminderRow() {
+    val context = LocalContext.current
+    var choice by remember { mutableStateOf(ScanReminder.current(context)) }
+    var open by remember { mutableStateOf(false) }
+    var pending by remember { mutableStateOf<ScanReminder?>(null) }
+    var declined by remember { mutableStateOf(false) }
+    val ask = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { granted ->
+        val want = pending ?: return@rememberLauncherForActivityResult
+        if (granted) { ScanReminder.apply(context, want); choice = want; declined = false } else declined = true
+        pending = null
+    }
+    Box {
+        RowCard(Icons.Outlined.NotificationsNone, "Re-scan reminder",
+            if (declined) "Notifications are off. Allow them for this app in Settings, then choose again." else "A reminder on this device to check again.",
+            onClick = { open = true }) { Text(choice.title, color = Brand.textSubtle) }
+        androidx.compose.material3.DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            ScanReminder.entries.forEach { r ->
+                androidx.compose.material3.DropdownMenuItem(text = { Text(r.title) }, onClick = {
+                    open = false
+                    if (r == ScanReminder.OFF || ScanReminder.canNotify(context)) { ScanReminder.apply(context, r); choice = r; declined = false }
+                    else { pending = r; ask.launch(android.Manifest.permission.POST_NOTIFICATIONS) }
+                })
+            }
+        }
     }
 }
 
@@ -221,6 +269,7 @@ fun SettingsScreen(scanner: Scanner) {
         SectionTitle("Your scans")
         Panel {
             RowCard(Icons.Outlined.History, "Scan history") { Text("$count", color = Brand.textSubtle) }
+            ReminderRow()
             RowCard(Icons.Outlined.Delete, "Clear history", tint = Brand.concern, showDivider = false,
                 onClick = { scanner.history.clear(); count = 0 })
         }

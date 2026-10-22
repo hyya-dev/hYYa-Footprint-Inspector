@@ -34,6 +34,11 @@ enum CheckUpGuide {
               why: "Apple's own review of who and what can reach your information. It covers people you share with and app permissions in one place.",
               path: "Settings › Privacy & Security › Safety Check",
               actions: ["Tap Manage Sharing & Access.", "Go through each screen and remove anything you don't recognise or no longer need."]),
+        .init(id: "device-management", title: "VPN & Device Management", symbol: "gearshape.2",
+              why: "A profile here can let an organisation manage this device, send your internet traffic through its servers, or read connections that are meant to be private.",
+              path: "Settings › General › VPN & Device Management",
+              actions: ["Tap each profile or management entry you don't recognise, then choose Remove.",
+                        "Keep ones your work or school set up with you, and VPNs you installed yourself."]),
         .init(id: "health", title: "Health", symbol: "heart.text.square",
               why: "Health data is the most personal information on your device: sleep, heart, cycles, medicines.",
               path: "Settings › Health › Data Access & Devices",
@@ -86,6 +91,12 @@ enum CheckUpGuide {
 
     /// The Mac's areas. Most System Settings pages open directly on a Mac.
     static let macSteps: [CheckUpStep] = [
+        .init(id: "mac-device-management", title: "Device Management", symbol: "gearshape.2",
+              why: "A profile here can let an organisation manage this Mac, send your internet traffic through its servers, or read connections that are meant to be private.",
+              path: "System Settings › General › Device Management",
+              actions: ["Select each profile you don't recognise and click the minus button to remove it.",
+                        "Keep ones your work or school set up with you."],
+              pane: "com.apple.Profiles-Settings.extension"),
         .init(id: "mac-location", title: "Location", symbol: "location",
               why: "Your location shows where you live, work and spend time.",
               path: "System Settings › Privacy & Security › Location Services",

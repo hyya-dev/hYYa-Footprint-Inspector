@@ -22,10 +22,14 @@ struct SensitiveView: View {
     #if os(macOS)
     static let heroLine = "Any app on a Mac can list every app you've installed, without asking you. Pick the kinds to check."
     static let limitLine = "On a Mac there's no limit: any app can see everything in your Applications folder. These are the apps that say the most about a person."
+    static let othersLine = "Every app on this Mac can see all your apps, including banking, government, employer and ID apps."
     #else
     static let heroLine = "Any app can ask whether certain apps are installed, one by one, without asking you. Pick the kinds to check."
     static let limitLine = "The system lets each app ask about 25 apps at most, so I picked the ones that say the most about a person."
+    static let othersLine = "Any app on this device can run this same check, including banking, government, employer and ID apps."
     #endif
+    /// No organisation is named: we can't see which apps check, so we don't claim any does.
+    static let websiteLine = "If you'd rather an organisation couldn't, use its website in your browser instead of its app. A website can't see which apps you have."
 
     private var foundCount: Int { results?.values.reduce(0) { $0 + $1.count } ?? 0 }
 
@@ -117,6 +121,7 @@ struct SensitiveView: View {
                     .font(.system(.caption))
                     .foregroundStyle(Brand.textSubtle)
             }
+            OthersCanCheckCard()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .transition(.scale(scale: 0.95).combined(with: .opacity))
@@ -160,6 +165,28 @@ private struct FoundAppCard: View {
                 .foregroundStyle(Brand.sand)
                 .padding(.top, 4)
             StepList(steps: category.steps + [SensitiveCatalogue.deleteStep])
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .brandCard(padding: 16)
+    }
+}
+
+/// Shown after every check: the same question can be asked by apps people trust with their
+/// identity, and the browser is the way out.
+private struct OthersCanCheckCard: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Who else can check this?", systemImage: "building.columns")
+                .font(.headline)
+                .foregroundStyle(Brand.ink)
+            Text(SensitiveView.othersLine)
+                .font(.subheadline)
+                .foregroundStyle(Brand.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(SensitiveView.websiteLine)
+                .font(.subheadline)
+                .foregroundStyle(Brand.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .brandCard(padding: 16)

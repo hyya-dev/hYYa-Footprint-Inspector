@@ -44,7 +44,7 @@ object Readers {
     val all: List<Reader> = listOf(
         ::identity, ::system, ::storage, ::display, ::audio, ::language, ::accessibility, ::sensors,
         ::network, ::security, ::apps, ::reinstall,
-    ).map { f -> Reader { f(it) } } + PermissionReaders.all
+    ).map { f -> Reader { f(it) } } + Reader { WatchReaders.read(it) } + PermissionReaders.all
 }
 
 /** Store screenshots must never show a real device: `-e sampleData true` swaps personal values. */

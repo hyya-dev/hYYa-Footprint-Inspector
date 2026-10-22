@@ -32,6 +32,37 @@ struct CatalogueTests {
         #expect(SensitiveCatalogue.allSchemes.count == Set(SensitiveCatalogue.allSchemes).count)
     }
 
+    /// The "who else can check" card names no organisation and makes no detection claim, and the
+    /// Check-up covers device management (docs/WATCHERS-RESEARCH.md).
+    @Test func othersCanCheckCopyAndDeviceManagementStep() {
+        let lines = [SensitiveView.othersLine, SensitiveView.websiteLine]
+        let claims = /(?i)\b(spy\w*|malware|virus|threat|detect\w*)\b/
+        for line in lines { #expect(line.firstMatch(of: claims) == nil, "Claim in: \(line)") }
+        #expect(CheckUpGuide.iosSteps.contains { $0.id == "device-management" })
+        #expect(CheckUpGuide.macSteps.contains { $0.id == "mac-device-management" && $0.pane != nil })
+    }
+
+    /// The first reminder comes days after turning it on, never the same day.
+    @Test func scanReminderFirstFiresLater() throws {
+        let cal = Calendar(identifier: .gregorian)
+        let now = try #require(cal.date(from: DateComponents(year: 2026, month: 10, day: 22, hour: 9)))
+        #expect(ScanReminder.off.trigger(from: now, calendar: cal) == nil)
+        let weekly = try #require(ScanReminder.weekly.trigger(from: now, calendar: cal)?.dateComponents)
+        let nextWeekly = try #require(cal.nextDate(after: now, matching: weekly, matchingPolicy: .nextTime))
+        #expect(nextWeekly.timeIntervalSince(now) > 5 * 86_400)
+        let monthly = try #require(ScanReminder.monthly.trigger(from: now, calendar: cal)?.dateComponents)
+        let nextMonthly = try #require(cal.nextDate(after: now, matching: monthly, matchingPolicy: .nextTime))
+        #expect(nextMonthly.timeIntervalSince(now) > 25 * 86_400)
+        #expect(!ScanReminder.notificationBody.isEmpty)
+    }
+
+    /// The scoreboard reads the system's name and version; a self-referencing getter once
+    /// recursed until the stack ran out (found 2026-10-22, never shipped).
+    @MainActor @Test func systemNameAndVersionResolve() {
+        #expect(!System.name.isEmpty)
+        #expect(System.version.split(separator: ".").count >= 2)
+    }
+
     @Test func noCustomURLSchemeOfOurOwn() {
         // docs/HYYA-APPS-DETECTABILITY.md: other apps must not be able to detect this one.
         #expect(Bundle.main.object(forInfoDictionaryKey: "CFBundleURLTypes") == nil)

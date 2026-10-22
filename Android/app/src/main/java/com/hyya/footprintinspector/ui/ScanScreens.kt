@@ -18,6 +18,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Accessibility
 import androidx.compose.material.icons.outlined.Apps
+import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Contacts
@@ -56,6 +57,7 @@ import com.hyya.footprintinspector.scan.PermissionKind
 import com.hyya.footprintinspector.scan.Scanner
 
 fun Section.icon(): ImageVector = when (this) {
+    Section.WATCH -> Icons.Outlined.PrivacyTip
     Section.IDENTITY -> Icons.Outlined.Smartphone
     Section.SYSTEM -> Icons.Outlined.Refresh
     Section.STORAGE -> Icons.Outlined.Storage
@@ -142,8 +144,16 @@ private fun Results(scanner: Scanner, nav: Nav) {
             SectionTitle("Worth a look", concerning.size.toString())
             Panel { concerning.forEachIndexed { i, f -> ClueRow(f, nav, i < concerning.lastIndex) } }
         }
-        for ((group, title) in listOf(Group.PASSIVE to "Seen without asking", Group.ADVANCED to "Clever tricks", Group.PERMISSION to "Seen once you allow it")) {
+        for ((group, title) in listOf(Group.WATCH to "Who can watch you", Group.PASSIVE to "Seen without asking", Group.ADVANCED to "Clever tricks", Group.PERMISSION to "Seen once you allow it")) {
             val sections = Section.entries.filter { it.group == group }
+            if (group == Group.WATCH) {
+                // The headline check: its findings sit right on the Scan screen, one tap from the fix.
+                val fs = sections.flatMap { scanner.findings(it) }
+                if (fs.isEmpty()) continue
+                SectionTitle(title, fs.count { it.severity != Severity.LOW }.takeIf { it > 0 }?.toString())
+                Panel { fs.forEachIndexed { i, f -> FindingRow(f, nav, i < fs.lastIndex) } }
+                continue
+            }
             SectionTitle(title)
             Panel {
                 sections.forEachIndexed { i, s ->
@@ -179,7 +189,7 @@ fun SectionScreen(scanner: Scanner, section: Section, nav: Nav) {
     val findings = scanner.findings(section)
     Page {
         BackBar(section.title, nav)
-        HeroCard(when (section.group) { Group.PERMISSION -> "Needs your permission"; Group.ADVANCED -> "Clever trick"; else -> "Seen without asking" },
+        HeroCard(when (section.group) { Group.PERMISSION -> "Needs your permission"; Group.ADVANCED -> "Clever trick"; Group.WATCH -> "Who can watch you"; else -> "Seen without asking" },
             section.title,
             when {
                 kind != null && !kind.granted(context) -> "Here's what any app you allow gets to see."

@@ -26,7 +26,7 @@ android {
         targetSdk = 36
         // versionName is the marketing version (owner: 1.0.0 on every store); versionCode is the
         // build number and may be bumped freely, but Play refuses a code it already holds.
-        versionCode = 1
+        versionCode = 2
         versionName = "1.0.0"
     }
 
@@ -65,5 +65,6 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons)
+    implementation(libs.androidx.work.runtime.ktx)
     testImplementation(libs.junit)
 }

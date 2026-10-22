@@ -26,6 +26,8 @@ class MainActivity : ComponentActivity() {
         intent.getStringExtra("sensitiveCategories")?.let { ids ->
             getSharedPreferences("app", MODE_PRIVATE).edit().putStringSet("sensitiveCategories", ids.split(",").toSet()).apply()
         }
+        // Shows the re-scan reminder now, to check it without waiting a week.
+        if (intent.getBooleanExtra("testReminder", false)) com.hyya.footprintinspector.remind.ScanReminder.post(this)
         setContent { FootprintTheme { App(startTab, autoScan, intent.getStringExtra("openFinding")) } }
     }
 }
