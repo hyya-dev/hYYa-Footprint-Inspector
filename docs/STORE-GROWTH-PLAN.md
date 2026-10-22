@@ -81,7 +81,7 @@ on-device-only design.
 
 ## 6. App Accessibility and App Privacy
 - **App Privacy:** "Data Not Collected". The privacy policy is with hyya.com
-  (`docs/WEBSITE-PRIVACY-POLICY-PROMPT.md`).
+  (brief delivered; in git history).
 - **App Accessibility:** declare what's true once tested: VoiceOver, larger text, reduced motion.
   The mascot animation already respects Reduce Motion.
 

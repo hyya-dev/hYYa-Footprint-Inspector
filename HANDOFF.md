@@ -87,7 +87,7 @@ Done in App Store Connect:
 - **App:** `MARKETING_VERSION` 1.0.0 and `ITSAppUsesNonExemptEncryption` NO.
 
 Still blocking submission:
-1. **Privacy policy page** on hyya.com (brief: `docs/WEBSITE-PRIVACY-POLICY-PROMPT.md`). The URL
+1. **Privacy policy page** on hyya.com (brief delivered; in git history). The URL
    is set but 404s.
 2. **GitHub repo is private.** The listing, Settings and policy all say "open source", so it must
    be public before launch. Owner decision.
