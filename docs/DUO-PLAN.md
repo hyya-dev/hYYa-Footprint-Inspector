@@ -41,6 +41,34 @@ interfaces on this Mac (every API named below was checked there), and hands-on p
   the Duo, so `FlowCheckUITests` drives it. **The owner turns, folds and opens the device when
   asked**, at each step below.
 
+## Lessons from hYYa Encrypted Notes (2026-10-24), and where they hit us
+
+- **The Xcode version is the trigger.** Builds from Xcode 27.1 (iOS 27.1 SDK) get the vertical side
+  bars on the Duo. This Mac has only 27.1, so our live build 13 already has them; the owner's
+  screenshots show it.
+- **Standard parts do most of the work:** size classes, system toolbars and sheets, safe areas.
+  Never use the device model, screen size or orientation to choose a layout.
+- **Every bar button needs an icon.** A text-only button can't stand in the vertical bar; it stays
+  across the top and can cover the title. We have two:
+  - "Done" in How the score works (`ScanView.swift`)
+  - "Close" in Fix them with me (`FixWizard.swift`)
+
+  Both become a `Label` with a symbol (xmark / checkmark).
+- **Test Close by tapping it,** folded and open, upright and sideways. Our flow test taps Close
+  but never checks that the sheet actually went away, and the store-screenshot test swipes sheets
+  away instead.
+  - New check: after the tap, something only that sheet shows (for example "Fix 1 of") must be gone.
+  - Break the button once on purpose to prove the test can fail.
+- **XCTest only photographs the outer (folded) screen;** it's black while the device is open. Open
+  poses are checked in Device Hub with the owner turning or folding it, then on the owner's Duo
+  through TestFlight.
+- **Some Duo failures are the test harness, not the app.** The synthetic Home button and arrow keys
+  don't reach the 27.1 Duo, and offsets tuned for one iPhone break at 466 points wide. Sort every
+  failure into app or harness before fixing.
+- **Store:** Duo screenshots, for both the outer and inner screens, become required from April 2027.
+  The App Store Connect API didn't offer that screenshot type as of 2026-10-06, so plan a Duo slide
+  set and check the API before then.
+
 ## What we'll do
 
 ### Phase 1: get the basics right (every pose)
@@ -57,7 +85,8 @@ interfaces on this Mac (every API named below was checked there), and hands-on p
    - Fix the Fix-wizard button that sits off the bottom of the folded screen.
    - Fix the Check-up Back button that lands by the clock.
 3. **Sheets.** Fix them with me, How the score works and Share each get one standard Close in the
-   toolbar, so the system places it correctly in every pose.
+   toolbar, **with an icon**, so the system places it correctly in every pose. Each one is tested by
+   tapping it, then checking that something only that sheet shows has disappeared.
    - This covers the owner's "x doesn't work" finding, seen in other apps; ours must never do it.
 4. **No faded cards.** Drop the 55% fade at the screen edges (`scrollIn3D`), keep the gentle tilt.
 5. **Half-width check.** Every page must work at half the inner display, for when two apps share it.

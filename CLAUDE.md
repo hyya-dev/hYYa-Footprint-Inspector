@@ -52,7 +52,9 @@ look there first. They are read-only from here.
   project's Simulator `fi-iPhone-Duo` (folded, open, portrait and landscape): run
   `FlowCheckUITests` there, because taps from the Simulator panel don't reach the Duo. On the
   Duo the system shows the pages as an unlabelled icon rail on the right and the clock and
-  status icons down the right edge, so keep buttons clear of both.
+  status icons down the right edge, so keep buttons clear of both. Give every bar button an icon
+  (text-only ones can't go vertical and cover the title). Test every Close by tapping it, then
+  check that something only that screen shows is gone. Lessons: `docs/DUO-PLAN.md`.
 - **🚨 Never submit for review without the owner's explicit consent** (Apple or Google; a
   version, a build, a custom product page or a PPO test). Prepare everything up to the submit
   button, then ask, naming exactly what would be submitted.

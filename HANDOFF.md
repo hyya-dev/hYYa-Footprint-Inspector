@@ -60,7 +60,7 @@ test first. 🚨 Nothing is submitted, iOS, macOS or Play, without the owner's c
    - Unit tests on iOS 27 and 26.0, Mac and Android.
    - FlowCheckUITests on `fi-iPhone-Duo` and a regular iPhone.
    - My own screenshot review of every flow.
-8. **Store**: refresh the slides that show the first page or findings, and the copy that
+8. **Store** (Duo screenshots, outer and inner screens, are required from April 2027): refresh the slides that show the first page or findings, and the copy that
    mentions the score, for App Store, Mac and Play. Translate with Gemini after the owner approves
    the English.
 9. **Ship**:
