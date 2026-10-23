@@ -46,7 +46,8 @@ test first. 🚨 Nothing is submitted, iOS, macOS or Play, without the owner's c
    - Leaked passwords: Apple Passwords' warning about passwords found in known leaks (on Android,
      Google Password Checkup). Nothing is sent from our app.
    - Not doing: antivirus scanning or Moonlock (not possible, and against our offline design).
-5. **Duo layout** (my checks):
+5. **Duo layout** (my checks; full plan in `docs/DUO-PLAN.md`: labelled sidebar when open, list and
+   detail side by side, laptop pose, buzz the owner for every rotation or fold):
    - Pages show by name, not just an icon, in the Duo's side rail.
    - In "Fix them with me", the main button sits fully on screen when folded (FlowCheckUITests
      currently fails here).
