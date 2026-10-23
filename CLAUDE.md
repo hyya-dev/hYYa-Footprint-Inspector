@@ -50,8 +50,11 @@ look there first. They are read-only from here.
 - **🚨 Never submit for review without the owner's explicit consent** (Apple or Google; a
   version, a build, a custom product page or a PPO test). Prepare everything up to the submit
   button, then ask, naming exactly what would be submitted.
-- **Clean up after every submission** (owner, 2026-10-22): each time a version goes to review
-  (Apple or Google), finish by removing local clutter: `build/`, `Android/app/build`,
+- **Clean up after every submission** (owner, 2026-10-22; widened 2026-10-23): once every owed
+  build, listing, slide set and translation has gone to review (Apple or Google), finish by
+  **expiring the obsolete builds in App Store Connect** (every iOS and macOS build older than the
+  one in review or on sale; never that one; `scripts/asc-expire-old-builds.mjs --apply`) and
+  removing local clutter: `build/`, `Android/app/build`,
   `Android/build`, `Android/.gradle`, this project's DerivedData, `.DS_Store` files, scratch
   captures, and the app's test copies on shared Simulators and the borrowed emulator (also clear
   status-bar overrides and emulator demo mode). Keep `.env`, `Android/local.properties`, the
