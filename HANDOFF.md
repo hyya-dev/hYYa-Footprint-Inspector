@@ -1,18 +1,22 @@
 # HANDOFF: where the work is
 
-## Now (2026-10-22): v1.0.0 build 13 is ready for the owner to reorder slides and submit
+## Now (2026-10-23): iOS v1.0.0 is on the App Store; macOS is waiting for review
 
 | Store | What | State |
 | --- | --- | --- |
-| App Store, iOS/iPadOS | v1.0.0 (build 5) | Waiting for review. Resubmitted by the owner after the CallKit/China and price-in-screenshots rejection was fixed. |
-| App Store, macOS | v1.0.0 (build 6, keychain fix) | Waiting for review. Resubmitted by the owner. |
-| Google Play, closed testing (alpha) | 1.0.0 (versionCode 1) | **Live** since 2026-10-21 ("Your update is live"). |
-| Google Play, listing | 86 localised listings and the English gallery | **Live** since 2026-10-21 (approved the same day). |
+| App Store, iOS/iPadOS | v1.0.0 (build 13) | **On sale** since 2026-10-23 08:31 UTC (approved, released automatically). https://apps.apple.com/app/id6824033636 |
+| App Store, macOS | v1.0.0 (build 13) | Waiting for review (submitted by the owner 2026-10-22). |
+| Google Play, closed testing (alpha) | 1.0.0 (versionCode 7) | **Live** to closed testers since 2026-10-22. Production: apply after 14 days of 12+ testers (around 2026-11-04). |
+| Google Play, listing | 79 localised listings, 7 slides in the iOS order | **Live** since 2026-10-22. |
+
+- Next: hyya.com can switch the iOS status from "coming soon" to the App Store link; Mac stays
+  "coming soon" until its verdict.
+- ASC builds 1–12 are expired; build 13 is live on both platforms.
 
 🚨 Nothing goes to review (Apple or Google) without the owner's explicit consent. Releases are
 always set to release automatically after approval.
 
-### 2026-10-22: build 13 prepared, not submitted
+### 2026-10-22: build 13 prepared and submitted
 - iOS and macOS v1.0.0 were pulled from review by the owner for the new features (Tracker, Fix them
   with me, rings, five-step flow, plain-language findings). Build 13 is attached to both, with the new
   English copy, 49 translations, reviewer notes and slides (7 iPhone, 7 iPad, 6 Mac) uploaded.
