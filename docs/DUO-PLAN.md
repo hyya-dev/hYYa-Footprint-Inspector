@@ -68,6 +68,14 @@ interfaces on this Mac (every API named below was checked there), and hands-on p
 - **Store:** Duo screenshots, for both the outer and inner screens, become required from April 2027.
   The App Store Connect API didn't offer that screenshot type as of 2026-10-06, so plan a Duo slide
   set and check the API before then.
+- **Laptop pose comes free if the keyboard can push the screen** (lesson 11). Checked 2026-10-24:
+  our app has no text input at all and no bottom bar on iPhone. Its only safe-area opt-outs are
+  the black background and the fade at the top. So nothing here can block the keyboard.
+  - One small follow-on: that top fade (`Components.swift`, 64 points) was made for a clock at the
+    top. On the folded Duo the clock is on the side, so the fade only dims our content there.
+    Apply it only when there is a top safe area.
+  - If text input is ever added: no `.ignoresSafeArea(.keyboard)`, keep any bar on the keyboard
+    itself, and test typing in laptop pose in Device Hub.
 
 ## What we'll do
 
