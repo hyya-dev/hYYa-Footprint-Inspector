@@ -37,9 +37,8 @@ interfaces on this Mac (every API named below was checked there), and hands-on p
     the stable bottom half, with the same controls as every other pose.
 - **Hinge state.** `onHingeChange` reports `closed`, `partiallyOpen` and `fullyOpen`. Apple says to
   use it only for small refinements, never to drive the main layout.
-- **Testing.** Device Hub in Xcode previews every pose. Taps from the Simulator panel don't reach
-  the Duo, so `FlowCheckUITests` drives it. **The owner turns, folds and opens the device when
-  asked**, at each step below.
+- **Testing.** Mostly automated, on the folded Simulator. Device Hub needs the owner at the controls,
+  so it's used **once**, at the end, with one written list (see "Check before TestFlight").
 
 ## Lessons from hYYa Encrypted Notes (2026-10-24), and where they hit us
 
@@ -134,8 +133,35 @@ interfaces on this Mac (every API named below was checked there), and hands-on p
 - **Android foldables:** get the same idea, list and detail side by side on wide screens (Compose
   adaptive list-detail), checked on a foldable emulator profile.
 
-## Check before TestFlight (every phase)
-- `FlowCheckUITests` passes on `fi-iPhone-Duo`, on a regular iPhone and on the iOS 26.0 Simulator.
-- In Device Hub: folded, open portrait, open landscape, book, laptop and half-width Split View. The
-  owner turns or folds the device when asked, and I review a screenshot of every page.
-- Then TestFlight, and the owner tests on their Duo before any submission.
+## Check before TestFlight (how, in this order)
+
+Every result is reported with how it was checked: **code reading**, **Simulator (folded)**,
+**Device Hub** or **owner's Duo**. A Simulator pass is never described as "works on Duo".
+
+1. **Code reading** (finds most Duo problems). Look for:
+   - layout keyed to device model, orientation or screen size instead of size class
+   - bar items without an icon
+   - keyboard safe-area opt-outs or fixed heights
+   - custom close buttons in the top-trailing corner, where the Duo's status column sits
+
+   Every API name is checked against the 27.1 SDK interfaces, never taken from blogs.
+2. **Simulator, folded and headless** (`fi-iPhone-Duo`; the Simulator app never needs to open).
+   - Run `FlowCheckUITests` and the close-button tests:
+     `xcodebuild … -destination "id=<duo>" -collect-test-diagnostics never test`.
+   - Sideways in the same tests with `XCUIDevice.shared.orientation = .landscapeLeft`. Landscape
+     captures come out rotated.
+   - Screens: `xcrun simctl io <udid> screenshot --display=1` is the outer screen (1398×2034);
+     `--display=3` is the inner one (2007×2853). The one showing black isn't in use.
+   - Sort every failure into app defect or harness limit. Known harness limits: the synthetic Home
+     press and arrow keys don't reach the Duo, and offsets tuned to one iPhone break at 466 points.
+   - Also run on a regular iPhone and on the iOS 26.0 Simulator.
+3. **Close buttons, by tapping.** Each custom close or dismiss is tapped, upright and sideways. The
+   test checks that something only that screen has is gone, and the button is broken once on
+   purpose to prove the test fails.
+4. **Device Hub, once.** Code can't fold or open the Simulator. One request to the owner, with the
+   full written list of poses and screens, all captured in that one sitting. Never pose by pose.
+   - Poses: open portrait, open landscape, book, laptop, and half-width Split View.
+   - Screens: each of the five pages, a finding, Fix them with me, a Check-up step, and How the
+     score works.
+5. **The owner's Duo through TestFlight.** This is the final check, and the only one for book, tent
+   and laptop feel. Log the result. No submission before it.
