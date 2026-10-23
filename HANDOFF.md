@@ -16,6 +16,57 @@
   - 🔔 Tell them again when Android goes live in production on Google Play.
 - ASC builds 1–12 are expired; build 13 is live on both platforms.
 
+## Next: v1.0.1 to-do (agreed with the owner 2026-10-23)
+
+⏸ **Don't start until Apple approves macOS 1.0.0.** Then the same 1.0.1 ships on iOS, macOS and
+Android. Android 1.0.1 goes to closed testers. Each build goes to TestFlight for the owner's Duo
+test first. 🚨 Nothing is submitted, iOS, macOS or Play, without the owner's consent.
+
+**Where the issues came from:**
+- **Friends and family**, on ordinary non-folding iPhones: they stay on the first page, the
+  words are too technical, the restart line is unclear, two scores confuse them, and three
+  questions (below).
+- **My own checks on the owner's Duo**: the owner's Duo screenshots and the `fi-iPhone-Duo`
+  Simulator.
+
+1. **First page shows the whole check** (friends): one overall privacy score from all four checks
+   (Footprint, Sensitive apps, Tracker, Check-up). The four steps sit there as cards that tick off
+   as each is done, leading people on. Only one score at the top. The clue ring moves down into
+   the clue list.
+2. **Plain words** (friends): every finding becomes a one-line headline plus one short sentence.
+   This covers the iOS catalogue (about 48), Mac (32) and Android. For example: "Apps can tell
+   when you last restarted" / "That exact moment is rare, so apps can use it to recognise you."
+   Also apply the unified severity words (already committed, 25ca9a5).
+3. **Restart, said clearly** (friends): "Restart once a week. It's worth it: apps can no longer
+   link you by your last restart time, and it also clears some kinds of spyware that only live
+   in memory." Apply to `Fix.restart` and the boot-time and copy-counter findings.
+4. **New Check-up steps** (friends' questions, answered as guided steps, never as antivirus):
+   - Spyware: Lockdown Mode, keep the system updated, restart weekly, Apple threat
+     notifications, device-management profiles you don't recognise.
+   - Leaked passwords: Apple Passwords' warning about passwords found in known leaks (on Android,
+     Google Password Checkup). Nothing is sent from our app.
+   - Not doing: antivirus scanning or Moonlock (not possible, and against our offline design).
+5. **Duo layout** (my checks):
+   - Pages show by name, not just an icon, in the Duo's side rail.
+   - In "Fix them with me", the main button sits fully on screen when folded (FlowCheckUITests
+     currently fails here).
+   - The Back button on Check-up steps stays clear of the clock and status icons.
+   - Cards no longer fade to 55% near the screen edge (`scrollIn3D` opacity).
+   - Check folded, open, portrait and landscape.
+6. **Port to Android and Mac**: the same first page, words and Check-up steps (Android uses
+   Settings intents; Mac uses System Settings panes).
+7. **Verify**:
+   - Unit tests on iOS 27 and 26.0, Mac and Android.
+   - FlowCheckUITests on `fi-iPhone-Duo` and a regular iPhone.
+   - My own screenshot review of every flow.
+8. **Store**: refresh the slides that show the first page or findings, and the copy that
+   mentions the score, for App Store, Mac and Play. Translate with Gemini after the owner approves
+   the English.
+9. **Ship**:
+   - TestFlight (iOS and Mac). The owner tests on the Duo.
+   - Prepare the 1.0.1 versions and the Play closed-test edit, then ask before submitting.
+10. **After submitting**: expire old builds, clean up local clutter, and tell hyya.com what's new.
+
 🚨 Nothing goes to review (Apple or Google) without the owner's explicit consent. Releases are
 always set to release automatically after approval.
 
