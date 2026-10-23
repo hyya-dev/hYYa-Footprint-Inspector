@@ -47,6 +47,12 @@ look there first. They are read-only from here.
 - **Installed-app checks:** cover the most sensitive apps, grouped by category. The user picks
   which categories to scan. See `docs/SENSITIVE-APP-CATALOGUE.md`.
 - **Subtitle / ASO:** decided at the store-listing stage, not before.
+- **Every build goes to TestFlight first, for the owner to test on their iPhone Duo** (owner,
+  2026-10-23), before submission is even proposed. Before that, verify it myself on this
+  project's Simulator `fi-iPhone-Duo` (folded, open, portrait and landscape): run
+  `FlowCheckUITests` there, because taps from the Simulator panel don't reach the Duo. On the
+  Duo the system shows the pages as an unlabelled icon rail on the right and the clock and
+  status icons down the right edge, so keep buttons clear of both.
 - **🚨 Never submit for review without the owner's explicit consent** (Apple or Google; a
   version, a build, a custom product page or a PPO test). Prepare everything up to the submit
   button, then ask, naming exactly what would be submitted.
@@ -58,7 +64,7 @@ look there first. They are read-only from here.
   `Android/build`, `Android/.gradle`, this project's DerivedData, `.DS_Store` files, scratch
   captures, and the app's test copies on shared Simulators and the borrowed emulator (also clear
   status-bar overrides and emulator demo mode). Keep `.env`, `Android/local.properties`, the
-  generated `.xcodeproj` and the `fi-ios26-iPhone17Pro` Simulator. Report the before/after size.
+  generated `.xcodeproj` and the `fi-ios26-iPhone17Pro` and `fi-iPhone-Duo` Simulators. Report the before/after size.
 - **Store growth:** use App Store Connect's Custom Product Pages, Asset Library and Product Page
   Optimization wherever possible. Plan: `docs/STORE-GROWTH-PLAN.md`.
 - **App Store record:** Apple ID 6824033636, SKU `hyya-footprint-inspector`, created
