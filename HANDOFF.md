@@ -9,8 +9,11 @@
 | Google Play, closed testing (alpha) | 1.0.0 (versionCode 7) | **Live** to closed testers since 2026-10-22. Production: apply after 14 days of 12+ testers (around 2026-11-04). |
 | Google Play, listing | 79 localised listings, 7 slides in the iOS order | **Live** since 2026-10-22. |
 
-- Next: hyya.com can switch the iOS status from "coming soon" to the App Store link; Mac stays
-  "coming soon" until its verdict.
+- hyya.com: switched to the live App Store link on 2026-10-23. Changed: the product page (badge,
+  Smart App Banner, structured data), the home card and FAQ, llms.txt, llms-full.txt and the
+  sitemap. Mac and Android still say "coming soon".
+  - 🔔 Tell the hyya.com workspace when Apple approves the Mac version.
+  - 🔔 Tell them again when Android goes live in production on Google Play.
 - ASC builds 1–12 are expired; build 13 is live on both platforms.
 
 🚨 Nothing goes to review (Apple or Google) without the owner's explicit consent. Releases are
