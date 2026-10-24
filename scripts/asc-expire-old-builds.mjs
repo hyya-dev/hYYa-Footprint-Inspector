@@ -43,10 +43,10 @@ for (const platform of ["IOS", "MAC_OS"]) {
   const keepIds = new Set(attached.map((v) => v.build));
   const kept = builds.filter((b) => keepIds.has(b.id));
   if (!kept.length) { console.log(`${platform}: no build in review or on sale; nothing expired`); continue; }
-  // Superseded builds go too: anything not attached to a version and older than the newest attached.
-  const floor = Math.max(...kept.map((b) => Number(b.attributes.version)));
-  console.log(`${platform}: keeping build ${kept.map((b) => b.attributes.version).join(", ")} (${attached.map((v) => v.state).join(", ")}) and anything newer`);
-  const old = builds.filter((b) => !b.attributes.expired && !keepIds.has(b.id) && Number(b.attributes.version) < floor)
+  console.log(`${platform}: keeping build ${kept.map((b) => b.attributes.version).join(", ")} (${attached.map((v) => v.state).join(", ")}) and the newest build`);
+  // Above that line only the newest build stays in TestFlight; older ones there are superseded.
+  const newest = Math.max(...builds.map((b) => Number(b.attributes.version)));
+  const old = builds.filter((b) => !b.attributes.expired && !keepIds.has(b.id) && Number(b.attributes.version) < newest)
     .sort((a, b) => Number(a.attributes.version) - Number(b.attributes.version));
   for (const b of old) {
     if (apply) await api(`/v1/builds/${b.id}`, "PATCH", { data: { type: "builds", id: b.id, attributes: { expired: true } } });
