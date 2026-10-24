@@ -1,7 +1,7 @@
 hYYa Footprint Inspector for Mac is a free privacy-education app. It reads the same information any sandboxed Mac App Store app can read and shows it ONLY to the person using the Mac, so they can see their own "fingerprint" and reduce it. Nothing is collected, stored off the device or transmitted: there is no account, no server, no analytics, no third-party SDK, and the app has no network entitlement. The App Privacy label is "Data Not Collected".
 
 No login is required. To review:
-1. Click "Start scan". Results appear in a few seconds.
+1. Click "Start with check 1". Results appear in a few seconds.
 2. Click any clue to see what it reveals, why the system allows it, and how to fix it. Where a fix exists, "Open in System Settings" opens the matching System Settings page.
 3. Each permission category ("Seen once you allow it") asks for that permission only when the user clicks "Show me", and shows counts and summaries only.
 4. "Sensitive apps": the user picks categories, then clicks Check. Results are hidden until clicked, cleared when the app goes to the background, and never stored.
@@ -16,7 +16,9 @@ About entitlements: camera (to list camera names only; no capture), Bluetooth, l
 
 The app has no CallKit and no pricing references in its screenshots.
 
-New in this build:
+Also in the app:
 - Tracker: lists the System Settings panes that show which apps can record the screen, use accessibility, monitor input or read all files, each opened with an x-apple.systempreferences link. The app reads none of these itself.
-- Re-scan reminder (Settings): optional, off by default. It schedules a local notification on the Mac (weekly or monthly) after asking the user for permission. There is no server and no push notification.
-- "Fix them with me": steps through the user's fixable findings one at a time and opens System Settings. The app never changes any setting itself.
+- Re-scan reminder: optional local notification (weekly or monthly), asked for only when chosen. No server, no push.
+- "Fix them with me": steps through fixable findings and opens System Settings; the app never changes a setting itself.
+
+New in 1.0.1: the first screen shows one privacy score for the checks done and links to each check; plainer wording for every finding; Check-up adds guidance steps (keep macOS updated, check the Passwords app for leaked passwords, Lockdown Mode for people at risk). These are instructions only: the app detects no malware and reads no passwords.

@@ -51,16 +51,17 @@ let same = 0;
 for (const l of locs) {
   const r = repo[l.attributes.locale]; if (!r) continue;
   const a = l.attributes;
-  const fields = ["description", "keywords", "promotionalText", "whatsNew"].filter((k) => (a[k] ?? "") !== (r[k] ?? ""));
+  // What's New is iOS only (it's the iPhone Duo line, and a platform's first version can't have one).
+  const fields = ["description", "keywords", "promotionalText", ...(PLATFORM === "IOS" ? ["whatsNew"] : [])].filter((k) => (a[k] ?? "") !== (r[k] ?? ""));
   if (fields.length) ok(false, `${l.attributes.locale}: differs from repo in ${fields.join(", ")}`); else same++;
-  if (!a.whatsNew?.includes("iPhone Duo")) ok(false, `${l.attributes.locale}: What's New missing`);
+  if (PLATFORM === "IOS" && !a.whatsNew?.includes("iPhone Duo")) ok(false, `${l.attributes.locale}: What's New missing`);
 }
 ok(same === Object.keys(repo).length, `${same} of ${Object.keys(repo).length} languages match the repo exactly (description, keywords, promo, What's New)`);
 
 // Screenshots (the primary language's sets; the others fall back to them).
 const enLoc = locs.find((l) => l.attributes.locale === "en-US");
 const sets = (await api(`/v1/appStoreVersionLocalizations/${enLoc.id}/appScreenshotSets?limit=50`)).data;
-for (const want of ["APP_IPHONE_67", "APP_IPAD_PRO_3GEN_129", "APP_IPHONE_DUO"]) {
+for (const want of PLATFORM === "MAC_OS" ? ["APP_DESKTOP"] : ["APP_IPHONE_67", "APP_IPAD_PRO_3GEN_129", "APP_IPHONE_DUO"]) {
   const set = sets.find((s) => s.attributes.screenshotDisplayType === want);
   const shots = set ? (await api(`/v1/appScreenshotSets/${set.id}/appScreenshots?limit=50`)).data : [];
   const done = shots.filter((s) => s.attributes.assetDeliveryState?.state === "COMPLETE").length;

@@ -69,7 +69,8 @@ for (const locale of files) {
     // Creating an app-info localisation also creates the version's, so look it up again.
     if (!verLocs[locale]) Object.assign(verLocs, Object.fromEntries((await api(`/v1/appStoreVersions/${version.id}/appStoreVersionLocalizations?limit=200`)).data.map((v) => [v.attributes.locale, v.id])));
     const verAttrs = { description: l.description, keywords: l.keywords, promotionalText: l.promotionalText,
-      supportUrl: en.supportUrl, marketingUrl: en.marketingUrl, ...(l.whatsNew ? { whatsNew: l.whatsNew } : {}) };
+      supportUrl: en.supportUrl, marketingUrl: en.marketingUrl, // What's New is the iPhone Duo line, and a platform's first version can't have one: iOS only.
+      ...(l.whatsNew && PLATFORM === "IOS" ? { whatsNew: l.whatsNew } : {}) };
     if (verLocs[locale]) {
       await api(`/v1/appStoreVersionLocalizations/${verLocs[locale]}`, "PATCH", { data: { type: "appStoreVersionLocalizations", id: verLocs[locale], attributes: verAttrs } });
     } else {

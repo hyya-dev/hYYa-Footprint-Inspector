@@ -82,8 +82,8 @@ const verLocs = await api(`/v1/appStoreVersions/${version.id}/appStoreVersionLoc
 const verLoc = verLocs.data.find((l) => l.attributes.locale === "en-US");
 await api(`/v1/appStoreVersionLocalizations/${verLoc.id}`, "PATCH", { data: { type: "appStoreVersionLocalizations", id: verLoc.id, attributes: {
   description: listing.description, keywords: listing.keywords, promotionalText: listing.promotionalText,
-  supportUrl: listing.supportUrl, marketingUrl: listing.marketingUrl, ...(listing.whatsNew ? { whatsNew: listing.whatsNew } : {}) } } });
-step(`description, keywords, promotional text, ${listing.whatsNew ? "What's New, " : ""}support and marketing URLs`);
+  supportUrl: listing.supportUrl, marketingUrl: listing.marketingUrl, ...(listing.whatsNew && PLATFORM === "IOS" ? { whatsNew: listing.whatsNew } : {}) } } });
+step(`description, keywords, promotional text, ${listing.whatsNew && PLATFORM === "IOS" ? "What's New, " : ""}support and marketing URLs`);
 
 // Copyright on the version
 await api(`/v1/appStoreVersions/${version.id}`, "PATCH", { data: { type: "appStoreVersions", id: version.id, attributes: { copyright: listing.copyright } } });

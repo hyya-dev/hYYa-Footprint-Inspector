@@ -103,6 +103,8 @@ struct RootView: View {
         }
         .environment(\.goToTab, go)
         .onChange(of: scenePhase) { _, phase in if phase == .background { check.clearSessionResults() } }
+        // Store screenshots: a Sensitive check with nothing found, as on iOS.
+        .task { if LaunchOptions.has("-sampleData") { check.recordSensitive(found: 0) } }
         .task { if LaunchOptions.has("-openSettings") { openSettings() } }
         #else
         TabView(selection: Binding(get: { tab }, set: { t in go(t); Haptics.selection() })) {
