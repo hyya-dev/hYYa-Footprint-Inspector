@@ -1,12 +1,12 @@
 {
   "_note": "Marketing slides (English only). Each slide: mascot, full app name, a real screen, a benefit headline and three highlights. Words wrapped in *asterisks* are set in the sand accent.",
   "slides": [
-    {"screen": "store-02-results", "headline": "See what *every app* can learn about you", "highlights": ["One score out of 100", "A colour chart at a glance", "Nothing leaves your device"], "mascot": "right"},
+    {"screen": "store-02-results", "headline": "See what *every app* can learn about you", "highlights": ["One privacy score, four checks", "Plain words, no jargon", "Nothing leaves your device"], "mascot": "right"},
     {"screen": "store-08-tracker", "headline": "See what your apps *really did*", "highlights": ["Who used your location or photos", "Who shared with ad companies", "Normal things stay calm"], "mascot": "left"},
     {"screen": "store-09-fix", "headline": "Fix it *step by step*", "highlights": ["One fix at a time", "Straight to the right setting", "Watch your score go up"], "mascot": "right"},
-    {"screen": "store-04-finding", "headline": "Every clue explained. *Every fix* shown.", "highlights": ["What it reveals", "How serious it is", "How to fix it"], "mascot": "left"},
+    {"screen": "store-04-finding", "headline": "Every clue in *plain words*", "highlights": ["Straight to the point", "How serious it is", "How to fix it"], "mascot": "left"},
     {"screen": "store-05-sensitive", "headline": "Which apps *give you away?*", "highlights": ["Dating, faith, health, VPN", "Banks can ask too", "Hidden, never saved"], "mascot": "right"},
-    {"screen": "store-06-checkup", "headline": "Take back *your private info*", "highlights": ["Health, location, photos", "One area at a time", "Tick off as you go"], "mascot": "left"},
+    {"screen": "store-06-checkup", "headline": "Keep *spying apps* out", "highlights": ["Updates, restarts, passwords", "Health, location, photos", "One area at a time"], "mascot": "left"},
     {"screen": "store-01-home", "headline": "Private. Yours. *Open source.*", "highlights": ["No account, no ads", "No tracking, ever", "Made by hYYa"], "mascot": "right"}
   ]
 }
