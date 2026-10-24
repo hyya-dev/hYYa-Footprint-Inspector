@@ -1,6 +1,6 @@
 # HANDOFF: where the work is
 
-## Now (2026-10-23): iOS v1.0.0 is on the App Store; macOS is waiting for review
+## Now (2026-10-24): iOS 1.0.1 (15) submitted for review; macOS 1.0.0 in review
 
 | Store | What | State |
 | --- | --- | --- |
@@ -73,8 +73,11 @@ or Play, without the owner's consent.
 - `scripts/asc-audit-version.mjs` passes every check.
 - New scripts: `asc-prepare-version.mjs` and `asc-audit-version.mjs`. The listing scripts carry
   What's New and skip app info that's locked while macOS is in review.
-- 🚨 Waiting on: the owner's Duo test of build 14, then the owner's go-ahead to submit. After the
-  iOS submission: Android 1.0.1 to closed testers. macOS stays on hold until 1.0.0's verdict.
+- ✅ **Submitted 2026-10-24** on the owner's go-ahead (review submission e8e29d29),
+  `WAITING_FOR_REVIEW`, releases automatically. Build 14 expired; local clutter purged (823 MB →
+  122 MB, plus this project's DerivedData).
+- Next: Android 1.0.1 for closed testers (ask the owner before sending). macOS stays on hold until
+  1.0.0's verdict. Tell hyya.com once 1.0.1 is live.
 
 **Still to do for 1.0.1 (later):** Mac plain words for Mac findings, and the Mac and Android ports.
 
