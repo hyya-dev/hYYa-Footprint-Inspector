@@ -68,7 +68,7 @@ struct PrivacyReportView: View {
             .fileImporter(isPresented: $importing, allowedContentTypes: Self.types) { result in load(result) }
             .onChange(of: scenePhase) { _, phase in if phase == .background { report = nil } }
             .onChange(of: report?.sharing.count) { _, n in if let n { check.recordTracker(sharing: n) } }
-            .task { if CommandLine.arguments.contains("-sampleData") && report == nil { report = .sample } }
+            .task { if LaunchOptions.has("-sampleData") && report == nil { report = .sample } }
             .sensoryFeedback(trigger: opened) { _, _ in (report?.sharing.isEmpty ?? true) ? .success : .warning }
         }
     }
@@ -195,6 +195,8 @@ struct PrivacyReportView: View {
         let scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
         do {
+            let size = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
+            guard size <= PrivacyReport.maxBytes else { throw PrivacyReport.ReadError.tooBig }
             let r = try PrivacyReport.read(try Data(contentsOf: url))
             withAnimation(reduceMotion ? nil : .spring(response: 0.45, dampingFraction: 0.85)) { report = r; showNormal = false }
             opened += 1

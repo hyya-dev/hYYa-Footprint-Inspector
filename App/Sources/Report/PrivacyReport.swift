@@ -154,13 +154,21 @@ struct PrivacyReport: Sendable {
     }
 
     enum ReadError: Error, LocalizedError {
-        case notAReport
+        case notAReport, tooBig
         var errorDescription: String? {
-            "This doesn't look like an App Privacy Report. In Settings › Privacy & Security › App Privacy Report, tap the Share button at the top right, save it to Files, then open it here."
+            switch self {
+            case .notAReport: "This doesn't look like an App Privacy Report. In Settings › Privacy & Security › App Privacy Report, tap the Share button at the top right to export it, save it to Files, then analyze it here."
+            case .tooBig: "This file is far bigger than an App Privacy Report can be, so it wasn't opened."
+            }
         }
     }
 
+    /// A week's report is a few megabytes at most. Anything far bigger isn't one, and reading it
+    /// whole could run the device out of memory.
+    static let maxBytes = 64 * 1024 * 1024
+
     static func read(_ data: Data) throws -> PrivacyReport {
+        guard data.count <= maxBytes else { throw ReadError.tooBig }
         var byApp: [String: AppActivity] = [:]
         var first: Date?, last: Date?
         var recognised = 0
@@ -183,10 +191,11 @@ struct PrivacyReport: Sendable {
             if type == "networkActivity", let bundle = obj["bundleID"] as? String, let domain = obj["domain"] as? String, !domain.isEmpty {
                 recognised += 1
                 var app = byApp[bundle] ?? AppActivity(bundleID: bundle)
-                let hits = (obj["hits"] as? Int) ?? 1
+                // Clamped and added without overflow: a crafted file can't crash the app.
+                let hits = min(max((obj["hits"] as? Int) ?? 1, 0), 1_000_000)
                 let old = app.sites[domain]
                 app.sites[domain] = Site(domain: domain, owner: (obj["domainOwner"] as? String).flatMap { $0.isEmpty ? nil : $0 } ?? old?.owner,
-                                         hits: (old?.hits ?? 0) + hits,
+                                         hits: (old?.hits ?? 0).addingReportingOverflow(hits).overflow ? Int.max : (old?.hits ?? 0) + hits,
                                          byApp: (old?.byApp ?? false) || (obj["initiatedType"] as? String ?? "AppInitiated") == "AppInitiated")
                 byApp[bundle] = app
                 note(date(obj["timeStamp"])); note(date(obj["firstTimeStamp"]))

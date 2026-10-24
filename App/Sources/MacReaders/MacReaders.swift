@@ -17,7 +17,7 @@ import SystemConfiguration
 /// readers that would show a name, a permanent ID, a device name or an app list show made-up
 /// values instead. Nothing else changes.
 enum MacSample {
-    static let on = CommandLine.arguments.contains("-sampleData")
+    static let on = LaunchOptions.has("-sampleData")
 }
 
 // MARK: - You

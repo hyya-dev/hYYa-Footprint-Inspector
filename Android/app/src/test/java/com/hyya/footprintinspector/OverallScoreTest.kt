@@ -37,3 +37,12 @@ class OverallScoreTest {
         }
     }
 }
+
+/** Security review 2026-10-24: launch extras are honoured in debug builds only. */
+class LaunchExtrasTest {
+    @Test fun everyExtraIsDebugOnly() {
+        val src = java.io.File("src/main/java/com/hyya/footprintinspector/MainActivity.kt").readText()
+        val unguarded = src.lines().filter { "intent.get" in it && "dev" !in it }
+        assertTrue("Extras read without the debug guard: $unguarded", unguarded.isEmpty())
+    }
+}

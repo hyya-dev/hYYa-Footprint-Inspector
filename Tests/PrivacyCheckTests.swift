@@ -59,3 +59,19 @@ struct PrivacyCheckTests {
         for s in steps { #expect(s.why.firstMatch(of: claims) == nil, "Claim in \(s.id)") }
     }
 }
+
+/// Security review 2026-10-24: a crafted report file can't crash the app or exhaust memory.
+struct ReportHardeningTests {
+    @Test func hugeHitCountsAreClampedNotOverflowed() throws {
+        let line = #"{"type":"networkActivity","bundleID":"com.example.x","domain":"a.example.com","hits":9223372036854775807}"#
+        let data = Data(Array(repeating: line, count: 50).joined(separator: "\n").utf8)
+        let report = try PrivacyReport.read(data)
+        let hits = report.ranked.first?.sites.values.first?.hits ?? 0
+        #expect(hits > 0 && hits <= 50 * 1_000_000)
+    }
+
+    @Test func oversizedFilesAreRefused() {
+        let big = Data(count: PrivacyReport.maxBytes + 1)
+        #expect(throws: PrivacyReport.ReadError.self) { try PrivacyReport.read(big) }
+    }
+}

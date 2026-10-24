@@ -28,3 +28,11 @@ Android/local.properties
 Android/.gradle/
 Android/build/
 Android/app/build/
+
+# Keys never belong in the repo (they live outside it). A safety net, not the plan.
+*.p8
+*.p12
+*.jks
+*.keystore
+keystore.properties
+*service-account*.json

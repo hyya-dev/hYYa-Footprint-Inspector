@@ -20,14 +20,19 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT))
         // Screenshot switches (adb shell am start … --ez sampleData true --es startTab sensitive --ez autoScan true).
-        Sample.on = intent.getBooleanExtra("sampleData", false)
-        val startTab = intent.getStringExtra("startTab")?.let { name -> Tab.entries.firstOrNull { it.name.equals(name, true) } } ?: Tab.SCAN
-        val autoScan = intent.getBooleanExtra("autoScan", false)
-        intent.getStringExtra("sensitiveCategories")?.let { ids ->
+        // Debug builds only: this activity is exported (it's the launcher), so in a store build any
+        // installed app could otherwise start it with made-up, reassuring results.
+        val dev = BuildConfig.DEBUG
+        Sample.on = dev && intent.getBooleanExtra("sampleData", false)
+        val startTab = (if (dev) intent.getStringExtra("startTab") else null)?.let { name -> Tab.entries.firstOrNull { it.name.equals(name, true) } } ?: Tab.SCAN
+        val autoScan = dev && intent.getBooleanExtra("autoScan", false)
+        if (dev) intent.getStringExtra("sensitiveCategories")?.let { ids ->
             getSharedPreferences("app", MODE_PRIVATE).edit().putStringSet("sensitiveCategories", ids.split(",").toSet()).apply()
         }
         // Shows the re-scan reminder now, to check it without waiting a week.
-        if (intent.getBooleanExtra("testReminder", false)) com.hyya.footprintinspector.remind.ScanReminder.post(this)
-        setContent { FootprintTheme { App(startTab, autoScan, intent.getStringExtra("openFinding"), intent.getBooleanExtra("openFix", false)) } }
+        if (dev && intent.getBooleanExtra("testReminder", false)) com.hyya.footprintinspector.remind.ScanReminder.post(this)
+        val openFinding = if (dev) intent.getStringExtra("openFinding") else null
+        val openFix = dev && intent.getBooleanExtra("openFix", false)
+        setContent { FootprintTheme { App(startTab, autoScan, openFinding, openFix) } }
     }
 }

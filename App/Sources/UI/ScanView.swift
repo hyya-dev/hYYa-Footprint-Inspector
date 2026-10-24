@@ -198,7 +198,7 @@ private struct Results: View {
         }
 
         ScoreGuideCard(score: score, fixes: fixes, all: scanner.allFindings) { fixing = true }
-            .task { if CommandLine.arguments.contains("-openFix") && !fixes.isEmpty { fixing = true } }
+            .task { if LaunchOptions.has("-openFix") && !fixes.isEmpty { fixing = true } }
 
 
         SectionDivider()

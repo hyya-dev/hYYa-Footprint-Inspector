@@ -103,7 +103,7 @@ struct RootView: View {
         }
         .environment(\.goToTab, go)
         .onChange(of: scenePhase) { _, phase in if phase == .background { check.clearSessionResults() } }
-        .task { if CommandLine.arguments.contains("-openSettings") { openSettings() } }
+        .task { if LaunchOptions.has("-openSettings") { openSettings() } }
         #else
         TabView(selection: Binding(get: { tab }, set: { t in go(t); Haptics.selection() })) {
             ForEach(AppTab.allCases) { t in
@@ -118,7 +118,7 @@ struct RootView: View {
         // Store screenshots: the sample Tracker report and a Sensitive check with nothing found, so
         // every screen can be captured from launch switches alone (the iPhone Duo can't be tapped
         // by tests in every pose).
-        .task { if CommandLine.arguments.contains("-sampleData") { check.recordTracker(sharing: PrivacyReport.sample.sharing.count); check.recordSensitive(found: 0) } }
+        .task { if LaunchOptions.has("-sampleData") { check.recordTracker(sharing: PrivacyReport.sample.sharing.count); check.recordSensitive(found: 0) } }
         #endif
     }
 
@@ -135,12 +135,21 @@ struct RootView: View {
     #endif
 }
 
-/// Launch switches used only to take store screenshots without clicking through by hand.
+/// Launch switches used only to take store screenshots and run UI tests without clicking through
+/// by hand. They work in Debug builds only: in a store build any program that can launch the app
+/// (on a Mac, any local process) could otherwise make it show made-up, reassuring results.
 enum LaunchOptions {
+    #if DEBUG
+    private static let args = CommandLine.arguments
+    #else
+    private static let args: [String] = []
+    #endif
+
+    static func has(_ flag: String) -> Bool { args.contains(flag) }
+
     static func value(after flag: String) -> String? {
-        let args = CommandLine.arguments
         guard let i = args.firstIndex(of: flag), i + 1 < args.count else { return nil }
         return args[i + 1]
     }
-    static var autoScan: Bool { CommandLine.arguments.contains("-autoScan") }
+    static var autoScan: Bool { has("-autoScan") }
 }
