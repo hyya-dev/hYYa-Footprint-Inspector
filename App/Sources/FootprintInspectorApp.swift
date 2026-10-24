@@ -8,6 +8,7 @@ import SwiftUI
 struct FootprintInspectorApp: App {
     @State private var history: HistoryStore
     @State private var scanner: Scanner
+    @State private var check = PrivacyCheck()
 
     init() {
         let history = HistoryStore()
@@ -26,6 +27,7 @@ struct FootprintInspectorApp: App {
             SettingsView()
                 .environment(scanner)
                 .environment(history)
+                .environment(check)
                 .tint(Brand.accent)
                 .preferredColorScheme(.dark)
                 .frame(width: 560, height: 680)
@@ -40,6 +42,7 @@ struct FootprintInspectorApp: App {
             RootView()
                 .environment(scanner)
                 .environment(history)
+                .environment(check)
                 .tint(Brand.accent)
                 .preferredColorScheme(.dark)
                 #if os(macOS)
@@ -53,6 +56,8 @@ struct RootView: View {
     /// Screenshot runs can open on a given tab with `-startTab footprint|sensitive|tracker|checkup|settings`.
     @State private var tab: AppTab = LaunchOptions.value(after: "-startTab").flatMap(AppTab.init(launchName:)) ?? .footprint
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(PrivacyCheck.self) private var check
     #if os(macOS)
     @Environment(\.openSettings) private var openSettings
     #endif
@@ -97,6 +102,7 @@ struct RootView: View {
             .modifier(TabSwitchTransition(tab: tab))
         }
         .environment(\.goToTab, go)
+        .onChange(of: scenePhase) { _, phase in if phase == .background { check.clearSessionResults() } }
         .task { if CommandLine.arguments.contains("-openSettings") { openSettings() } }
         #else
         TabView(selection: Binding(get: { tab }, set: { t in go(t); Haptics.selection() })) {
@@ -104,7 +110,11 @@ struct RootView: View {
                 Tab(t.title, systemImage: t.symbol, value: t) { page(t) }
             }
         }
+        // Named pages in a sidebar on wide screens (an open iPhone Duo, iPad); the system's own
+        // tab bar or side strip everywhere else.
+        .tabViewStyle(.sidebarAdaptable)
         .environment(\.goToTab, go)
+        .onChange(of: scenePhase) { _, phase in if phase == .background { check.clearSessionResults() } }
         #endif
     }
 

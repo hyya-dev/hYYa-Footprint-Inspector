@@ -8,7 +8,7 @@ struct CheckUpView: View {
     #if os(macOS)
     static let introLine = "macOS never tells one app which other apps can reach your location, contacts or screen. Only System Settings knows, so let's look together."
     #else
-    static let introLine = "The system never tells one app which other apps can reach your Health, location or photos. Only Settings knows, so let's look together."
+    static let introLine = "Keep spying apps out, then see which apps can reach your Health, location or photos. Only Settings knows, so let's look together, one area at a time."
     #endif
 
     /// Ticked steps, remembered on this phone only so the user can pick up where they left off.
@@ -18,9 +18,9 @@ struct CheckUpView: View {
 
     var body: some View {
         let total = CheckUpGuide.steps.count
-        NavigationStack {
+        ListDetailStack {
             Page {
-                HeroCard(eyebrow: "Permission check-up",
+                HeroCard(eyebrow: "Check-up",
                          title: done.count == total ? "All checked!" : "\(done.count) of \(total) checked",
                          subtitle: Self.introLine,
                          mood: done.count == total ? .happy : .idle,
@@ -59,6 +59,8 @@ struct CheckUpView: View {
             .inlineTitle()
             .clearNavigationBar()
             .sensoryFeedback(.success, trigger: done.count == total)
+        } placeholder: {
+            DetailPlaceholder(line: "Pick an area to see where to go and what to do.")
         }
     }
 
@@ -82,7 +84,7 @@ struct CheckUpStepView: View {
 
     var body: some View {
         Page {
-            HeroCard(eyebrow: "Permission check-up", title: step.title, subtitle: step.why,
+            HeroCard(eyebrow: "Check-up", title: step.title, subtitle: step.why,
                      mood: isDone ? .happy : .thinking, mascotSize: 96)
 
             ToneCard(tone: .context, title: "Where to go", symbol: "gearshape") {
@@ -107,9 +109,11 @@ struct CheckUpStepView: View {
             .buttonStyle(GhostButtonStyle())
             .frame(maxWidth: .infinity)
             #else
-            Button("Open Settings") { SettingsLink.openSettingsHome() }
-                .buttonStyle(GhostButtonStyle())
-                .frame(maxWidth: .infinity)
+            if step.id != "restart" {
+                Button("Open Settings") { SettingsLink.openSettingsHome() }
+                    .buttonStyle(GhostButtonStyle())
+                    .frame(maxWidth: .infinity)
+            }
             #endif
 
             Button(isDone ? "Checked ✓" : "I've checked this") {

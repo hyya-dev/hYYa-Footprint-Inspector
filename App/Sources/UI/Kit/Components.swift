@@ -14,6 +14,9 @@ struct Page<Content: View>: View {
     var resetOn: AnyHashable? = nil
     @ViewBuilder var content: Content
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// Only fade under a clock at the top. On an iPhone Duo the clock sits in a side strip, and a
+    /// fade there would just dim the page.
+    @State private var topInset: CGFloat = 0
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -35,11 +38,14 @@ struct Page<Content: View>: View {
         }
         .background(BrandBackground())
         // Content fades out under the status bar instead of colliding with the clock.
+        .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.top } action: { topInset = $0 }
         .overlay(alignment: .top) {
-            LinearGradient(colors: [.black, .black.opacity(0)], startPoint: .top, endPoint: .bottom)
-                .frame(height: 64)
-                .ignoresSafeArea(edges: .top)
-                .allowsHitTesting(false)
+            if topInset > 24 {
+                LinearGradient(colors: [.black, .black.opacity(0)], startPoint: .top, endPoint: .bottom)
+                    .frame(height: 64)
+                    .ignoresSafeArea(edges: .top)
+                    .allowsHitTesting(false)
+            }
         }
         }
     }
@@ -240,6 +246,7 @@ struct ScoreOrb: View {
     let value: Int
     var size: CGFloat = 132
     var tint: Color = Brand.sand
+    var label = "Privacy score"
 
     var body: some View {
         ZStack {
@@ -265,7 +272,7 @@ struct ScoreOrb: View {
         .frame(width: size, height: size)
         .tiltParallax(6)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Footprint score \(value) out of 100")
+        .accessibilityLabel("\(label) \(value) out of 100")
     }
 }
 

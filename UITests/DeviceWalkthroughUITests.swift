@@ -74,7 +74,7 @@ final class DeviceWalkthroughUITests: XCTestCase {
     func launchAndScan() -> String {
         app.launch()
         handleSystemAlert(context: "launch")
-        let start = app.buttons["Start scan"]
+        let start = app.buttons["Start with check 1"]
         let again = app.buttons["Scan again"]
         XCTAssertTrue(start.waitForExistence(timeout: 15), "Start scan button missing")
         let t0 = Date()

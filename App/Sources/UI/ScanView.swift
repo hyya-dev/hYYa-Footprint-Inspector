@@ -42,12 +42,16 @@ struct ScanView: View {
 
 private struct IdleHome: View {
     @Environment(Scanner.self) private var scanner
+    @Environment(HistoryStore.self) private var history
+    @Environment(PrivacyCheck.self) private var check
+    @AppStorage("checkUpDone") private var checkUpStored = ""
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 28) {
-            LivingMascot(mood: .idle, size: 230)
+        let overall = OverallScore.current(scanner: scanner, history: history, check: check, checkUpStored: checkUpStored)
+        VStack(alignment: .leading, spacing: 24) {
+            LivingMascot(mood: .idle, size: 200)
                 .frame(maxWidth: .infinity)
-                .padding(.top, 36)
+                .padding(.top, 24)
             VStack(alignment: .leading, spacing: 12) {
                 Brand.eyebrow("hYYa Footprint Inspector")
                 AccentRule()
@@ -55,18 +59,22 @@ private struct IdleHome: View {
                     .font(.system(size: 34, weight: .bold))
                     .foregroundStyle(Brand.ink)
                     .fixedSize(horizontal: false, vertical: true)
-                Text("A scan reads exactly what any app on this device can read, then shows you how to fix what matters.")
+                Text("Four quick checks show what apps can learn about you, then help you fix it.")
                     .font(.body)
                     .foregroundStyle(Brand.textMuted)
                     .lineSpacing(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             VStack(spacing: 14) {
-                Button("Start scan") { Task { await scanner.scan() } }
+                Button("Start with check 1") { Task { await scanner.scan() } }
                     .buttonStyle(PrimaryCTAButtonStyle())
                 Text("Nothing leaves your device · Open source")
                     .font(.footnote)
                     .foregroundStyle(Brand.textSubtle)
+                    .frame(maxWidth: .infinity)
             }
+            SectionTitle(title: "Your checks", trailing: "\(overall.doneCount) of \(overall.total)")
+            ChecksPanel(overall: overall) { Task { await scanner.scan() } }
         }
     }
 }
@@ -123,32 +131,58 @@ private struct Results: View {
     @Environment(\.goToTab) private var goToTab
     @Namespace private var zoom
 
+    @Environment(HistoryStore.self) private var history
+    @Environment(PrivacyCheck.self) private var check
+    @AppStorage("checkUpDone") private var checkUpStored = ""
+
     var body: some View {
         let score = scanner.score
         let concerning = scanner.concerning
+        let overall = OverallScore.current(scanner: scanner, history: history, check: check, checkUpStored: checkUpStored)
+        let left = overall.total - overall.doneCount
 
-        // Summary: score on the left, the detective on the right.
+        // One score for the whole check, then the four checks that make it up.
         VStack(alignment: .leading, spacing: 18) {
             HStack(alignment: .center) {
-                ScoreOrb(value: score.value, size: 128, tint: score.level == .light ? Tone.fix.tint : (score.level == .moderate ? Brand.sand : Tone.alert.tint))
+                ScoreOrb(value: overall.value ?? score.value, size: 128, tint: tint(overall.level))
                 Spacer()
                 LivingMascot(mood: concerning.isEmpty ? .happy : .concerned, size: 132)
             }
             .padding(.top, 20)
             VStack(alignment: .leading, spacing: 6) {
-                Text(score.level.title)
+                Brand.eyebrow("Your privacy score")
+                Text(overall.level?.title ?? "")
                     .font(.system(size: 30, weight: .bold))
                     .foregroundStyle(Brand.ink)
                 AccentRule().padding(.vertical, 4)
-                Text("This scan found \(scanner.allFindings.count) clues about this device. \(concerning.isEmpty ? "Nothing stands out." : "\(concerning.count) are worth a look.") Higher scores are better.")
+                Text(left == 0 ? "All \(overall.total) checks done. Higher is better." :
+                        "Based on \(overall.doneCount) of \(overall.total) checks. Do the other \(left) to complete your score.")
                     .font(.body)
                     .foregroundStyle(Brand.textMuted)
                     .lineSpacing(2)
+                    .fixedSize(horizontal: false, vertical: true)
                 Button("How the score works") { showingFormula = true }
                     .font(.footnote)
                     .foregroundStyle(Brand.textSubtle)
                     .padding(.top, 2)
             }
+            ChecksPanel(overall: overall)
+        }
+        .sheet(isPresented: $showingFormula) { FormulaSheet() }
+        .sheet(isPresented: $fixing) { FixWizard(fixes: fixes) { Task { await scanner.scan() } } }
+
+        SectionDivider()
+
+        // Check 1 in detail: the footprint score and its clues.
+        VStack(alignment: .leading, spacing: 14) {
+            Brand.eyebrow("Check 1 · Footprint")
+            Text("\(score.level.title): \(score.value)")
+                .font(.title2.weight(.bold))
+                .foregroundStyle(Brand.ink)
+            Text("Any app can read \(scanner.allFindings.count) clues about this device. \(concerning.isEmpty ? "None stands out." : "\(concerning.count) are worth a look.")")
+                .font(.body)
+                .foregroundStyle(Brand.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
             let seen = scanner.allFindings
             SummaryRing(slices: [
                 .alert(seen.filter { $0.severity == .high }.count, "worth a look"),
@@ -161,8 +195,6 @@ private struct Results: View {
                 ShareCardButton()
             }
         }
-        .sheet(isPresented: $showingFormula) { FormulaSheet() }
-        .sheet(isPresented: $fixing) { FixWizard(fixes: fixes) { Task { await scanner.scan() } } }
 
         ScoreGuideCard(score: score, fixes: fixes, all: scanner.allFindings) { fixing = true }
             .task { if CommandLine.arguments.contains("-openFix") && !fixes.isEmpty { fixing = true } }
@@ -209,6 +241,14 @@ private struct Results: View {
         NextStepCard(step: .sensitive) { goToTab(.sensitive) }
     }
 
+    private func tint(_ level: OverallScore.Level?) -> Color {
+        switch level {
+        case .good?: Tone.fix.tint
+        case .fair?: Brand.sand
+        default: Tone.alert.tint
+        }
+    }
+
     @ViewBuilder
     private func group(_ group: SignalGroup, title: String) -> some View {
         SectionTitle(title: title)
@@ -229,7 +269,7 @@ struct ClueRow: View {
     var body: some View {
         let fixable = finding.definition.fix.level != .onlyApple
         RowCard(symbol: finding.definition.section.symbol,
-                title: finding.definition.title,
+                title: finding.definition.headline,
                 subtitle: fixable ? "You can fix this" : "Only Apple can fix this",
                 tileFG: Brand.concern) {
             HStack(spacing: 8) {
@@ -276,11 +316,16 @@ private struct FormulaSheet: View {
         NavigationStack {
             Page {
                 MascotSays(line: "No secret maths. Here's exactly how I score.", mood: .thinking)
-                ToneCard(tone: .context, title: "How it adds up", symbol: "function") { Text(FootprintScore.explanation).font(.body).foregroundStyle(Brand.textMuted).lineSpacing(3).fixedSize(horizontal: false, vertical: true) }
+                ToneCard(tone: .context, title: "Your privacy score", symbol: "function") { Text(OverallScore.explanation).font(.body).foregroundStyle(Brand.textMuted).lineSpacing(3).fixedSize(horizontal: false, vertical: true) }
+                ToneCard(tone: .context, title: "The footprint score in detail", symbol: "pawprint") { Text(FootprintScore.explanation).font(.body).foregroundStyle(Brand.textMuted).lineSpacing(3).fixedSize(horizontal: false, vertical: true) }
             }
             .navigationTitle("How the score works")
             .inlineTitle()
-            .toolbar { Button("Done") { dismiss() } }
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button { dismiss() } label: { Label("Done", systemImage: "checkmark") }
+                }
+            }
         }
         .presentationDetents([.large])
     }

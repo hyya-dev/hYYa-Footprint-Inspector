@@ -17,6 +17,7 @@ struct PrivacyReportView: View {
     @State private var problem: String?
     @State private var opened = 0
     @State private var showNormal = false
+    @Environment(PrivacyCheck.self) private var check
     var onNext: (() -> Void)? = nil
 
     private static let types: [UTType] = [UTType(filenameExtension: "ndjson") ?? .data, .json, .plainText, .data]
@@ -66,6 +67,7 @@ struct PrivacyReportView: View {
             .clearNavigationBar()
             .fileImporter(isPresented: $importing, allowedContentTypes: Self.types) { result in load(result) }
             .onChange(of: scenePhase) { _, phase in if phase == .background { report = nil } }
+            .onChange(of: report?.sharing.count) { _, n in if let n { check.recordTracker(sharing: n) } }
             .task { if CommandLine.arguments.contains("-sampleData") && report == nil { report = .sample } }
             .sensoryFeedback(trigger: opened) { _, _ in (report?.sharing.isEmpty ?? true) ? .success : .warning }
         }
