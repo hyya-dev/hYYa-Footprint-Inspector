@@ -71,8 +71,18 @@ fun App(startTab: Tab = Tab.SCAN, autoScan: Boolean = false, openFinding: String
     var tab by rememberSaveable { mutableStateOf(startTab) }
     val nav = remember { Nav().also { n -> openFinding?.let { n.push(Route.FindingRoute(it)) }; if (openFix) n.push(Route.FixRoute) } }
     if (autoScan && scanner.findings.isEmpty()) androidx.compose.runtime.LaunchedEffect(Unit) { scanner.scan() }
+    // Store screenshots: a Sensitive check with nothing found, so the score can show three checks.
+    if (com.hyya.footprintinspector.scan.Sample.on && scanner.sensitiveFound == null) scanner.sensitiveFound = 0
 
     BackHandler(enabled = nav.stack.isNotEmpty()) { nav.pop() }
+    // The sensitive-app result counts in the score only while the app is on screen, like the
+    // result itself; it's never saved.
+    val owner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    androidx.compose.runtime.DisposableEffect(owner) {
+        val obs = androidx.lifecycle.LifecycleEventObserver { _, e -> if (e == androidx.lifecycle.Lifecycle.Event.ON_STOP) scanner.sensitiveFound = null }
+        owner.lifecycle.addObserver(obs)
+        onDispose { owner.lifecycle.removeObserver(obs) }
+    }
     val view = androidx.compose.ui.platform.LocalView.current
     val goTo: (Tab) -> Unit = { t -> tab = t; nav.stack.clear() }
 
@@ -127,7 +137,7 @@ fun App(startTab: Tab = Tab.SCAN, autoScan: Boolean = false, openFinding: String
                         Route.FixRoute -> FixScreen(scanner, nav)
                         null -> when (t) {
                             Tab.SCAN -> ScanScreen(scanner, nav)
-                            Tab.SENSITIVE -> SensitiveScreen()
+                            Tab.SENSITIVE -> SensitiveScreen(scanner)
                             Tab.TRACKER -> TrackerScreen(scanner, nav)
                             Tab.CHECKUP -> CheckUpScreen(nav)
                             Tab.SETTINGS -> SettingsScreen(scanner)

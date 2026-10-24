@@ -83,7 +83,7 @@ private fun prefs(c: Context) = c.getSharedPreferences("app", Context.MODE_PRIVA
 // MARK: Sensitive apps
 
 @Composable
-fun SensitiveScreen() {
+fun SensitiveScreen(scanner: com.hyya.footprintinspector.scan.Scanner) {
     val context = LocalContext.current
     var chosen by remember { mutableStateOf(prefs(context).getStringSet("sensitiveCategories", emptySet())!!.toSet()) }
     var results by remember { mutableStateOf<Map<String, List<SensitiveApp>>?>(null) }
@@ -151,7 +151,7 @@ fun SensitiveScreen() {
                     color = Brand.textSubtle, fontSize = 12.sp, lineHeight = 16.sp)
             }
             PrimaryButton(if (chosen.isEmpty()) "Pick at least one kind" else "Check ${chosen.size} kind${if (chosen.size == 1) "" else "s"}") {
-                if (chosen.isNotEmpty()) { results = Sensitive.scan(context, chosen); revealed = false }
+                if (chosen.isNotEmpty()) { val r = Sensitive.scan(context, chosen); results = r; revealed = false; scanner.sensitiveFound = r.values.sumOf { it.size } }
             }
         }
     }
@@ -163,7 +163,7 @@ private fun FoundAppCard(c: SensitiveCategory, app: SensitiveApp) {
         Pill("Worth a look", Brand.concern, Brand.concernSoft)
         Text(listOfNotNull(c.tells, c.risk).joinToString(" "), color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp)
         Eyebrow("What to do")
-        StepList(c.steps + Sensitive.DELETE_STEP)
+        StepList(listOf(Sensitive.HIDE_STEP) + c.steps + Sensitive.DELETE_STEP)
     }
 }
 
@@ -274,13 +274,13 @@ fun CheckUpScreen(nav: Nav) {
     val context = LocalContext.current
     val done = prefs(context).getStringSet("checkUpDone", emptySet())!!
     Page {
-        HeroCard("Permission check-up", if (done.size == CheckUp.steps.size) "All checked!" else "${done.size} of ${CheckUp.steps.size} checked",
-            "Android never tells one app which other apps can reach your location, contacts or notifications. Only Settings knows, so let's look together.")
+        HeroCard("Check-up", if (done.size == CheckUp.steps.size) "All checked!" else "${done.size} of ${CheckUp.steps.size} checked",
+            "Keep spying apps out, then see which apps can reach your location, contacts or notifications. Only Settings knows, so let's look together, one area at a time.")
         LinearProgressIndicator(progress = { done.size.toFloat() / CheckUp.steps.size }, color = Tone.FIX.tint, trackColor = Brand.tile,
             modifier = Modifier.fillMaxWidth())
         Panel {
             CheckUp.steps.forEachIndexed { i, s ->
-                RowCard(if (s.id in done) Icons.Outlined.CheckCircle else Icons.Outlined.Security, s.title, s.path.substringBefore(" (on Samsung").let { if (it.length > 60) "Permission manager › " + s.path.substringAfterLast("› ") else it },
+                RowCard(if (s.id in done) Icons.Outlined.CheckCircle else Icons.Outlined.Security, s.title, s.path.substringBefore(" (on Samsung").let { if (it.length > 60 && "Permission manager" in it) "Permission manager › " + s.path.substringAfterLast("› ") else it.substringBefore(", then") },
                     tint = if (s.id in done) Brand.green else Brand.sand, showDivider = i < CheckUp.steps.lastIndex,
                     onClick = { nav.push(Route.CheckUpRoute(i)) }) {
                     Icon(if (s.id in done) Icons.Outlined.CheckCircle else Icons.AutoMirrored.Outlined.KeyboardArrowRight, null,

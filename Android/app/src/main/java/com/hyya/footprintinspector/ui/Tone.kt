@@ -30,6 +30,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -226,6 +227,57 @@ fun SummaryRing(slices: List<Slice>, caption: String? = null, centre: String? = 
                     Spacer(Modifier.width(6.dp))
                     Text(s.label, color = Brand.textMuted, fontSize = 14.sp)
                 }
+            }
+        }
+    }
+}
+
+/**
+ * The four checks as rows, as on iOS (ChecksPanel in Journey.swift): what each does, whether it's
+ * done, and its part of the score. Tapping one goes to that page; step 1 starts the scan.
+ */
+@Composable
+fun ChecksPanel(overall: com.hyya.footprintinspector.model.OverallScore, scanner: com.hyya.footprintinspector.scan.Scanner, checkUpDone: Int, onScan: (() -> Unit)?) {
+    val go = LocalGoTo.current
+    val parts = overall.parts
+    val tabs = listOf(Tab.SCAN to com.hyya.footprintinspector.model.OverallScore.Part.FOOTPRINT,
+        Tab.SENSITIVE to com.hyya.footprintinspector.model.OverallScore.Part.SENSITIVE,
+        Tab.TRACKER to com.hyya.footprintinspector.model.OverallScore.Part.TRACKER,
+        Tab.CHECKUP to com.hyya.footprintinspector.model.OverallScore.Part.CHECKUP)
+    Panel {
+        tabs.forEachIndexed { i, (tab, part) ->
+            val value = parts[part]
+            val status = when (tab) {
+                Tab.SCAN -> value?.let { com.hyya.footprintinspector.model.FootprintScore(it, 0, 0).level.title } ?: "Not checked yet"
+                Tab.SENSITIVE -> scanner.sensitiveFound?.let { n -> if (n == 0) "No app can spot them" else if (n == 1) "1 app can be spotted" else "$n apps can be spotted" } ?: "Not checked yet"
+                Tab.TRACKER -> if (value == null) "Checked with the Footprint scan" else {
+                    val n = scanner.findings(com.hyya.footprintinspector.model.Section.WATCH).count { it.isConcerning }
+                    if (n == 0) "Nothing worth a look" else if (n == 1) "1 power worth a look" else "$n powers worth a look"
+                }
+                Tab.CHECKUP -> if (checkUpDone == 0) "Not started" else "$checkUpDone of ${com.hyya.footprintinspector.catalogue.CheckUp.steps.size} areas checked"
+                Tab.SETTINGS -> ""
+            }
+            val done = value != null
+            Column {
+                Row(
+                    Modifier.fillMaxWidth().pressable { if (tab == Tab.SCAN) onScan?.invoke() else go(tab) }.padding(horizontal = 14.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(Modifier.size(32.dp).clip(CircleShape).background(if (done) Tone.FIX.tint.copy(alpha = 0.16f) else Brand.sand.copy(alpha = 0.12f)),
+                        contentAlignment = Alignment.Center) {
+                        if (done) Icon(androidx.compose.material.icons.Icons.Outlined.Check, null, tint = Tone.FIX.tint, modifier = Modifier.size(18.dp))
+                        else Text("${i + 1}", color = Brand.sand, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(tab.label, color = Brand.ink, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                        Text(tab.pitch, color = Brand.textSubtle, fontSize = 12.sp, lineHeight = 16.sp)
+                        Text(status, color = if (done) Tone.FIX.tint else Brand.sand, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                    if (value != null) Text("$value", color = Brand.ink, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+                    else if (!(tab == Tab.SCAN && onScan == null)) Icon(androidx.compose.material.icons.Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = Brand.textSubtle)
+                }
+                if (i < tabs.lastIndex) androidx.compose.material3.HorizontalDivider(Modifier.padding(start = 58.dp), color = Brand.rule, thickness = 0.5.dp)
             }
         }
     }

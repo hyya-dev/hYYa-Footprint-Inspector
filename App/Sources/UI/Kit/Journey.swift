@@ -171,13 +171,7 @@ struct ChecksPanel: View {
     @Environment(PrivacyCheck.self) private var check
     @AppStorage("checkUpDone") private var checkUpStored = ""
 
-    private var tabs: [AppTab] {
-        #if os(macOS)
-        [.footprint, .sensitive, .checkup, .tracker]
-        #else
-        [.footprint, .sensitive, .tracker, .checkup]
-        #endif
-    }
+    private let tabs: [AppTab] = [.footprint, .sensitive, .tracker, .checkup]
 
     var body: some View {
         Panel {

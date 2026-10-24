@@ -76,6 +76,10 @@ import com.hyya.footprintinspector.model.FootprintScore
 import com.hyya.footprintinspector.model.Group
 import com.hyya.footprintinspector.model.Section
 import com.hyya.footprintinspector.model.Severity
+import com.hyya.footprintinspector.model.PlainWords
+import com.hyya.footprintinspector.model.headline
+import com.hyya.footprintinspector.model.brief
+import com.hyya.footprintinspector.model.fixTitle
 import com.hyya.footprintinspector.scan.Phase
 import com.hyya.footprintinspector.scan.PermissionKind
 import com.hyya.footprintinspector.scan.Scanner
@@ -113,16 +117,20 @@ fun BackBar(title: String, nav: Nav) {
 fun ScanScreen(scanner: Scanner, nav: Nav) {
     when (scanner.phase) {
         Phase.IDLE -> Page {
-            Spacer(Modifier.padding(top = 24.dp))
-            Mascot(200, Modifier.align(Alignment.CenterHorizontally))
+            val context = LocalContext.current
+            val overall = scanner.overall(context)
+            Spacer(Modifier.padding(top = 16.dp))
+            Mascot(180, Modifier.align(Alignment.CenterHorizontally))
             Eyebrow("hYYa Footprint Inspector")
             AccentRule()
             Text("What do your apps know about you?", color = Brand.ink, fontSize = 30.sp, fontWeight = FontWeight.Bold, lineHeight = 34.sp)
-            Text("A scan reads exactly what any app on this device can read, then shows you how to fix what matters.",
+            Text("Four quick checks show what apps can learn about you, then help you fix it.",
                 color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
-            PrimaryButton("Start scan") { scanner.scan() }
+            PrimaryButton("Start with check 1") { scanner.scan() }
             Text("Nothing leaves your device · Open source", color = Brand.textSubtle, fontSize = 12.sp,
                 textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+            SectionTitle("Your checks", "${overall.doneCount} of ${overall.total}")
+            ChecksPanel(overall, scanner, checkUpDoneCount(context)) { scanner.scan() }
         }
         Phase.SCANNING -> Page {
             Spacer(Modifier.padding(top = 60.dp))
@@ -141,18 +149,31 @@ fun ScanScreen(scanner: Scanner, nav: Nav) {
 private fun Results(scanner: Scanner, nav: Nav) {
     val score = scanner.score
     val concerning = scanner.concerning
+    val context = LocalContext.current
+    val overall = scanner.overall(context)
+    val left = overall.total - overall.doneCount
     Page {
+        // One score for the whole check, then the four checks that make it up.
         Row(verticalAlignment = Alignment.CenterVertically) {
-            ScoreOrb(score.value)
+            ScoreOrb(overall.value ?: score.value)
             Spacer(Modifier.weight(1f))
             Mascot(96)
         }
-        Text(score.level.title, color = Brand.ink, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+        Eyebrow("Your privacy score")
+        Text(overall.level?.title ?: "", color = Brand.ink, fontSize = 26.sp, fontWeight = FontWeight.Bold)
         AccentRule()
-        Text("This scan found ${scanner.findings.size} clues about this device. " +
-            (if (concerning.isEmpty()) "Nothing stands out." else "${concerning.size} are worth a look.") + " Higher scores are better.",
+        Text(if (left == 0) "All ${overall.total} checks done. Higher is better."
+            else "Based on ${overall.doneCount} of ${overall.total} checks. Do the other $left to complete your score.",
             color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
         Text("How the score works", color = Brand.sand, fontSize = 13.sp, modifier = Modifier.clickableNoRipple { nav.push(Route.ScoreRoute) })
+        ChecksPanel(overall, scanner, checkUpDoneCount(context), null)
+        androidx.compose.material3.HorizontalDivider(color = Brand.rule, thickness = 0.5.dp)
+        // Check 1 in detail: the footprint score and its clues.
+        Eyebrow("Check 1 · Footprint")
+        Text("${score.level.title}: ${score.value}", color = Brand.ink, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        Text("Any app can read ${scanner.findings.size} clues about this device. " +
+            (if (concerning.isEmpty()) "None stands out." else "${concerning.size} are worth a look."),
+            color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
         val seen = scanner.findings
         SummaryRing(listOf(
             Slice("worth a look", seen.count { it.severity == Severity.HIGH }, Tone.ALERT.tint),
@@ -201,9 +222,14 @@ private fun Results(scanner: Scanner, nav: Nav) {
     }
 }
 
+/** Check-up areas ticked, out of the current list. */
+fun checkUpDoneCount(context: android.content.Context): Int =
+    context.getSharedPreferences("app", android.content.Context.MODE_PRIVATE).getStringSet("checkUpDone", emptySet())!!
+        .intersect(com.hyya.footprintinspector.catalogue.CheckUp.steps.map { it.id }.toSet()).size
+
 @Composable
 private fun ClueRow(f: Finding, nav: Nav, divider: Boolean) {
-    RowCard(f.definition.section.icon(), f.definition.title,
+    RowCard(f.definition.section.icon(), f.definition.headline,
         subtitle = if (f.definition.fix.fixable) "You can fix this" else "Only Google or the device maker can fix this",
         tint = if (f.isConcerning) Brand.concern else Brand.sand, showDivider = divider,
         onClick = { nav.push(Route.FindingRoute(f.id)) }) {
@@ -235,7 +261,7 @@ fun SectionScreen(scanner: Scanner, section: Section, nav: Nav) {
             }
             SectionTitle("What an app would get")
             val defs = Catalogue.definitions(section)
-            Panel { defs.forEachIndexed { i, d -> RowCard(section.icon(), d.title, d.reveals, showDivider = i < defs.lastIndex) } }
+            Panel { defs.forEachIndexed { i, d -> RowCard(section.icon(), d.headline, d.brief, showDivider = i < defs.lastIndex) } }
         } else if (findings.isNotEmpty()) {
             SectionTitle("On this device")
             Panel { findings.forEachIndexed { i, f -> FindingRow(f, nav, i < findings.lastIndex) } }
@@ -247,7 +273,7 @@ fun SectionScreen(scanner: Scanner, section: Section, nav: Nav) {
 private fun FindingRow(f: Finding, nav: Nav, divider: Boolean) {
     Column(Modifier.clickableNoRipple { nav.push(Route.FindingRoute(f.id)) }.padding(horizontal = 14.dp, vertical = 12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(f.definition.title, color = Brand.textMuted, fontSize = 12.sp, modifier = Modifier.weight(1f))
+            Text(f.definition.headline, color = Brand.textMuted, fontSize = 12.sp, modifier = Modifier.weight(1f))
             SeverityDot(f.severity)
         }
         Text(f.reading.value, color = Brand.ink, fontSize = 15.sp)
@@ -265,10 +291,12 @@ fun FindingScreen(scanner: Scanner, id: String, nav: Nav) {
     var showDetails by remember { mutableStateOf(false) }
     Page {
         BackBar(d.title, nav)
+        var showMore by remember { mutableStateOf(false) }
         // The clue itself.
         ToneCard(head) {
             ToneBadge(if (f.isConcerning) "Worth a look" else f.severity.label, head, Icons.Outlined.ErrorOutline)
-            Text(d.title, color = Brand.ink, fontSize = 28.sp, fontWeight = FontWeight.Bold, lineHeight = 33.sp)
+            Text(d.headline, color = Brand.ink, fontSize = 28.sp, fontWeight = FontWeight.Bold, lineHeight = 33.sp)
+            Text(d.brief, color = Brand.ink, fontSize = 16.sp, lineHeight = 22.sp)
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(Brand.upper("On your device"), color = Brand.textSubtle, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.3.sp)
                 Text(f.reading.value, color = Brand.ink, fontSize = 20.sp, fontWeight = FontWeight.Light, lineHeight = 26.sp)
@@ -303,17 +331,26 @@ fun FindingScreen(scanner: Scanner, id: String, nav: Nav) {
             ImpactRow(Icons.Outlined.Schedule, "How long it lasts", com.hyya.footprintinspector.model.Impact.lasting(d.persistence))
             ImpactRow(Icons.Outlined.Link, "What it lets them do", com.hyya.footprintinspector.model.Impact.reach(f.severity))
         }
-        MascotNote(d.reveals, Tone.EXPLAIN, "What it tells an app", Icons.Outlined.ChatBubbleOutline)
-        InfoCard("Why the system allows it", Tone.CONTEXT, Icons.Outlined.HelpOutline) {
-            Text(d.why, color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
-        }
         val fixTone = if (d.fix.fixable) Tone.FIX else Tone.LIMIT
-        ToneCard(fixTone, if (d.fix.fixable) "How to fix it" else "Only Google or the device maker can fix this",
+        ToneCard(fixTone, if (d.fix.fixable) (PlainWords.text[d.id]?.action ?: "How to fix it") else "Only Google or the device maker can fix this",
             if (d.fix.fixable) Icons.Outlined.Build else Icons.Outlined.Lock,
             trailing = if (d.fix.fixable && f.isConcerning) ({ ToneBadge("+${FootprintScore.HIGH_WEIGHT} points", Tone.FIX) }) else null) {
             Text(d.fix.summary, color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
             if (d.fix.steps.isNotEmpty()) StepList(d.fix.steps, fixTone.tint)
             if (d.fix.fixable) PrimaryButton("Open Settings") { openSettings(context, d.fix.settingsAction) }
+        }
+        // The fuller explanation, for anyone who wants it, out of the way of the answer.
+        ToneCard(Tone.EXPLAIN) {
+            Row(Modifier.fillMaxWidth().pressable { showMore = !showMore }, verticalAlignment = Alignment.CenterVertically) {
+                Text("More about this", color = Tone.EXPLAIN.tint, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                Icon(if (showMore) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore, null, tint = Tone.EXPLAIN.tint)
+            }
+            if (showMore) {
+                Text("What it tells an app", color = Brand.ink, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text(d.reveals, color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
+                Text("Why the system allows it", color = Brand.ink, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text(d.why, color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
+            }
         }
     }
 }
@@ -335,7 +372,8 @@ fun ScoreScreen(nav: Nav) {
     Page {
         BackBar("How the score works", nav)
         MascotSays("No secret maths. Here's exactly how I score.", tone = Tone.CONTEXT)
-        Text(FootprintScore.explanation, color = Brand.textMuted, fontSize = 15.sp, lineHeight = 22.sp)
+        InfoCard("Your privacy score", Tone.CONTEXT) { Text(com.hyya.footprintinspector.model.OverallScore.explanation, color = Brand.textMuted, fontSize = 15.sp, lineHeight = 22.sp) }
+        InfoCard("The footprint score in detail", Tone.CONTEXT) { Text(FootprintScore.explanation, color = Brand.textMuted, fontSize = 15.sp, lineHeight = 22.sp) }
     }
 }
 
@@ -354,7 +392,7 @@ private fun ScoreGuide(scanner: Scanner, nav: Nav) {
         FootprintScore.Level.MODERATE -> "Higher is better. You're in the middle: a few clues together could single out this device."
         FootprintScore.Level.HEAVY -> "Higher is better. A low score means apps can easily tell this device apart from others and recognise you."
     }
-    ToneCard(if (fixes.isEmpty()) Tone.FIX else Tone.CONTEXT, "What your score means", Icons.Outlined.Speed) {
+    ToneCard(if (fixes.isEmpty()) Tone.FIX else Tone.CONTEXT, "What the footprint score means", Icons.Outlined.Speed) {
         Text(meaning, color = Brand.ink, fontSize = 14.sp, lineHeight = 20.sp)
         Row(Modifier.fillMaxWidth().height(10.dp), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
             Box(Modifier.weight(50f).fillMaxHeight().clip(CircleShape).background(Tone.ALERT.tint.copy(alpha = if (score.value < 50) 0.9f else 0.35f)))
@@ -373,7 +411,7 @@ private fun ScoreGuide(scanner: Scanner, nav: Nav) {
                 color = Brand.ink, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, lineHeight = 19.sp)
             fixes.take(5).forEach { f ->
                 Row { Text("+${FootprintScore.points(f)}", color = Tone.FIX.tint, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.width(38.dp))
-                    Text(f.definition.title, color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp) }
+                    Text(f.definition.fixTitle, color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp) }
             }
             PrimaryButton("Fix them with me") { nav.push(Route.FixRoute) }
         }
@@ -393,7 +431,7 @@ fun FixScreen(scanner: Scanner, nav: Nav) {
             val f = fixes[index]
             androidx.compose.material3.LinearProgressIndicator(progress = { index.toFloat() / fixes.size }, color = Tone.FIX.tint, trackColor = Brand.tile, modifier = Modifier.fillMaxWidth())
             Text("Apps can't change these settings for you, so I'll open each page. Come back here after each change.", color = Brand.textSubtle, fontSize = 12.sp, lineHeight = 16.sp)
-            ToneCard(Tone.FIX, f.definition.title, Icons.Outlined.Build, trailing = { ToneBadge("+${FootprintScore.points(f)} points", Tone.FIX) }) {
+            ToneCard(Tone.FIX, f.definition.fixTitle, Icons.Outlined.Build, trailing = { ToneBadge("+${FootprintScore.points(f)} points", Tone.FIX) }) {
                 Text(f.definition.fix.summary, color = Brand.ink, fontSize = 15.sp, lineHeight = 21.sp)
                 if (f.definition.fix.steps.isNotEmpty()) StepList(f.definition.fix.steps, Tone.FIX.tint)
                 GhostButton("Open Settings") { openSettings(context, f.definition.fix.settingsAction) }

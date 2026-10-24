@@ -49,7 +49,8 @@ const listings = readdirSync(dir).filter((f) => f.endsWith(".json")).map((f) => 
 // English (United States) comes from the approved source file.
 const md = readFileSync(`${ROOT}GooglePlayConsole/listing-en-US.md`, "utf8");
 const section = (name) => md.split(`## ${name}\n`)[1].split("\n## ")[0].trim();
-listings.push({ language: "en-US", title: section("App name (30)"), shortDescription: section("Short description (80)"), fullDescription: section("Full description (4000)") });
+listings.push({ language: "en-US", title: section("App name (30)"), shortDescription: section("Short description (80)"), fullDescription: section("Full description (4000)"),
+  releaseNotes: section("Release notes (500)") });
 for (const l of listings) for (const [f, max] of Object.entries(LIMITS))
   if (!l[f] || [...l[f]].length > max) throw new Error(`${l.language} ${f} is empty or over ${max}`);
 
@@ -69,7 +70,8 @@ const b = await api(token, `https://androidpublisher.googleapis.com/upload/andro
   { method: "POST", raw: aab, contentType: "application/octet-stream" });
 await call(token, `${E}/tracks/alpha`, { method: "PUT", body: { track: "alpha", releases: [{
   name: "1.0.0 (" + b.versionCode + ")", versionCodes: [String(b.versionCode)], status: "completed",
-  releaseNotes: [{ language: "en-US", text: "New: see who can watch you, fix things step by step, and a colour chart on every page. Plainer words throughout." }],
+  // Each language's own note: the feature line above the fixed sentence (owner's rule).
+  releaseNotes: listings.filter((l) => l.releaseNotes).map((l) => ({ language: l.language, text: l.releaseNotes })),
 }] } });
 console.log(`• closed testing: versionCode ${b.versionCode}`);
 

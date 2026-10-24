@@ -26,7 +26,12 @@ data class SensitiveCategory(
 object Sensitive {
     const val OTHERS_LINE = "Any app on this device can run this same check, including banking, government, employer and ID apps."
     const val WEBSITE_LINE = "If you'd rather an organisation couldn't, use its website in your browser instead of its app. A website can't see which apps you have."
-    const val DELETE_STEP ="To delete an app: touch and hold its icon, then tap Uninstall. Hiding it doesn't help, but Private space (Android 15 and later) or Secure Folder does."
+    /**
+     * The best first step: apps in Private space (or Samsung's Secure Folder) live in a separate,
+     * locked profile, so apps outside it can't spot them, and their owner still opens them.
+     */
+    const val HIDE_STEP = "Best: move it into Private space (Android 15 and later; on Samsung, Secure Folder). Apps outside it can no longer spot it, and you still open it behind your lock. Check again here to see it gone."
+    const val DELETE_STEP = "To delete an app: touch and hold its icon, then tap Uninstall."
 
     val categories = listOf(
         SensitiveCategory("dating", "Dating and LGBTQ+",

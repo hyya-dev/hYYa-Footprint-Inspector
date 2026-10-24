@@ -12,6 +12,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.hyya.footprintinspector.catalogue.Catalogue
+import com.hyya.footprintinspector.catalogue.CheckUp
+import com.hyya.footprintinspector.model.OverallScore
 import com.hyya.footprintinspector.model.Finding
 import com.hyya.footprintinspector.model.FootprintScore
 import com.hyya.footprintinspector.model.Reading
@@ -53,6 +55,26 @@ class Scanner(app: Application) : AndroidViewModel(app) {
 
     val concerning: List<Finding> get() = findings.filter { it.isConcerning }
     val score: FootprintScore get() = FootprintScore.of(findings)
+
+    /**
+     * Sensitive apps: how many answered the last check. Memory only, cleared when the app leaves
+     * the screen, like the result itself: never saved.
+     */
+    var sensitiveFound by mutableStateOf<Int?>(null)
+
+    /** The four checks as one score, for the first page. */
+    fun overall(context: Context): OverallScore {
+        val ticked = context.getSharedPreferences("app", Context.MODE_PRIVATE).getStringSet("checkUpDone", emptySet())!!
+        val ids = CheckUp.steps.map { it.id }.toSet()
+        val done = phase == Phase.DONE
+        return OverallScore.of(
+            footprint = if (done) score.value else history.latest?.score,
+            sensitiveFound = sensitiveFound,
+            watchers = if (done) findings(Section.WATCH).count { it.isConcerning } else null,
+            checkUpDone = ticked.intersect(ids).size,
+            checkUpTotal = ids.size,
+        )
+    }
 
     fun scan() {
         if (phase == Phase.SCANNING) return

@@ -28,7 +28,8 @@ if (!KEY || KEY.startsWith("PASTE_")) { console.error("Add GEMINI_API_KEY to .en
 const md = readFileSync(new URL("../GooglePlayConsole/listing-en-US.md", import.meta.url), "utf8");
 const section = (name) => md.split(`## ${name}\n`)[1].split("\n## ")[0].trim();
 const BRAND = section("App name (30)");
-const en = { shortDescription: section("Short description (80)"), fullDescription: section("Full description (4000)") };
+const en = { shortDescription: section("Short description (80)"), fullDescription: section("Full description (4000)"),
+  releaseNotes: section("Release notes (500)") };
 const OUT = new URL("../GooglePlayConsole/localized/", import.meta.url);
 mkdirSync(OUT, { recursive: true });
 
@@ -59,6 +60,7 @@ export const COPIES = {
 };
 // "Phone" in the languages where Gemini reached for it: the listing serves tablets too.
 const PHONE = /phone|mobile|smartphone|móvil|mòbil|móbil|celular|telemóvel|telefon|телефон|смартфон|फ़ोन|फोन|ফোন|ફોન|ਫ਼ੋਨ|ਫੋਨ|ఫోన్|ಫೋನ್|ഫോൺ|فون|موبایل|گوشی|هاتف|جوال|טלפון|ስልክ|手机|手機|携帯|スマホ|휴대폰|스마트폰|điện thoại|โทรศัพท์|ဖုန်း|foon|cellulare/i;
+const MICROPHONE = /(?:micro|mikro|mic|ميكرو|میکرو|माइक्रो|मायक्रो|मैक्रो|ಮೈಕ್ರೊ|ಮೈಕ್ರೋ|മൈക്രോ|మైక్రో|மைக்ரோ|মাইক্রো|ਮਾਈਕ੍ਰੋ|માઇક્રો|מיקרו|ማይክሮ|მიკრო|микро|μικρό|麦克|麥克|マイク|마이크|ไมโคร|မိုက်ခရို)\S*/giu;
 const BANNED = /loupe|mysk|spyware|malware|anti-?virus|\bvirus\b|#\s*1|\bbest\b/i;
 
 function check(l) {
@@ -67,12 +69,16 @@ function check(l) {
   if (!l.shortDescription || len(l.shortDescription) > 80) issues.push(`shortDescription is ${len(l.shortDescription)} characters (max 80)`);
   if (!l.fullDescription || len(l.fullDescription) > 4000) issues.push(`fullDescription is ${len(l.fullDescription)} characters (max 4000)`);
   for (const f of ["shortDescription", "fullDescription"]) {
-    if (/\b(?:iphone|ipad|ios|macos|mac)\b/i.test(l[f] ?? "")) issues.push(`${f} must not name an Apple device or system`);
-    if (PHONE.test(l[f] ?? "")) issues.push(`${f} says "${l[f].match(PHONE)[0]}": use the neutral word for "device" instead`);
+    // Letter-aware edges: in many scripts \b treats accented letters as breaks ("…ios" in Lithuanian).
+    if (/(?<!\p{L})(?:iphone|ipad|ios|macos|mac)(?!\p{L})/iu.test(l[f] ?? "")) issues.push(`${f} must not name an Apple device or system`);
+    // "Microphone" contains "phone" in most languages; it isn't a device name, so it's allowed.
+    const phone = (l[f] ?? "").replace(MICROPHONE, "").match(PHONE);
+    if (phone) issues.push(`${f} says "${phone[0]}": use the neutral word for "device" instead`);
     if (BANNED.test(l[f] ?? "")) issues.push(`${f} uses a banned word (${l[f].match(BANNED)[0]})`);
   }
   if (!l.fullDescription?.includes(BRAND)) issues.push(`fullDescription must keep the name "${BRAND}" untranslated`);
-  if (!l.fullDescription?.includes("Mozilla Public License 2.0")) issues.push(`fullDescription must keep "Mozilla Public License 2.0" unchanged`);
+  if (!l.releaseNotes || len(l.releaseNotes) > 500) issues.push(`releaseNotes is ${len(l.releaseNotes)} characters (max 500)`);
+  else if (l.releaseNotes.trim().split("\n").length !== en.releaseNotes.split("\n").length) issues.push("releaseNotes must keep the same lines as the English");
   return issues;
 }
 
@@ -83,16 +89,17 @@ Rules:
 - Natural, native wording; calm and plain, never alarmist or hyped. Not a word-for-word translation.
 - Google Play search reads the full description, so use the local everyday terms people really search for: privacy check, app permissions, device fingerprint, digital footprint, trackers. Let them appear naturally a few times; no keyword stuffing.
 - shortDescription: at most 80 characters. Same message as the English: see what apps know about your device, then fix it; free, open source, private.
-- fullDescription: at most 4000 characters, plain text. Keep the structure: paragraphs, the UPPERCASE section headings (translated, still uppercase where the script has case) and the • bullets. Keep "${BRAND}", "hYYa" and "Mozilla Public License 2.0" unchanged. "Settings" is the system's own localised name for the Settings app. Keep "Android" and "Google" where the English has them, but never name iPhone, iPad, iOS or Mac.
+- fullDescription: at most 4000 characters, plain text. Keep the structure: paragraphs, the UPPERCASE section headings (translated, still uppercase where the script has case) and the • bullets. Keep "${BRAND}" and "hYYa" unchanged. "Settings" is the system's own localised name for the Settings app. Keep "Android" and "Google" where the English has them, but never name iPhone, iPad, iOS or Mac.
 - Stay device-neutral: the listing is for phones and tablets alike, so say "device" (the local neutral word) wherever the English says "device". Never write "phone", "mobile", "smartphone", "cell" or "tablet".
+- releaseNotes: the release note. Keep its two lines: the "• New:" line, and on the second line a faithful translation of the fixed sentence "This release contains general bug fixes and stability improvements."
 - Never mention other apps or companies (other than Google and Android as in the English), viruses, malware or spyware, and make no ranking claims.
 ${feedback ? `\nYour previous attempt had these problems; fix all of them:\n- ${feedback.join("\n- ")}\n` : ""}
 English listing (JSON):
 ${JSON.stringify(en, null, 1)}`;
 }
 
-const schema = { type: "OBJECT", required: ["shortDescription", "fullDescription"], properties: {
-  shortDescription: { type: "STRING" }, fullDescription: { type: "STRING" } } };
+const schema = { type: "OBJECT", required: ["shortDescription", "fullDescription", "releaseNotes"], properties: {
+  shortDescription: { type: "STRING" }, fullDescription: { type: "STRING" }, releaseNotes: { type: "STRING" } } };
 
 async function gemini(text) {
   for (let a = 1; a <= 5; a++) {
@@ -109,7 +116,7 @@ async function gemini(text) {
 }
 
 const write = (code, l) => writeFileSync(new URL(`${code}.json`, OUT),
-  JSON.stringify({ language: code, title: BRAND, shortDescription: l.shortDescription, fullDescription: l.fullDescription }, null, 2) + "\n");
+  JSON.stringify({ language: code, title: BRAND, shortDescription: l.shortDescription, fullDescription: l.fullDescription, releaseNotes: l.releaseNotes }, null, 2) + "\n");
 
 async function localise(code) {
   if (!FORCE && existsSync(new URL(`${code}.json`, OUT))) return `${code}: kept`;

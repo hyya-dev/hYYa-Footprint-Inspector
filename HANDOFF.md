@@ -16,6 +16,13 @@
   - 🔔 Tell them again when Android goes live in production on Google Play.
 - ASC builds 1–12 are expired; build 13 is live on both platforms.
 
+## ⏰ Due by 2026-10-31: apply for Apple featuring (owner, 2026-10-24)
+- Nominate the app for App Store featuring in App Store Connect (Featuring Nominations).
+- Before then, check every requirement Apple lists for featuring and fill any gap: quality and
+  polish, accessibility, localisation, privacy, latest technology (iOS 27.1 / iPhone Duo),
+  in-app events and store assets.
+- 🚨 A nomination goes to Apple, so prepare it fully and ask the owner before sending it.
+
 ## Next: v1.0.1 to-do (agreed with the owner 2026-10-23)
 
 ▶ **iOS 1.0.1 (14) built and uploaded to TestFlight on 2026-10-24** (the owner asked to go ahead

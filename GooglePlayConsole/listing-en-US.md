@@ -15,17 +15,20 @@ See what your apps know and did, then fix it in a few taps. Free and private.
 Your apps can learn more about you than you think. hYYa Footprint Inspector shows you what they can see, who can watch you, and how to fix it, in plain words.
 
 FOUR SIMPLE STEPS
-1. Footprint: one tap checks what any app can read about your device and gives you a score out of 100. Higher is better.
+1. Footprint: one tap checks what any app can read about your device.
 2. Sensitive apps: see which of your apps others can spot, like dating, faith, health or VPN apps, and what that could say about you.
 3. Tracker: see which apps can read your screen, read every notification, or lock your device. Apps holding more than one of these are flagged, because that's how monitoring apps work. Then open Android's own record of which apps used your location, camera and microphone.
-4. Check-up: go through your settings one area at a time and take back access you don't want to give.
+4. Check-up: keep spying apps out with updates, weekly restarts and a leaked-password check, then go through your settings one area at a time and take back access you don't want to give.
+
+ONE SCORE FOR ALL FOUR
+Your privacy score, out of 100, brings the four checks together. Higher is better, and it grows as you finish each check.
 
 FIX IT WITH ME
 Tap "Fix them with me" and the app walks you through each fix, one at a time, opening the exact setting for you. Then scan again and watch your score go up.
 
 CLEAR, CALM AND HONEST
 • A colour chart on every page: red is worth a look, amber is worth knowing, green is fine.
-• Every finding explained: what it reveals, how serious it is and how long it lasts.
+• Every finding in plain words: a short headline, one line on why it matters, and how to fix it.
 • Apps built into your device aren't flagged, and parental-control or work apps are named for what they are.
 • An honest "only Google or the device maker can fix this" when there's nothing you can do.
 • A weekly or monthly reminder to check again, if you'd like one.
@@ -42,6 +45,10 @@ PRIVATE BY DESIGN
 Meet the detective: he's on every page and has a tip if you tap him.
 
 hYYa Footprint Inspector is part of the hYYa family of privacy-first apps.
+
+## Release notes (500)
+• New: one privacy score for all four checks, plainer words, and new steps to keep spying apps out.
+This release contains general bug fixes and stability improvements.
 
 ## Category
 Tools
