@@ -44,7 +44,9 @@ const version = versions.data[0];
 if (!version) throw new Error("No editable iOS version");
 const infos = await api(`/v1/apps/${APP_ID}/appInfos`);
 const info = infos.data.find((i) => ["PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED", "REJECTED"].includes(i.attributes.state)) ?? infos.data[0];
-const infoLocs = Object.fromEntries((await api(`/v1/appInfos/${info.id}/appInfoLocalizations?limit=200`)).data.map((l) => [l.attributes.locale, l.id]));
+const infoLocData = (await api(`/v1/appInfos/${info.id}/appInfoLocalizations?limit=200`)).data;
+const infoLocs = Object.fromEntries(infoLocData.map((l) => [l.attributes.locale, l.id]));
+const infoNow = Object.fromEntries(infoLocData.map((l) => [l.attributes.locale, l.attributes]));
 let verLocs = Object.fromEntries((await api(`/v1/appStoreVersions/${version.id}/appStoreVersionLocalizations?limit=200`)).data.map((l) => [l.attributes.locale, l.id]));
 
 const wanted = process.argv.slice(2);
@@ -57,7 +59,9 @@ for (const locale of files) {
   try {
     const infoAttrs = { name: l.name, subtitle: l.subtitle, privacyPolicyUrl: en.privacyPolicyUrl };
     if (infoLocs[locale]) {
-      await api(`/v1/appInfoLocalizations/${infoLocs[locale]}`, "PATCH", { data: { type: "appInfoLocalizations", id: infoLocs[locale], attributes: infoAttrs } });
+      // The app info locks while any platform is in review; skip it then if it already matches.
+      const same = infoNow[locale]?.name === l.name && infoNow[locale]?.subtitle === l.subtitle;
+      if (!same) await api(`/v1/appInfoLocalizations/${infoLocs[locale]}`, "PATCH", { data: { type: "appInfoLocalizations", id: infoLocs[locale], attributes: infoAttrs } });
     } else {
       await api(`/v1/appInfoLocalizations`, "POST", { data: { type: "appInfoLocalizations", attributes: { locale, ...infoAttrs },
         relationships: { appInfo: { data: { type: "appInfos", id: info.id } } } } });
@@ -65,7 +69,7 @@ for (const locale of files) {
     // Creating an app-info localisation also creates the version's, so look it up again.
     if (!verLocs[locale]) Object.assign(verLocs, Object.fromEntries((await api(`/v1/appStoreVersions/${version.id}/appStoreVersionLocalizations?limit=200`)).data.map((v) => [v.attributes.locale, v.id])));
     const verAttrs = { description: l.description, keywords: l.keywords, promotionalText: l.promotionalText,
-      supportUrl: en.supportUrl, marketingUrl: en.marketingUrl };
+      supportUrl: en.supportUrl, marketingUrl: en.marketingUrl, ...(l.whatsNew ? { whatsNew: l.whatsNew } : {}) };
     if (verLocs[locale]) {
       await api(`/v1/appStoreVersionLocalizations/${verLocs[locale]}`, "PATCH", { data: { type: "appStoreVersionLocalizations", id: verLocs[locale], attributes: verAttrs } });
     } else {

@@ -20,6 +20,9 @@ const SETS = (process.env.PLATFORM ?? "IOS") === "MAC_OS" ? {
 } : {
   iphone: { dir: "store/slides/iphone-6.9", type: "APP_IPHONE_67" },
   ipad: { dir: "store/slides/ipad-13", type: "APP_IPAD_PRO_3GEN_129" },
+  // iPhone Duo: one set for both screens (1398×2034 folded, 2007×2853 open). The value isn't in
+  // Apple's published API reference yet; uploads to it were confirmed working by other tools.
+  duo: { dir: "store/slides/duo", type: "APP_IPHONE_DUO" },
 };
 const only = process.argv[2];
 const { ASC_ISSUER_ID, ASC_KEY_ID, ASC_PRIVATE_KEY_PATH } = process.env;

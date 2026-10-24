@@ -46,6 +46,12 @@ final class StoreScreenshotsUITests: XCTestCase {
         if bar.exists { bar.tap() } else { app.buttons[name].firstMatch.tap() }
     }
 
+    /// Back: in the top bar on most devices, in the side strip on a folded iPhone Duo.
+    private func back() {
+        let bar = app.navigationBars.buttons.element(boundBy: 0)
+        if bar.exists { bar.tap() } else { app.buttons["BackButton"].firstMatch.tap() }
+    }
+
     private func scrollTo(_ element: XCUIElement, max: Int = 10) {
         var n = 0
         while !element.isHittable && n < max { app.swipeUp(velocity: .slow); n += 1 }
@@ -78,7 +84,7 @@ final class StoreScreenshotsUITests: XCTestCase {
             shot("cand-\(group)")
             app.swipeUp(velocity: .slow)
             shot("cand-\(group)-2")
-            app.navigationBars.buttons.element(boundBy: 0).tap()
+            back()
             sleep(1)
         }
     }
@@ -96,7 +102,7 @@ final class StoreScreenshotsUITests: XCTestCase {
             guard row.exists else { continue }
             row.tap(); sleep(1)
             shot("review-\(group)")
-            app.navigationBars.buttons.element(boundBy: 0).tap(); sleep(1)
+            back(); sleep(1)
         }
         tab("Sensitive apps"); sleep(1)
         app.swipeUp(velocity: .fast); app.swipeUp(velocity: .fast); sleep(1)
@@ -120,32 +126,7 @@ final class StoreScreenshotsUITests: XCTestCase {
         sleep(2)
         shot("store-01-home")
 
-        tap("Start with check 1")
-        XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 20))
-        // Second scan so the "since your last scan" card appears.
-        app.buttons["Scan again"].tap()
-        sleep(1)
-        XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 20))
-        sleep(2)
-        shot("store-02-results")
-
-        // The "Worth a look" list, with the comparison card's top edge just below the status bar,
-        // so nothing sits half-hidden under the clock.
-        let card = app.staticTexts.containing(NSPredicate(format: "label CONTAINS[c] 'since your last scan'")).firstMatch
-        if card.waitForExistence(timeout: 3) {
-            let top = app.windows.firstMatch.frame.minY + 66
-            let start = card.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-            let end = app.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: card.frame.midX, dy: top + 34))
-            start.press(forDuration: 0.1, thenDragTo: end, withVelocity: .slow, thenHoldForDuration: 0.8)
-        }
-        sleep(2)
-        shot("store-03-clues")
-
-        let clue = app.buttons.containing(NSPredicate(format: "label CONTAINS 'Last restart'")).firstMatch
-        scrollTo(clue)
-        if clue.exists { clue.tap(); sleep(2); shot("store-04-finding") }
-        app.navigationBars.buttons.element(boundBy: 0).tap()
-
+        // Checks 2 and 3 first, so the results show one privacy score built from three checks.
         tab("Sensitive apps")
         sleep(1)
         for name in ["Dating and LGBTQ+", "Health and fertility", "VPN, Tor and censorship tools"] {
@@ -156,17 +137,32 @@ final class StoreScreenshotsUITests: XCTestCase {
         app.swipeDown(velocity: .fast)
         sleep(1)
         shot("store-05-sensitive")
-
-        tab("Check-up")
-        sleep(1)
-        shot("store-06-checkup")
+        let check = app.buttons.containing(NSPredicate(format: "label BEGINSWITH 'Check '")).firstMatch
+        scrollTo(check, max: 6)
+        if check.exists { check.tap(); sleep(1) }
 
         tab("Tracker")
         sleep(2)
         shot("store-08-tracker")
 
-        // The score explained, with "Fix them with me", then the first fix step.
+        tab("Check-up")
+        sleep(1)
+        shot("store-06-checkup")
+
         tab("Footprint")
+        tap("Start with check 1")
+        XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 20))
+        sleep(2)
+        shot("store-02-results")
+
+        let clue = app.buttons.containing(NSPredicate(format: "label CONTAINS 'last restarted'")).firstMatch
+        scrollTo(clue, max: 14)
+        if clue.exists { clue.tap(); sleep(2); shot("store-04-finding") }
+        back()
+        sleep(1)
+        app.swipeDown(velocity: .fast); app.swipeDown(velocity: .fast)
+
+        // The score explained, with "Fix them with me", then the first fix step.
         let fix = app.buttons["Fix them with me"]
         scrollTo(fix, max: 6)
         if fix.exists {
@@ -174,7 +170,8 @@ final class StoreScreenshotsUITests: XCTestCase {
             sleep(1)
             shot("store-10-score")
             fix.tap()
-            sleep(2)
+            _ = app.buttons["Done, next"].waitForExistence(timeout: 5)
+            sleep(3) // let the sheet finish rising before the shot
             shot("store-09-fix")
             app.buttons["Close"].firstMatch.tap()
         }

@@ -48,8 +48,22 @@ or Play, without the owner's consent.
 - Mac: builds, 5 tests pass.
 - Not yet: Device Hub open poses, or the owner's Duo.
 
-**Still to do for 1.0.1:** store slides and copy (the first page changed), Mac plain words for Mac
-findings, Mac and Android ports.
+**App Store Connect, iOS 1.0.1 (prepared 2026-10-24, NOT submitted):**
+- Version 1.0.1 is created with build 14 attached and releases automatically after approval.
+- English and 49 languages: description, promotional text and What's New. What's New reads
+  "• Now made for iPhone Duo." above the fixed sentence (owner's rule). Subtitles and keywords
+  were kept.
+- Reviewer notes are 3,994 of 4,000 characters.
+- Slides: 7 iPhone, 7 iPad and 7 Duo. The Duo slides are folded-screen captures, in set
+  `APP_IPHONE_DUO`, which isn't in Apple's published API reference but works. Open-screen Duo
+  slides need one Device Hub sitting with the owner (optional; the set takes both sizes).
+- `scripts/asc-audit-version.mjs` passes every check.
+- New scripts: `asc-prepare-version.mjs` and `asc-audit-version.mjs`. The listing scripts carry
+  What's New and skip app info that's locked while macOS is in review.
+- 🚨 Waiting on: the owner's Duo test of build 14, then the owner's go-ahead to submit. After the
+  iOS submission: Android 1.0.1 to closed testers. macOS stays on hold until 1.0.0's verdict.
+
+**Still to do for 1.0.1 (later):** Mac plain words for Mac findings, and the Mac and Android ports.
 
 **Where the issues came from:**
 - **Friends and family**, on ordinary non-folding iPhones: they stay on the first page, the

@@ -8,6 +8,8 @@
 // limits and our wording rules; failures are retried with the reasons, then reported.
 //
 //   node scripts/gemini-localize-listing.mjs [locale …] [--model name] [--force]
+//   node scripts/gemini-localize-listing.mjs --text-only   (redo promotional text, description and
+//     What's New only; each language keeps its own subtitle and keywords, so search ranking holds)
 //
 // The key comes from GEMINI_API_KEY in the environment or in the gitignored .env file.
 
@@ -18,6 +20,8 @@ const opt = (name, fallback) => { const i = argv.indexOf(name); return i >= 0 ? 
 const MODEL = opt("--model", "gemini-3.7-flash");
 const FORCE = argv.includes("--force");
 if (FORCE) argv.splice(argv.indexOf("--force"), 1);
+const TEXT_ONLY = argv.includes("--text-only");
+if (TEXT_ONLY) argv.splice(argv.indexOf("--text-only"), 1);
 const envFile = new URL("../.env", import.meta.url);
 const KEY = process.env.GEMINI_API_KEY || (existsSync(envFile) ? (readFileSync(envFile, "utf8").split("\n")
   .find((l) => l.startsWith("GEMINI_API_KEY=")) ?? "").slice(15).trim() : "");
@@ -58,6 +62,13 @@ function check(l) {
   if (new Set(words.map((w) => w.toLowerCase())).size !== words.length) issues.push("keywords: duplicates");
   const taken = `${BRAND} ${l.subtitle ?? ""}`.toLowerCase().split(/[\s,&:،、・]+/).filter((w) => w.length > 1);
   for (const w of words) if (taken.includes(w.toLowerCase())) issues.push(`keyword "${w}" already appears in the name or subtitle`);
+  if (en.whatsNew) {
+    if (!l.whatsNew || len(l.whatsNew) > 4000) issues.push("whatsNew is missing or too long");
+    else {
+      if (!l.whatsNew.includes("iPhone Duo")) issues.push('whatsNew must keep "iPhone Duo" exactly as written');
+      if (l.whatsNew.split("\n").length !== en.whatsNew.split("\n").length) issues.push("whatsNew must keep the same lines as the English");
+    }
+  }
   for (const [k, v] of Object.entries(l)) if (BANNED.test(v)) issues.push(`${k} uses a banned word (${v.match(BANNED)[0]})`);
   if (/\bfree\b/i.test(l.subtitle ?? "") || /gratuit|gratis|kostenlos|無料|免费|免費|무료|бесплат|مجان/i.test(l.subtitle ?? "")) issues.push("subtitle must not mention price or free");
   return issues;
@@ -73,13 +84,18 @@ Rules:
 - promotionalText: at most 170 characters. Keep it device-neutral like the English (phone, tablet or computer): never name iPhone, iPad, Mac or Android.
 - description: at most 4000 characters, plain text. Keep the structure: paragraphs, the UPPERCASE section headings (translated, still uppercase where the script has case) and the • bullets. Keep "${BRAND}", "hYYa" and "Mozilla Public License 2.0" unchanged; "Settings" is the system's own localised name for the Settings app. Stay device-neutral like the English ("your device", "the system"): never name iPhone, iPad, iOS, Mac or Android.
 - Never mention other apps or companies, viruses, malware or spyware, and make no ranking claims.
+- whatsNew: the release note. Keep its two lines: the bullet line (keep "iPhone Duo" exactly as written, it's the device's name) and, on the second line, a faithful translation of the fixed sentence "This release contains general bug fixes and stability improvements."
 ${feedback ? `\nYour previous attempt had these problems; fix all of them:\n- ${feedback.join("\n- ")}\n` : ""}
 English listing (JSON):
-${JSON.stringify({ subtitle: en.subtitle, keywords: en.keywords, promotionalText: en.promotionalText, description: en.description }, null, 1)}`;
+${JSON.stringify(TEXT_ONLY ? { promotionalText: en.promotionalText, description: en.description, whatsNew: en.whatsNew }
+  : { subtitle: en.subtitle, keywords: en.keywords, promotionalText: en.promotionalText, description: en.description, whatsNew: en.whatsNew }, null, 1)}`;
 }
 
-const schema = { type: "OBJECT", required: ["subtitle", "keywords", "promotionalText", "description"], properties: {
-  subtitle: { type: "STRING" }, keywords: { type: "STRING" }, promotionalText: { type: "STRING" }, description: { type: "STRING" } } };
+const schema = TEXT_ONLY
+  ? { type: "OBJECT", required: ["promotionalText", "description", "whatsNew"], properties: {
+      promotionalText: { type: "STRING" }, description: { type: "STRING" }, whatsNew: { type: "STRING" } } }
+  : { type: "OBJECT", required: ["subtitle", "keywords", "promotionalText", "description", "whatsNew"], properties: {
+      subtitle: { type: "STRING" }, keywords: { type: "STRING" }, promotionalText: { type: "STRING" }, description: { type: "STRING" }, whatsNew: { type: "STRING" } } };
 
 async function gemini(text) {
   for (let a = 1; a <= 5; a++) {
@@ -97,14 +113,17 @@ async function gemini(text) {
 
 async function localise(locale) {
   const file = new URL(`${locale}.json`, OUT);
-  if (!FORCE && existsSync(file)) return `${locale}: kept`;
+  if (!FORCE && !TEXT_ONLY && existsSync(file)) return `${locale}: kept`;
+  const kept = TEXT_ONLY && existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : null;
   let result, issues;
   if (ENGLISH.has(locale)) {
-    result = { subtitle: en.subtitle, keywords: en.keywords, promotionalText: en.promotionalText, description: en.description };
+    result = { subtitle: kept?.subtitle ?? en.subtitle, keywords: kept?.keywords ?? en.keywords,
+               promotionalText: en.promotionalText, description: en.description, whatsNew: en.whatsNew };
     issues = check(result);
   } else {
     for (let attempt = 1; attempt <= 4; attempt++) {
       result = await gemini(prompt(LOCALES[locale], issues));
+      if (kept) result = { subtitle: kept.subtitle, keywords: kept.keywords, ...result };
       result.keywords = result.keywords.split(/\s*[,،、，]\s*/).filter(Boolean).join(",");
       issues = check(result);
       if (!issues.length) break;

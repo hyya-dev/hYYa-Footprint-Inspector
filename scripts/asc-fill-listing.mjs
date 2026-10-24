@@ -57,41 +57,54 @@ if (!version) throw new Error("No editable iOS version");
 const infos = await api(`/v1/apps/${APP_ID}/appInfos`);
 const info = infos.data.find((i) => ["PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED", "REJECTED"].includes(i.attributes.state)) ?? infos.data[0];
 
+// The app info (name, subtitle, categories, age rating) is shared by every platform and locks while
+// any platform is in review. Skip it then, but only if what's there already matches.
+const locked = (e) => /INVALID_STATE|STATE_ERROR|not editable/.test(String(e.message));
+async function infoStep(label, fn, matches = async () => true) {
+  try { await fn(); step(label); }
+  catch (e) {
+    if (!locked(e)) throw e;
+    if (!(await matches())) throw new Error(`${label}: locked while another platform is in review, and it differs from the repo`);
+    step(`${label}: already as in the repo (locked while another platform is in review)`);
+  }
+}
+
 // App info localization: name, subtitle, privacy policy URL
 const infoLocs = await api(`/v1/appInfos/${info.id}/appInfoLocalizations`);
 const infoLoc = infoLocs.data.find((l) => l.attributes.locale === "en-US");
-await api(`/v1/appInfoLocalizations/${infoLoc.id}`, "PATCH", { data: { type: "appInfoLocalizations", id: infoLoc.id, attributes: {
-  name: listing.name, subtitle: listing.subtitle, privacyPolicyUrl: listing.privacyPolicyUrl } } });
-step(`name, subtitle, privacy policy URL`);
+await infoStep(`name, subtitle, privacy policy URL`,
+  () => api(`/v1/appInfoLocalizations/${infoLoc.id}`, "PATCH", { data: { type: "appInfoLocalizations", id: infoLoc.id, attributes: {
+    name: listing.name, subtitle: listing.subtitle, privacyPolicyUrl: listing.privacyPolicyUrl } } }),
+  async () => infoLoc.attributes.name === listing.name && infoLoc.attributes.subtitle === listing.subtitle);
 
 // Version localization: description, keywords, promo text, URLs
 const verLocs = await api(`/v1/appStoreVersions/${version.id}/appStoreVersionLocalizations`);
 const verLoc = verLocs.data.find((l) => l.attributes.locale === "en-US");
 await api(`/v1/appStoreVersionLocalizations/${verLoc.id}`, "PATCH", { data: { type: "appStoreVersionLocalizations", id: verLoc.id, attributes: {
   description: listing.description, keywords: listing.keywords, promotionalText: listing.promotionalText,
-  supportUrl: listing.supportUrl, marketingUrl: listing.marketingUrl } } });
-step(`description, keywords, promotional text, support and marketing URLs`);
+  supportUrl: listing.supportUrl, marketingUrl: listing.marketingUrl, ...(listing.whatsNew ? { whatsNew: listing.whatsNew } : {}) } } });
+step(`description, keywords, promotional text, ${listing.whatsNew ? "What's New, " : ""}support and marketing URLs`);
 
 // Copyright on the version
 await api(`/v1/appStoreVersions/${version.id}`, "PATCH", { data: { type: "appStoreVersions", id: version.id, attributes: { copyright: listing.copyright } } });
 step(`copyright`);
 
 // Categories
-await api(`/v1/appInfos/${info.id}`, "PATCH", { data: { type: "appInfos", id: info.id, relationships: {
-  primaryCategory: { data: { type: "appCategories", id: listing.primaryCategory } },
-  secondaryCategory: { data: { type: "appCategories", id: listing.secondaryCategory } } } } });
-step(`categories ${listing.primaryCategory} / ${listing.secondaryCategory}`);
+await infoStep(`categories ${listing.primaryCategory} / ${listing.secondaryCategory}`,
+  () => api(`/v1/appInfos/${info.id}`, "PATCH", { data: { type: "appInfos", id: info.id, relationships: {
+    primaryCategory: { data: { type: "appCategories", id: listing.primaryCategory } },
+    secondaryCategory: { data: { type: "appCategories", id: listing.secondaryCategory } } } } }),
+  async () => (await api(`/v1/appInfos/${info.id}/primaryCategory`)).data?.id === listing.primaryCategory);
 
 // Age rating: nothing objectionable, no web access, no UGC, no ads → 4+
 const none = "NONE";
-await api(`/v1/ageRatingDeclarations/${info.id}`, "PATCH", { data: { type: "ageRatingDeclarations", id: info.id, attributes: {
+await infoStep(`age rating answers (all none → 4+)`, () => api(`/v1/ageRatingDeclarations/${info.id}`, "PATCH", { data: { type: "ageRatingDeclarations", id: info.id, attributes: {
   advertising: false, alcoholTobaccoOrDrugUseOrReferences: none, contests: none, gambling: false, gamblingSimulated: none,
   gunsOrOtherWeapons: none, healthOrWellnessTopics: false, lootBox: false, medicalOrTreatmentInformation: none,
   messagingAndChat: false, parentalControls: false, profanityOrCrudeHumor: none, ageAssurance: false,
   sexualContentGraphicAndNudity: none, sexualContentOrNudity: none, socialMedia: false, socialMediaAgeRestricted: false,
   horrorOrFearThemes: none, matureOrSuggestiveThemes: none, unrestrictedWebAccess: false, userGeneratedContent: false,
-  violenceCartoonOrFantasy: none, violenceRealisticProlongedGraphicOrSadistic: none, violenceRealistic: none } } });
-step(`age rating answers (all none → 4+)`);
+  violenceCartoonOrFantasy: none, violenceRealisticProlongedGraphicOrSadistic: none, violenceRealistic: none } } }));
 
 // Review details: contact copied from a sibling app, notes from store/review-notes.txt
 const sibVersions = await api(`/v1/apps/${REVIEW_CONTACT_APP_ID}/appStoreVersions?limit=1`);
