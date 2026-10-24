@@ -31,7 +31,7 @@ struct ScoreGuideCard: View {
     }
 
     var body: some View {
-        ToneCard(tone: fixes.isEmpty ? .fix : .context, title: "What your score means", symbol: "gauge.with.dots.needle.33percent") {
+        ToneCard(tone: fixes.isEmpty ? .fix : .context, title: "What the footprint score means", symbol: "gauge.with.dots.needle.33percent") {
             Text(meaning).font(.subheadline).foregroundStyle(Brand.ink).fixedSize(horizontal: false, vertical: true)
             ScoreBands(value: score.value)
             if fixes.isEmpty {
@@ -44,7 +44,7 @@ struct ScoreGuideCard: View {
                     ForEach(fixes.prefix(5)) { f in
                         HStack(alignment: .firstTextBaseline, spacing: 8) {
                             Text("+\(FootprintScore.points(for: f))").font(.subheadline.weight(.bold).monospacedDigit()).foregroundStyle(Tone.fix.tint).frame(minWidth: 34, alignment: .leading)
-                            Text(f.definition.title).font(.subheadline).foregroundStyle(Brand.textMuted).fixedSize(horizontal: false, vertical: true)
+                            Text(f.definition.headline).font(.subheadline).foregroundStyle(Brand.textMuted).fixedSize(horizontal: false, vertical: true)
                         }
                     }
                     if fixes.count > 5 { Text("and \(fixes.count - 5) more").font(.footnote).foregroundStyle(Brand.textSubtle) }
@@ -100,6 +100,7 @@ struct FixWizard: View {
     let onFinish: () -> Void
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @State private var index = 0
     @State private var done: Set<String> = []
 
@@ -112,7 +113,9 @@ struct FixWizard: View {
             .navigationTitle(index < fixes.count ? "Fix \(index + 1) of \(fixes.count)" : "All done")
             .inlineTitle()
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Close") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button { dismiss() } label: { Label("Close", systemImage: "xmark") }
+                }
             }
         }
         .sensoryFeedback(.selection, trigger: index)
@@ -130,7 +133,7 @@ struct FixWizard: View {
             ProgressView(value: Double(index), total: Double(fixes.count)).tint(Tone.fix.tint)
             Text("Apps can't change these settings for you, so I'll take you to each one. Come back here after each change.")
                 .font(.footnote).foregroundStyle(Brand.textSubtle).fixedSize(horizontal: false, vertical: true)
-            ToneCard(tone: .fix, title: f.definition.title, symbol: "wrench.and.screwdriver") {
+            ToneCard(tone: .fix, title: f.definition.headline, symbol: "wrench.and.screwdriver") {
                 ToneBadge(text: "+\(FootprintScore.points(for: f)) points", tone: .fix)
             } content: {
                 Text(f.definition.fix.summary).font(.body).foregroundStyle(Brand.ink).fixedSize(horizontal: false, vertical: true)
@@ -143,11 +146,25 @@ struct FixWizard: View {
                 Button("Open Settings") { SettingsLink.openSettingsHome() }.buttonStyle(GhostButtonStyle()).frame(maxWidth: .infinity)
                 #endif
             }
-            Button("Done, next") { done.insert(f.id); Haptics.success(); index += 1 }
-                .buttonStyle(PrimaryCTAButtonStyle(fill: Brand.green, depthColor: Color(hex: 0x0E8A56)))
-            Button("Skip this one") { index += 1 }
-                .buttonStyle(GhostButtonStyle())
-                .frame(maxWidth: .infinity)
+        }
+        // The answer stays in reach on every screen size, folded or not, instead of below the fold.
+        .safeAreaInset(edge: .bottom) {
+            // Side by side when the screen is short (sideways), stacked otherwise.
+            let layout = verticalSizeClass == .compact ? AnyLayout(HStackLayout(spacing: 12)) : AnyLayout(VStackLayout(spacing: 8))
+            layout {
+                Button("Done, next") { done.insert(f.id); Haptics.success(); index += 1 }
+                    .buttonStyle(PrimaryCTAButtonStyle(fill: Brand.green, depthColor: Color(hex: 0x0E8A56)))
+                Button("Skip this one") { index += 1 }
+                    .buttonStyle(GhostButtonStyle())
+                    .frame(maxWidth: .infinity)
+            }
+            .frame(maxWidth: 720)
+            .padding(.horizontal, 20)
+            .padding(.top, 10)
+            .padding(.bottom, 6)
+            .frame(maxWidth: .infinity)
+            .background { ZStack { Color.black; Brand.surface }.ignoresSafeArea(edges: .bottom) }
+            .overlay(alignment: .top) { Rectangle().fill(Brand.rule).frame(height: 0.5) }
         }
     }
 

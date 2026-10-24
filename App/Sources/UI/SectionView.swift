@@ -38,7 +38,7 @@ struct SectionView: View {
                 SectionTitle(title: "What an app would get")
                 Panel {
                     ForEach(SignalCatalogue.definitions(in: section)) { def in
-                        RowCard(symbol: "eye", title: def.title, subtitle: def.reveals) { EmptyView() }
+                        RowCard(symbol: "eye", title: def.headline, subtitle: def.brief) { EmptyView() }
                     }
                 }
             } else {
@@ -110,7 +110,7 @@ struct FindingCard: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(finding.definition.title)
+                Text(finding.definition.headline)
                     .font(.subheadline)
                     .foregroundStyle(Brand.textMuted)
                 Text(finding.reading.value)

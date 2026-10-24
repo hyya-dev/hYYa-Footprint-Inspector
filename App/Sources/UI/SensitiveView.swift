@@ -16,6 +16,7 @@ struct SensitiveView: View {
     @State private var checks = 0
     @Environment(\.goToTab) private var goToTab
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(PrivacyCheck.self) private var check
 
     private var chosen: Set<String> {
         Set(storedChoice.split(separator: ",").map(String.init))
@@ -160,6 +161,7 @@ struct SensitiveView: View {
         withAnimation(reduceMotion ? nil : .spring(response: 0.45, dampingFraction: 0.85)) {
             results = SensitiveCatalogue.scan(chosen)
         }
+        check.recordSensitive(found: foundCount)
         checks += 1
     }
 }

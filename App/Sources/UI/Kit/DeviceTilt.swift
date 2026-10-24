@@ -79,12 +79,12 @@ struct TiltParallax: ViewModifier {
 extension View {
     func tiltParallax(_ strength: Double = 8) -> some View { modifier(TiltParallax(strength: strength)) }
 
-    /// Cards that rise and tip into place as they scroll in, like sheets laid on a desk.
+    /// Cards that rise and tip into place as they scroll in, like sheets laid on a desk. They stay
+    /// fully opaque: a half-faded card at the screen edge reads as switched off.
     func scrollIn3D() -> some View {
         scrollTransition(.interactive, axis: .vertical) { content, phase in
             content
-                .opacity(phase.isIdentity ? 1 : 0.55)
-                .scaleEffect(phase.isIdentity ? 1 : 0.96)
+                .scaleEffect(phase.isIdentity ? 1 : 0.97)
                 .rotation3DEffect(.degrees(phase.value * -10), axis: (x: 1, y: 0, z: 0), anchor: phase.value < 0 ? .bottom : .top, perspective: 0.6)
         }
     }

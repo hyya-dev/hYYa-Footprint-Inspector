@@ -57,7 +57,7 @@ final class StoreScreenshotsUITests: XCTestCase {
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         app.launch()
         sleep(2)
-        tap("Start scan")
+        tap("Start with check 1")
         XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 20))
         for group in ["Remembered after deleting", "Location", "Photos", "Contacts", "Web fingerprint", "Account and App Store"] {
             app.swipeDown(velocity: .fast); app.swipeDown(velocity: .fast)
@@ -87,7 +87,7 @@ final class StoreScreenshotsUITests: XCTestCase {
     func testCaptureReview() {
         app.launch()
         sleep(2)
-        tap("Start scan")
+        tap("Start with check 1")
         XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 20))
         for group in ["Device identity", "Motion sensors", "Graphics and mobile network"] {
             app.swipeDown(velocity: .fast); app.swipeDown(velocity: .fast)
@@ -120,7 +120,7 @@ final class StoreScreenshotsUITests: XCTestCase {
         sleep(2)
         shot("store-01-home")
 
-        tap("Start scan")
+        tap("Start with check 1")
         XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 20))
         // Second scan so the "since your last scan" card appears.
         app.buttons["Scan again"].tap()

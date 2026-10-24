@@ -144,3 +144,168 @@ extension View {
         #endif
     }
 }
+
+// MARK: - The four checks, on the first page
+
+extension OverallScore {
+    /// Everything done so far: the Footprint scan (this one, or the last saved score), the
+    /// sensitive-app and Tracker results held in memory, and the Check-up areas ticked.
+    @MainActor static func current(scanner: Scanner, history: HistoryStore, check: PrivacyCheck, checkUpStored: String) -> OverallScore {
+        let ticked = Set(checkUpStored.split(separator: ",").map(String.init))
+        let ids = Set(CheckUpGuide.steps.map(\.id))
+        return OverallScore(footprint: scanner.phase == .done ? scanner.score.value : history.latest?.score,
+                            sensitiveFound: check.sensitiveFound,
+                            trackerSharing: check.trackerSharing,
+                            checkUpDone: ticked.intersection(ids).count,
+                            checkUpTotal: ids.count)
+    }
+}
+
+/// The four checks as rows: what each one does, whether it's done, and its part of the score.
+/// Tapping one goes to that page, so the first page is also the map of the whole app.
+struct ChecksPanel: View {
+    let overall: OverallScore
+    /// Step 1 starts the scan here instead of moving to another page.
+    var onScan: (() -> Void)? = nil
+    @Environment(\.goToTab) private var goToTab
+    @Environment(PrivacyCheck.self) private var check
+    @AppStorage("checkUpDone") private var checkUpStored = ""
+
+    private var tabs: [AppTab] {
+        #if os(macOS)
+        [.footprint, .sensitive, .checkup, .tracker]
+        #else
+        [.footprint, .sensitive, .tracker, .checkup]
+        #endif
+    }
+
+    var body: some View {
+        Panel {
+            ForEach(Array(tabs.enumerated()), id: \.element) { i, tab in
+                Button {
+                    Haptics.selection()
+                    if tab == .footprint { onScan?() } else { goToTab(tab) }
+                } label: {
+                    row(number: i + 1, tab: tab)
+                }
+                .buttonStyle(PressableCardStyle())
+                .disabled(tab == .footprint && onScan == nil)
+            }
+        }
+    }
+
+    private func part(_ tab: AppTab) -> OverallScore.Part? {
+        switch tab {
+        case .footprint: .footprint
+        case .sensitive: .sensitive
+        case .tracker: .tracker
+        case .checkup: .checkup
+        case .settings: nil
+        }
+    }
+
+    private func status(_ tab: AppTab, value: Int?) -> String {
+        switch tab {
+        case .footprint:
+            return value.map { FootprintScore.Level(value: $0).title } ?? "Not checked yet"
+        case .sensitive:
+            guard let n = check.sensitiveFound else { return "Not checked yet" }
+            return n == 0 ? "No app can spot them" : (n == 1 ? "1 app can be spotted" : "\(n) apps can be spotted")
+        case .tracker:
+            #if os(macOS)
+            return "Where to look on this Mac"
+            #else
+            guard let n = check.trackerSharing else { return "Not checked yet" }
+            return n == 0 ? "No app shared your data" : (n == 1 ? "1 app shared your data" : "\(n) apps shared your data")
+            #endif
+        case .checkup:
+            let ticked = Set(checkUpStored.split(separator: ",").map(String.init)).intersection(CheckUpGuide.steps.map(\.id)).count
+            return ticked == 0 ? "Not started" : "\(ticked) of \(CheckUpGuide.steps.count) areas checked"
+        case .settings:
+            return ""
+        }
+    }
+
+    private func row(number: Int, tab: AppTab) -> some View {
+        let value = part(tab).flatMap { overall.parts[$0] }
+        let done = value != nil
+        return HStack(spacing: 14) {
+            ZStack {
+                Circle().fill(done ? Tone.fix.tint.opacity(0.16) : Brand.sand.opacity(0.12))
+                if done {
+                    Image(systemName: "checkmark").font(.subheadline.weight(.bold)).foregroundStyle(Tone.fix.tint)
+                } else {
+                    Text("\(number)").font(.subheadline.weight(.semibold).monospacedDigit()).foregroundStyle(Brand.sand)
+                }
+            }
+            .frame(width: 32, height: 32)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(tab.title).font(.body.weight(.semibold)).foregroundStyle(Brand.ink)
+                Text(tab.pitch).font(.footnote).foregroundStyle(Brand.textSubtle)
+                    .multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true)
+                Text(status(tab, value: value))
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(done ? Tone.fix.tint : Brand.sand)
+            }
+            Spacer(minLength: 8)
+            if let value {
+                Text("\(value)").font(.title3.weight(.semibold).monospacedDigit()).foregroundStyle(Brand.ink)
+            } else if !(tab == .footprint && onScan == nil) {
+                Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(Brand.textSubtle)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .contentShape(Rectangle())
+        .overlay(alignment: .bottom) { Rectangle().fill(Brand.rule).frame(height: 0.5).padding(.leading, 62) }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Step \(number): \(tab.title). \(status(tab, value: value))\(value.map { ". Score \($0)" } ?? "")")
+    }
+}
+
+// MARK: - List and detail side by side
+
+/// A page with a list (clues, Check-up areas) whose rows open a detail. On a regular-width screen
+/// (an open iPhone Duo, iPad) the detail sits beside the list, as Mail does; folded or on a
+/// regular iPhone it collapses to one pane and rows push as before. The system sizes the columns
+/// and evens them out around the fold. The Mac's pages already sit inside its own sidebar.
+struct ListDetailStack<Content: View, Placeholder: View>: View {
+    @ViewBuilder var content: Content
+    @ViewBuilder var placeholder: Placeholder
+    #if os(iOS)
+    @State private var column: NavigationSplitViewColumn = .sidebar
+    #endif
+
+    var body: some View {
+        #if os(iOS)
+        NavigationSplitView(preferredCompactColumn: $column) {
+            content
+                .navigationSplitViewColumnWidth(min: 340, ideal: 420, max: 520)
+        } detail: {
+            NavigationStack { placeholder }
+        }
+        .navigationSplitViewStyle(.balanced)
+        #else
+        NavigationStack { content }
+        #endif
+    }
+}
+
+/// What the detail side shows before anything is picked.
+struct DetailPlaceholder: View {
+    let line: String
+
+    var body: some View {
+        VStack(spacing: 16) {
+            LivingMascot(mood: .thinking, size: 120)
+            Text(line)
+                .font(.body)
+                .foregroundStyle(Brand.textMuted)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(BrandBackground())
+    }
+}

@@ -16,6 +16,7 @@ struct FindingDetailView: View {
     let finding: Finding
     @State private var cleared = false
     @State private var showDetails = false
+    @State private var showMore = false
 
     private var def: SignalDefinition { finding.definition }
     private var fixable: Bool { def.fix.level != .onlyApple }
@@ -32,9 +33,13 @@ struct FindingDetailView: View {
                     Spacer(minLength: 8)
                     StatusBadge(status: def.status)
                 }
-                Text(def.title)
+                Text(def.headline)
                     .font(.system(.title, weight: .bold))
                     .foregroundStyle(Brand.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(def.brief)
+                    .font(.body)
+                    .foregroundStyle(Brand.ink)
                     .fixedSize(horizontal: false, vertical: true)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(Brand.brandUppercased("On your device"))
@@ -88,19 +93,25 @@ struct FindingDetailView: View {
                 }
             }
 
+            fixCard
+
             seriousCard
 
-            MascotSays(line: def.reveals, mood: finding.severity == .high ? .concerned : .thinking, size: 64,
-                       title: "What it tells an app", tone: .explain)
-
-            ToneCard(tone: .context, title: "Why the system allows it", symbol: "questionmark.circle") {
-                Text(def.why)
-                    .font(.body)
-                    .foregroundStyle(Brand.textMuted)
-                    .fixedSize(horizontal: false, vertical: true)
+            // The fuller explanation, for anyone who wants it, out of the way of the answer.
+            ToneCard(tone: .explain) {
+                DisclosureGroup(isExpanded: $showMore) {
+                    VStack(alignment: .leading, spacing: 14) {
+                        moreRow("What it tells an app", def.reveals)
+                        moreRow("Why the system allows it", def.why)
+                    }
+                    .padding(.top, 10)
+                } label: {
+                    Label("More about this", systemImage: "text.book.closed")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Tone.explain.tint)
+                }
+                .tint(Tone.explain.tint)
             }
-
-            fixCard
 
             if showSuggestions, let suggestion = HyyaSuggestions.suggestion(for: def.id) {
                 ToneCard(tone: .context, title: "From the makers of this app", symbol: "sparkles") {
@@ -132,6 +143,13 @@ struct FindingDetailView: View {
                       def.section.group == .permission ? "Only apps you've given this permission." : "Any app on this device, without asking you.")
             impactRow("clock", "How long it lasts", SignalImpact.lasting(def.persistence))
             impactRow("link", "What it lets them do", SignalImpact.reach(finding.severity))
+        }
+    }
+
+    private func moreRow(_ title: String, _ text: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(Brand.ink)
+            Text(text).font(.body).foregroundStyle(Brand.textMuted).fixedSize(horizontal: false, vertical: true)
         }
     }
 

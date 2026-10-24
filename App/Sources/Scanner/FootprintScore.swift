@@ -27,6 +27,14 @@ struct FootprintScore: Equatable, Sendable {
 
     enum Level: Sendable {
         case light, moderate, heavy
+
+        init(value: Int) {
+            switch value {
+            case 75...: self = .light
+            case 50..<75: self = .moderate
+            default: self = .heavy
+            }
+        }
         var title: String {
             switch self {
             case .light: "Light footprint"
@@ -36,13 +44,7 @@ struct FootprintScore: Equatable, Sendable {
         }
     }
 
-    var level: Level {
-        switch value {
-        case 75...: .light
-        case 50..<75: .moderate
-        default: .heavy
-        }
-    }
+    var level: Level { Level(value: value) }
 
     static func isFixable(_ finding: Finding) -> Bool {
         finding.definition.fix.level != .onlyApple

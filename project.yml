@@ -18,8 +18,8 @@ settings:
     SWIFT_VERSION: "5.0"
     # Apple silicon only: same convention as the sibling hYYa apps.
     ARCHS: arm64
-    MARKETING_VERSION: "1.0.0"
-    CURRENT_PROJECT_VERSION: "13"
+    MARKETING_VERSION: "1.0.1"
+    CURRENT_PROJECT_VERSION: "14"
     CODE_SIGN_STYLE: Automatic
     DEVELOPMENT_TEAM: "8PYFWUL3ND"
     SWIFT_STRICT_CONCURRENCY: complete
@@ -48,7 +48,7 @@ targets:
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         # iPhone: portrait only. iPad: all four, which Apple requires for iPad multitasking (an upload
         # with portrait-only iPad was rejected, 2026-10-17).
-        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         TARGETED_DEVICE_FAMILY: "1,2"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon

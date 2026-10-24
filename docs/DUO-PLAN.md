@@ -117,10 +117,10 @@ interfaces on this Mac (every API named below was checked there), and hands-on p
 ### Phase 2: use the open display (book-like, side by side)
 6. **List and detail side by side**, Mail's pattern, using `NavigationSplitView` on each page that
    has a list:
-   - Footprint: clues on the left, the open clue and its fix on the right.
-   - Tracker: apps on the left, what the chosen app did on the right.
-   - Check-up: steps on the left, the open step on the right.
-   - Sensitive apps: kinds on the left, the result on the right.
+   - Check-up: areas on the left, the open area on the right (built in 1.0.1).
+   - Not Footprint, Tracker or Sensitive apps: tried on 2026-10-24, the Footprint page squeezed
+     into a narrow column and left most of a wide screen empty. These pages are rich summaries,
+     not lists, so they keep one full-width column (capped at a reading width).
 
    Folded, each collapses to one pane, exactly as today. The system sizes the two columns and evens
    them out when the device is partly folded. There's no draggable divider: Apple doesn't offer one

@@ -52,11 +52,12 @@ final class FlowCheckUITests: XCTestCase {
 
     func testFootprintFlow() {
         app.launch()
-        assertVisible(app.buttons["Start scan"], "Start scan")
+        let start = app.buttons["Start with check 1"]
+        assertVisible(start, "Start with check 1")
         shot("footprint-start")
-        app.buttons["Start scan"].tap()
-        assertVisible(app.buttons["Scan again"], "Scan again after scanning", timeout: 25)
-        assertVisible(text("footprint"), "score level")
+        start.tap()
+        XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 25), "scan didn't finish")
+        assertVisible(text("checks"), "overall score line")
         shot("footprint-result")
 
         let fix = app.buttons["Fix them with me"]
@@ -68,9 +69,60 @@ final class FlowCheckUITests: XCTestCase {
             app.buttons["Done, next"].tap()
             sleep(1)
             shot("fix-step-2")
-            app.buttons["Close"].firstMatch.tap()
         }
     }
+
+    // MARK: Every close and done button, tapped (never swiped), upright and sideways.
+
+    /// Taps a sheet's own button and checks that something only that sheet shows has gone.
+    private func assertClosesByTapping(_ button: XCUIElement, unique: XCUIElement, _ what: String, file: StaticString = #filePath, line: UInt = #line) {
+        XCTAssertTrue(unique.waitForExistence(timeout: 8), "\(what): sheet didn't open", file: file, line: line)
+        XCTAssertTrue(button.waitForExistence(timeout: 5) && button.isHittable, "\(what): button not tappable", file: file, line: line)
+        shot("\(what)-open")
+        button.tap()
+        let gone = NSPredicate(format: "exists == false")
+        XCTAssertEqual(XCTWaiter().wait(for: [expectation(for: gone, evaluatedWith: unique)], timeout: 5), .completed,
+                       "\(what): still open after tapping its button", file: file, line: line)
+    }
+
+    private func closeButtonsChecked(_ orientation: UIDeviceOrientation, _ tag: String) {
+        app.launchArguments += ["-autoScan"]
+        app.launch()
+        XCUIDevice.shared.orientation = orientation
+        XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 25), "scan didn't finish")
+
+        // How the score works: Done.
+        let how = app.buttons["How the score works"]
+        scrollUntil(how)
+        how.tap()
+        assertClosesByTapping(app.buttons["Done"].firstMatch, unique: text("The footprint score in detail"), "how-\(tag)")
+
+        // Fix them with me: Close.
+        let fix = app.buttons["Fix them with me"]
+        scrollUntil(fix)
+        if fix.exists {
+            fix.tap()
+            assertClosesByTapping(app.buttons["Close"].firstMatch, unique: app.buttons["Done, next"], "fix-\(tag)")
+        }
+        XCUIDevice.shared.orientation = .portrait
+    }
+
+    /// Every page sideways, photographed for review (captures come out rotated).
+    func testPagesSideways() {
+        app.launchArguments += ["-autoScan"]
+        app.launch()
+        XCUIDevice.shared.orientation = .landscapeLeft
+        XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 25), "scan didn't finish")
+        shot("sideways-footprint")
+        for name in ["Sensitive apps", "Tracker", "Check-up", "Settings"] {
+            tab(name)
+            shot("sideways-\(name)")
+        }
+        XCUIDevice.shared.orientation = .portrait
+    }
+
+    func testCloseButtonsUpright() { closeButtonsChecked(.portrait, "upright") }
+    func testCloseButtonsSideways() { closeButtonsChecked(.landscapeLeft, "sideways") }
 
     func testSensitiveFlow() {
         app.launchArguments += ["-sensitiveCategories", "dating,health,circumvention"]
@@ -116,6 +168,9 @@ final class FlowCheckUITests: XCTestCase {
         first.tap()
         assertVisible(text("Where to go"), "step page")
         shot("checkup-step")
+        // Left ticked by an earlier run: untick so the test starts from the same place.
+        let ticked = app.buttons["Checked ✓"]
+        if ticked.waitForExistence(timeout: 2) { scrollUntil(ticked); ticked.tap(); sleep(1) }
         let done = app.buttons["I've checked this"]
         scrollUntil(done)
         done.tap()
