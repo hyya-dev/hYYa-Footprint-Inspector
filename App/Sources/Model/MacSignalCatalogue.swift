@@ -25,7 +25,7 @@ enum MacSignalCatalogue {
         static func privacy(_ anchor: String) -> String { "\(privacy)?\(anchor)" }
     }
 
-    static let restart = Fix.guided("Restarting your Mac gives this a new value.", [
+    static let restart = Fix.guided("Once a week is enough. Apps can no longer link you by your last restart time, and a restart also clears some kinds of spyware that only live in memory.", [
         "Choose Apple menu › Restart.",
     ])
 

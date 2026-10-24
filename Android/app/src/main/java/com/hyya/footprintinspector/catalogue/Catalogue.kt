@@ -24,7 +24,7 @@ import com.hyya.footprintinspector.model.Severity.MEDIUM
  * Device-neutral: "device", never a brand of phone.
  */
 object Catalogue {
-    private val restart = Fix.guided("Restarting your device gives this a new value.",
+    private val restart = Fix.guided("Once a week is enough. Apps can no longer link you by your last restart, and a restart also clears some kinds of spyware that only live in memory.",
         "Press and hold the power button (on some devices, power and volume up together).",
         "Tap Restart.")
 

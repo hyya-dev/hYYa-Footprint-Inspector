@@ -162,6 +162,7 @@ private struct Results: View {
                     .lineSpacing(2)
                     .fixedSize(horizontal: false, vertical: true)
                 Button("How the score works") { showingFormula = true }
+                    .buttonStyle(.plain)
                     .font(.footnote)
                     .foregroundStyle(Brand.textSubtle)
                     .padding(.top, 2)

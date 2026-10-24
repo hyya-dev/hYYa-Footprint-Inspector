@@ -64,3 +64,14 @@ final class MacReadersTests: XCTestCase {
                        "Install list not found in the data protection keychain")
     }
 }
+
+/// Every Mac finding has a plain headline and one short line (1.0.1).
+final class MacPlainWordsTests: XCTestCase {
+    func testEveryMacFindingHasPlainWords() {
+        for d in MacSignalCatalogue.list {
+            let entry = PlainWords.text[d.id]
+            XCTAssertNotNil(entry, "No plain words for \(d.id)")
+            if let entry { XCTAssertLessThanOrEqual(entry.headline.count, 60, "Headline too long: \(d.id)") }
+        }
+    }
+}
