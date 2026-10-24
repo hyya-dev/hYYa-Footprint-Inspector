@@ -18,9 +18,38 @@
 
 ## Next: v1.0.1 to-do (agreed with the owner 2026-10-23)
 
-⏸ **Don't start until Apple approves macOS 1.0.0.** Then the same 1.0.1 ships on iOS, macOS and
-Android. Android 1.0.1 goes to closed testers. Each build goes to TestFlight for the owner's Duo
-test first. 🚨 Nothing is submitted, iOS, macOS or Play, without the owner's consent.
+▶ **iOS 1.0.1 (14) built and uploaded to TestFlight on 2026-10-24** (the owner asked to go ahead
+before the macOS verdict). Waiting for the owner's Duo test. macOS and Android 1.0.1 come after
+macOS 1.0.0 is approved. Android 1.0.1 goes to closed testers. 🚨 Nothing is submitted, iOS, macOS
+or Play, without the owner's consent.
+
+**Done in iOS 1.0.1 (14):**
+- First page: one privacy score (the average of the checks done) and the four checks as cards.
+- Plain headline and one line for every iPhone finding (`PlainWords.swift`); the longer text sits
+  under "More about this".
+- Restart rewrite.
+- Check-up: keep the system updated, restart weekly, leaked passwords, protection from targeted
+  spyware.
+- Duo:
+  - named pages on wide screens (`.sidebarAdaptable`)
+  - icons on Close and Done
+  - Fix buttons pinned at the bottom, side by side when sideways
+  - Check-up list and detail when open
+  - landscape allowed on iPhone
+  - no faded cards; top fade only under a top clock
+
+**How it was checked:**
+- Code reading.
+- Simulator, folded `fi-iPhone-Duo`: 24 unit + 8 flow tests. The flow tests include every Close
+  and Done tapped upright and sideways; the Close button was broken once on purpose and the test
+  caught it.
+- Same tests on an iPhone 17 Pro (27.0) and on iOS 26.0.
+- iPad wide layout reviewed.
+- Mac: builds, 5 tests pass.
+- Not yet: Device Hub open poses, or the owner's Duo.
+
+**Still to do for 1.0.1:** store slides and copy (the first page changed), Mac plain words for Mac
+findings, Mac and Android ports.
 
 **Where the issues came from:**
 - **Friends and family**, on ordinary non-folding iPhones: they stay on the first page, the
