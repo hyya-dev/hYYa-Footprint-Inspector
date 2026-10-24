@@ -183,7 +183,11 @@ private struct FoundAppCard: View {
                 .tracking(1.1)
                 .foregroundStyle(Tone.fix.tint)
                 .padding(.top, 4)
+            #if os(iOS)
+            StepList(steps: [SensitiveCatalogue.hideStep] + category.steps + [SensitiveCatalogue.deleteStep], tint: Tone.fix.tint)
+            #else
             StepList(steps: category.steps + [SensitiveCatalogue.deleteStep], tint: Tone.fix.tint)
+            #endif
         }
     }
 }

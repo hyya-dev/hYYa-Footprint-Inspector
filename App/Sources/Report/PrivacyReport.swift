@@ -357,6 +357,8 @@ enum AppNames {
         "com.apple.mobilenotes": "Notes", "com.apple.reminders": "Reminders", "com.apple.Music": "Music",
         "com.apple.Fitness": "Fitness", "com.apple.shortcuts": "Shortcuts", "com.apple.TestFlight": "TestFlight",
         "com.apple.mobiletimer": "Clock", "com.apple.Preferences": "Settings", "com.apple.podcasts": "Podcasts",
+        // The made-up apps in the sample report (tests and store screenshots).
+        "com.example.photoeditor": "Photo Editor", "com.example.weatherplus": "Weather Plus", "com.example.chat": "Chat",
         // hYYa's apps.
         "com.hyya.footprintinspector": "hYYa Footprint Inspector", "com.hyya.prayerpal": "hYYa PrayerPal", "com.hyya.encryptednotes": "hYYa Encrypted Notes",
         "com.hyya.encryptedfolder": "hYYa Encrypted Folder", "com.hyya.subscriptionstracker": "hYYa Subscriptions Tracker",
@@ -374,11 +376,36 @@ enum AppNames {
     /// ID parts that never name the app.
     private static let generic: Set<String> = ["app", "ios", "iphone", "mobile", "client", "application", "prod", "release", "icma"]
 
+    /// App Store names of the most used apps in every country, built offline by
+    /// `scripts/build-app-names.mjs`. Nothing is looked up on the device.
+    static let store: [String: String] = {
+        guard let url = Bundle.main.url(forResource: "AppNames", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let map = try? JSONDecoder().decode([String: String].self, from: data) else { return [:] }
+        return map
+    }()
+
+    /// The name we know for sure, if any.
+    static func knownName(for bundleID: String) -> String? { known[bundleID] ?? store[bundleID] }
+
     static func name(for bundleID: String) -> String {
-        if let n = known[bundleID] { return n }
+        if let n = knownName(for: bundleID) { return n }
         let parts = bundleID.split(separator: ".").map(String.init)
         let last = parts.reversed().first { !generic.contains($0.lowercased()) } ?? parts.last ?? bundleID
-        let spaced = last.replacingOccurrences(of: "-", with: " ").replacingOccurrences(of: "_", with: " ")
+        return tidy(last)
+    }
+
+    /// For a name worked out from the ID, who made it, when the ID says: "com.stc.selfcare" → "stc".
+    static func maker(ofUnnamed bundleID: String) -> String? {
+        guard knownName(for: bundleID) == nil else { return nil }
+        let parts = bundleID.split(separator: ".").map(String.init)
+        guard parts.count >= 3, ["com", "net", "org", "co", "io", "sa", "ae"].contains(parts[0].lowercased()) || parts[0].count == 2 else { return nil }
+        let org = parts[1]
+        return generic.contains(org.lowercased()) || org.lowercased() == name(for: bundleID).lowercased() ? nil : org
+    }
+
+    private static func tidy(_ s: String) -> String {
+        let spaced = s.replacingOccurrences(of: "-", with: " ").replacingOccurrences(of: "_", with: " ")
         return spaced.prefix(1).uppercased() + spaced.dropFirst()
     }
 }

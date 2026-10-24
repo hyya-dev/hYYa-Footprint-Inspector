@@ -121,8 +121,15 @@ final class StoreScreenshotsUITests: XCTestCase {
         for i in 2...4 { app.swipeUp(velocity: .slow); shot("settings-\(i)") }
     }
 
-    func testCaptureStoreScreens() {
+    func testCaptureStoreScreens() { captureStoreScreens() }
+
+    /// The same screens sideways, for the iPhone Duo's landscape slides (its controls sit on the
+    /// side). Captures come out rotated; `scripts/make-landscape-slides.py` turns them upright.
+    func testCaptureStoreScreensLandscape() { captureStoreScreens(landscape: true) }
+
+    private func captureStoreScreens(landscape: Bool = false) {
         app.launch()
+        if landscape { XCUIDevice.shared.orientation = .landscapeLeft }
         sleep(2)
         shot("store-01-home")
 
@@ -155,7 +162,7 @@ final class StoreScreenshotsUITests: XCTestCase {
         sleep(2)
         shot("store-02-results")
 
-        let clue = app.buttons.containing(NSPredicate(format: "label CONTAINS 'last restarted'")).firstMatch
+        let clue = app.buttons.containing(NSPredicate(format: "label CONTAINS 'last restart'")).firstMatch
         scrollTo(clue, max: 14)
         if clue.exists { clue.tap(); sleep(2); shot("store-04-finding") }
         back()

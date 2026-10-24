@@ -165,7 +165,7 @@ struct FindingDetailView: View {
 
     private var fixCard: some View {
         ToneCard(tone: fixable ? .fix : .limit,
-                 title: fixable ? "How to fix it" : "Only Apple can fix this",
+                 title: fixable ? (PlainWords.action[def.id] ?? "How to fix it") : "Only Apple can fix this",
                  symbol: fixable ? "wrench.and.screwdriver" : "lock") {
             if fixable && finding.severity == .high {
                 ToneBadge(text: "+\(FootprintScore.highWeight) points", tone: .fix)
