@@ -34,7 +34,7 @@ enum SignalCatalogue {
 // MARK: - Shared fix wording
 
 extension Fix {
-    static let restart = Fix.guided("Restart once a week. It's worth it: apps can no longer link you by this value, and a restart also clears some kinds of spyware that only live in memory.", [
+    static let restart = Fix.guided("Once a week is enough. Apps can no longer link you by your last restart time, and a restart also clears some kinds of spyware that only live in memory.", [
         "Press and hold the side or top button and either volume button until the slider appears. On a device with a Home button, hold the side or top button alone.",
         "Drag the slider to turn the device off.",
         "Wait a few seconds, then hold the side or top button until the Apple logo appears.",

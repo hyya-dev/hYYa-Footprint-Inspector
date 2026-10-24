@@ -44,7 +44,7 @@ struct ScoreGuideCard: View {
                     ForEach(fixes.prefix(5)) { f in
                         HStack(alignment: .firstTextBaseline, spacing: 8) {
                             Text("+\(FootprintScore.points(for: f))").font(.subheadline.weight(.bold).monospacedDigit()).foregroundStyle(Tone.fix.tint).frame(minWidth: 34, alignment: .leading)
-                            Text(f.definition.headline).font(.subheadline).foregroundStyle(Brand.textMuted).fixedSize(horizontal: false, vertical: true)
+                            Text(f.definition.fixTitle).font(.subheadline).foregroundStyle(Brand.textMuted).fixedSize(horizontal: false, vertical: true)
                         }
                     }
                     if fixes.count > 5 { Text("and \(fixes.count - 5) more").font(.footnote).foregroundStyle(Brand.textSubtle) }
@@ -133,7 +133,7 @@ struct FixWizard: View {
             ProgressView(value: Double(index), total: Double(fixes.count)).tint(Tone.fix.tint)
             Text("Apps can't change these settings for you, so I'll take you to each one. Come back here after each change.")
                 .font(.footnote).foregroundStyle(Brand.textSubtle).fixedSize(horizontal: false, vertical: true)
-            ToneCard(tone: .fix, title: f.definition.headline, symbol: "wrench.and.screwdriver") {
+            ToneCard(tone: .fix, title: f.definition.fixTitle, symbol: "wrench.and.screwdriver") {
                 ToneBadge(text: "+\(FootprintScore.points(for: f)) points", tone: .fix)
             } content: {
                 Text(f.definition.fix.summary).font(.body).foregroundStyle(Brand.ink).fixedSize(horizontal: false, vertical: true)

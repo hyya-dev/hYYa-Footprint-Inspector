@@ -46,7 +46,7 @@ struct PrivacyReportView: View {
 
                 // Before a report: the one action. After: a quiet way to open a newer one.
                 if report == nil {
-                    Button("Open my report") { importing = true }
+                    Button("Analyze my report") { importing = true }
                         .buttonStyle(PrimaryCTAButtonStyle())
                     Label {
                         Text("Read only on this device. Nothing is saved or sent, and it's cleared when you leave.")
@@ -55,7 +55,7 @@ struct PrivacyReportView: View {
                     .font(.footnote)
                     .foregroundStyle(Brand.textSubtle)
                 } else {
-                    Button("Open a newer report") { importing = true }
+                    Button("Analyze a newer report") { importing = true }
                         .buttonStyle(GhostButtonStyle())
                         .frame(maxWidth: .infinity)
                 }
@@ -76,9 +76,9 @@ struct PrivacyReportView: View {
     private var howTo: some View {
         ToneCard(tone: .explain, title: "Get your report", symbol: "doc.text.magnifyingglass") {
             StepList(steps: [
-                "Open Settings › Privacy & Security › App Privacy Report. If it's off, turn it on and come back in a few days.",
-                "Tap the Share button at the top right, then Save to Files.",
-                "Come back here and tap Open my report.",
+                "Open Settings and type App Privacy Report in its search bar, or go to Privacy & Security › App Privacy Report. If it's off, turn it on and come back in a few days.",
+                "Tap the Share button at the top right to export it, then Save to Files.",
+                "Come back here and tap Analyze my report.",
             ], tint: Tone.explain.tint)
             Button("Open Settings") { SettingsLink.openSettingsHome() }
                 .buttonStyle(GhostButtonStyle())
@@ -241,6 +241,11 @@ private struct AppActivityCard: View {
     var body: some View {
         ToneCard(tone: tone, title: app.name, symbol: app.verdict == .sharesOutside ? "exclamationmark.bubble" : "app") {
             ToneBadge(text: app.verdict.label, tone: tone)
+            if !app.isThisApp && AppNames.knownName(for: app.bundleID) == nil {
+                // Not a widely used app: the name comes from its ID, so say so instead of guessing.
+                Text("Name worked out from the app's ID\(AppNames.maker(ofUnnamed: app.bundleID).map { ", made by \($0)" } ?? ""). It may look different on your Home Screen.")
+                    .font(.footnote).foregroundStyle(Brand.textSubtle).fixedSize(horizontal: false, vertical: true)
+            }
             Text(why).font(.subheadline).foregroundStyle(Brand.textMuted).fixedSize(horizontal: false, vertical: true)
             if app.verdict == .contentTrackers {
                 Text("Turn on Settings › Apps › Mail › Privacy Protection to block email trackers.")

@@ -169,7 +169,12 @@ Every result is reported with how it was checked: **code reading**, **Simulator 
    - Screens: `xcrun simctl io <udid> screenshot --display=1` is the outer screen (1398×2034);
      `--display=3` is the inner one (2007×2853). The one showing black isn't in use.
    - Sort every failure into app defect or harness limit. Known harness limits: the synthetic Home
-     press and arrow keys don't reach the Duo, and offsets tuned to one iPhone break at 466 points.
+     press, arrow keys and `XCUIDevice.shared.orientation` don't reach the Duo (checked 2026-10-24:
+     sideways tests ran upright), and offsets tuned to one iPhone break at 466 points.
+   - Xcode 27 has no separate Simulator app; Device Hub is the only way to turn or open the Duo.
+     For store slides, `scripts/capture-duo.sh <dir> outer|inner` captures all seven screens from
+     launch switches alone, in whatever pose Device Hub has set, and
+     `scripts/make-landscape-slides.py` lays them out sideways.
    - Also run on a regular iPhone and on the iOS 26.0 Simulator.
 3. **Close buttons, by tapping.** Each custom close or dismiss is tapped, upright and sideways. The
    test checks that something only that screen has is gone, and the button is broken once on

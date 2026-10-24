@@ -19,7 +19,7 @@ enum PlainWords {
 
         // System
         "cpu-ram": ("Apps can see your processor and memory", "Every device of your model shares them."),
-        "boot-time": ("Apps can tell when you last restarted", "That exact moment is rare, so apps can use it to recognise you. Restarting gives it a new value."),
+        "boot-time": ("Your last restart time gives you away", "Apps can read the exact moment you last restarted. It's rare enough to recognise you, until your next restart."),
         "low-power": ("Apps can see if Low Power Mode is on", "A small detail that changes often."),
         "battery": ("Apps can see your battery level", "It changes all the time, but two apps opened minutes apart see almost the same number."),
         "thermal": ("Apps can see if your device is warm", "A passing detail that says little about you."),
@@ -114,7 +114,58 @@ enum PlainWords {
     ]
 }
 
+extension PlainWords {
+    /// The fix said as the thing to do, for "Fix them with me" and the score's to-do list.
+    static let action: [String: String] = [
+        "idfv": "Delete apps from companies you no longer use",
+        "device-name": "Give your device a name without yours",
+        "os-version": "Turn on automatic updates",
+        "os-build": "Leave test (beta) updates",
+        "boot-time": "Restart once a week",
+        "audio-route": "Rename your headphones",
+        "languages": "Remove languages you don't use",
+        "keyboards": "Remove keyboards you don't use",
+        "region": "Set back formats you don't need",
+        "clip-count": "Restart once a week",
+        "clip-kinds": "Clear the clipboard",
+        "local-ip": "Turn on Private Wi-Fi Address",
+        "fonts": "Remove fonts you don't use",
+        "voices": "Delete voices you don't use",
+        "cellular": "Remove eSIMs you don't use",
+        "passcode": "Set a passcode",
+        "tracking": "Turn off tracking requests",
+        "managed": "Check for profiles you don't recognise",
+        "web-fingerprint": "Turn on Safari's fingerprinting protection",
+        "motion-activity": "Limit which apps see your activity",
+        "motion-steps": "Limit which apps see your activity",
+        "motion-pressure": "Limit which apps see your activity",
+        "loc-where": "Limit which apps see your location",
+        "loc-altitude": "Limit which apps see your location",
+        "loc-speed": "Limit which apps see your location",
+        "loc-precise": "Turn off Precise Location where it's not needed",
+        "cam-list": "Limit camera access",
+        "ble-nearby": "Limit Bluetooth access",
+        "lan-devices": "Limit Local Network access",
+        "contact-count": "Limit which apps see your contacts",
+        "contact-labels": "Limit which apps see your contacts",
+        "contact-accounts": "Limit which apps see your contacts",
+        "photo-places": "Give apps only the photos they need",
+        "photo-home-work": "Give apps only the photos they need",
+        "photo-library": "Give apps only the photos they need",
+        "cal-accounts": "Limit which apps see your calendars",
+        "cal-busy": "Limit which apps see your calendars",
+        "rem-lists": "Limit which apps see your reminders",
+        "rem-open": "Limit which apps see your reminders",
+        "music-library": "Limit which apps see your music",
+        "music-taste": "Limit which apps see your music",
+        "music-sub": "Limit which apps see your music",
+    ]
+}
+
 extension SignalDefinition {
+    /// What to do about it, as a short instruction.
+    var fixTitle: String { PlainWords.action[id] ?? headline }
+
     /// Straight to the point: what an app can see.
     var headline: String { PlainWords.text[id]?.headline ?? title }
     /// One short line on why it matters.

@@ -76,6 +76,14 @@ struct CheckUpView: View {
 }
 
 struct CheckUpStepView: View {
+    /// "Settings › Privacy & Security › Location Services" → "Location Services".
+    static func searchTerm(_ path: String) -> String? {
+        guard path.hasPrefix("Settings ›") else { return nil }
+        let last = path.components(separatedBy: "›").last?.trimmingCharacters(in: .whitespaces) ?? ""
+        let term = last.components(separatedBy: ", then").first?.trimmingCharacters(in: .whitespaces) ?? last
+        return term.isEmpty || term.hasPrefix("[") ? nil : term
+    }
+
     let step: CheckUpStep
     var number: Int = 1
     @Binding var isDone: Bool
@@ -93,6 +101,13 @@ struct CheckUpStepView: View {
                     .foregroundStyle(Tone.context.tint)
                     .fixedSize(horizontal: false, vertical: true)
                     .textSelection(.enabled)
+                #if os(iOS)
+                // No app can open another Settings page directly, so give the quickest way there.
+                if let term = Self.searchTerm(step.path) {
+                    Label("Quickest: open Settings and type \"\(term)\" in its search bar.", systemImage: "magnifyingglass")
+                        .font(.subheadline).foregroundStyle(Brand.textMuted).fixedSize(horizontal: false, vertical: true)
+                }
+                #endif
             }
             ToneCard(tone: .fix, title: "What to do", symbol: "checklist") {
                 StepList(steps: step.actions, tint: Tone.fix.tint)

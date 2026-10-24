@@ -115,6 +115,10 @@ struct RootView: View {
         .tabViewStyle(.sidebarAdaptable)
         .environment(\.goToTab, go)
         .onChange(of: scenePhase) { _, phase in if phase == .background { check.clearSessionResults() } }
+        // Store screenshots: the sample Tracker report and a Sensitive check with nothing found, so
+        // every screen can be captured from launch switches alone (the iPhone Duo can't be tapped
+        // by tests in every pose).
+        .task { if CommandLine.arguments.contains("-sampleData") { check.recordTracker(sharing: PrivacyReport.sample.sharing.count); check.recordSensitive(found: 0) } }
         #endif
     }
 
