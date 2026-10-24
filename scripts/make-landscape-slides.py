@@ -6,9 +6,8 @@
 
     python3 scripts/make-landscape-slides.py <raw-dir> <out-dir> <width> <height> [--rotate cw|ccw]
 
-Same layout as the Mac slides, scaled to the canvas: the mascot and full name, headline and
-highlights on the left; the real screen on the right in a rounded frame, running off the right
-edge. Copy comes from store/slides.json. Captures that come out upright from a sideways device
+The mascot and full name, the headline with its highlights beside it, and the whole real
+screen below in a rounded frame, so the Duo's side strip of pages stays in view. Copy comes from store/slides.json. Captures that come out upright from a sideways device
 are turned with --rotate.
 """
 import importlib.util, json, sys
@@ -27,32 +26,36 @@ def rounded(im, r):
 
 
 def make(s, raw, mascot, W, H, rotate):
-    k = W / 2880
+    k = W / 2853
     px = lambda v: int(v * k)
     c = slides.glow_background(W, H).convert("RGBA")
     d = ImageDraw.Draw(c)
-    left = px(130)
-    m = mascot.resize((px(150), int(px(150) * mascot.height / mascot.width)), Image.LANCZOS)
-    c.alpha_composite(m, (left, px(120)))
-    f = slides.font(px(58), "Semibold")
-    nx, ny = left + m.width + px(28), px(120) + m.height // 2 - px(38)
+    left = px(140)
+    # Top band: mascot and name, then the headline with its chips beside it.
+    m = mascot.resize((px(130), int(px(130) * mascot.height / mascot.width)), Image.LANCZOS)
+    c.alpha_composite(m, (left, px(90)))
+    f = slides.font(px(56), "Semibold")
+    nx, ny = left + m.width + px(26), px(90) + m.height // 2 - px(36)
     d.text((nx, ny), "hYYa", font=f, fill=slides.SAND)
     d.text((nx + d.textlength("hYYa ", font=f), ny), "Footprint Inspector", font=f, fill=slides.INK)
-    d.rounded_rectangle((nx, ny + px(84), nx + px(70), ny + px(90)), 3, fill=slides.SAND)
-    y = slides.draw_headline(d, s["headline"], left, px(120) + m.height + px(110), px(1000), px(112))
-    slides.chips(d, s["highlights"], left, y + px(60), px(1000), px(46))
-
+    d.rounded_rectangle((nx, ny + px(80), nx + px(66), ny + px(86)), 3, fill=slides.SAND)
+    top = px(90) + m.height + px(70)
+    y = slides.draw_headline(d, s["headline"], left, top, px(1300), px(104))
+    slides.chips(d, s["highlights"], left + px(1420), top + px(10), W - (left + px(1420)) - left, px(44))
+    # The real screen, large, running off the bottom edge.
     shot = Image.open(raw / f"{s['screen']}.png").convert("RGB")
     if rotate == "cw": shot = shot.rotate(-90, expand=True)
     if rotate == "ccw": shot = shot.rotate(90, expand=True)
-    sw = px(1650)
-    shot = shot.resize((sw, int(shot.height * sw / shot.width)), Image.LANCZOS)
-    shot = rounded(shot, px(40))
-    x, sy = px(1240), (H - shot.height) // 2
+    # The whole screen fits, so the Duo's side strip of pages stays in view.
+    sy = max(y, top + px(330)) + px(60)
+    fit = min((W - 2 * left) / shot.width, (H - sy - px(70)) / shot.height)
+    shot = shot.resize((int(shot.width * fit), int(shot.height * fit)), Image.LANCZOS)
+    shot = rounded(shot, px(48))
+    x = (W - shot.width) // 2
     shadow = Image.new("RGBA", c.size, (0, 0, 0, 0))
-    ImageDraw.Draw(shadow).rounded_rectangle((x + px(20), sy + px(40), x + shot.width + px(20), sy + shot.height + px(40)), px(44), fill=(0, 0, 0, 220))
+    ImageDraw.Draw(shadow).rounded_rectangle((x, sy + px(30), x + shot.width, sy + shot.height + px(30)), px(52), fill=(0, 0, 0, 220))
     c.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(px(45))))
-    ImageDraw.Draw(c).rounded_rectangle((x - 3, sy - 3, x + shot.width + 2, sy + shot.height + 2), px(42), outline=slides.SAND_DEEP + (255,), width=max(2, px(3)))
+    ImageDraw.Draw(c).rounded_rectangle((x - 3, sy - 3, x + shot.width + 2, sy + shot.height + 2), px(50), outline=slides.SAND_DEEP + (255,), width=max(2, px(3)))
     c.alpha_composite(shot, (x, sy))
     return c.convert("RGB")
 
