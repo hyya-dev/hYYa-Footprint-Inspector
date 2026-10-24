@@ -64,10 +64,12 @@ or Play, without the owner's consent.
   "• Now made for iPhone Duo." above the fixed sentence (owner's rule). Subtitles and keywords
   were kept.
 - Reviewer notes are 3,994 of 4,000 characters.
-- Slides: 7 iPhone and 7 iPad (re-uploaded with build 15's wording), plus 7 Duo portrait slides in
-  set `APP_IPHONE_DUO`. That set isn't in Apple's published API reference but works.
-  - The owner wants **landscape** Duo slides. This needs one Device Hub sitting (folded sideways,
-    then open sideways): `scripts/capture-duo.sh` and `scripts/make-landscape-slides.py` are ready.
+- Slides: 7 iPhone, 7 iPad, and 7 **landscape** iPhone Duo slides (open screen, 2853×2007, side
+  strip of pages in view) in set `APP_IPHONE_DUO`.
+  - They were captured in one Device Hub sitting (2026-10-24) with `scripts/capture-duo.sh … inner`
+    and laid out by `scripts/make-landscape-slides.py`.
+- The owner tested build 15 on their Duo through TestFlight on 2026-10-24: passed.
+- `scripts/asc-audit-version.mjs`: all checks pass.
 - `scripts/asc-audit-version.mjs` passes every check.
 - New scripts: `asc-prepare-version.mjs` and `asc-audit-version.mjs`. The listing scripts carry
   What's New and skip app info that's locked while macOS is in review.
