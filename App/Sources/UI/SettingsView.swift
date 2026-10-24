@@ -198,7 +198,7 @@ struct SupportRow: View {
     var body: some View {
         HStack(spacing: 13) {
             Image(systemName: symbol)
-                .font(.system(size: 17, weight: .medium))
+                .scaledFont(17, weight: .medium, relativeTo: .body)
                 .foregroundStyle(Brand.iconTint)
                 .frame(width: 26)
             VStack(alignment: .leading, spacing: 2) {

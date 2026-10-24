@@ -121,6 +121,23 @@ final class FlowCheckUITests: XCTestCase {
         XCUIDevice.shared.orientation = .portrait
     }
 
+    /// Dynamic Type (1.0.2): at the largest accessibility text size nothing on any page runs off
+    /// the screen's edge.
+    func testNothingClippedAtLargestText() {
+        for tab in ["footprint", "sensitive", "tracker", "checkup", "settings"] {
+            app.terminate()
+            app.launchArguments = ["-sampleData", "-autoScan", "-startTab", tab,
+                                   "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+            app.launch()
+            sleep(8)
+            let w = app.windows.firstMatch.frame
+            let clipped = (app.staticTexts.allElementsBoundByIndex + app.buttons.allElementsBoundByIndex)
+                .filter { $0.frame.width > 0 && $0.frame.minX < w.minX - 1 }
+            XCTAssertTrue(clipped.isEmpty, "\(tab): \(clipped.count) items run off the left edge, e.g. \(clipped.first?.label.prefix(40) ?? "")")
+            if tab == "footprint" { shot("largest-text-footprint") }
+        }
+    }
+
     func testCloseButtonsUpright() { closeButtonsChecked(.portrait, "upright") }
     func testCloseButtonsSideways() { closeButtonsChecked(.landscapeLeft, "sideways") }
 

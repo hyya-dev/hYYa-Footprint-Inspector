@@ -115,7 +115,7 @@ struct SensitiveView: View {
                 MascotSays(line: "None of these apps answered. Any app asking the same would find nothing.", mood: .happy, size: 76, tone: .fix)
             } else {
                 Text(found.count == 1 ? "1 app gives you away" : "\(found.count) apps give you away")
-                    .font(Brand.display(24))
+                    .scaledFont(24, weight: .semibold, relativeTo: .title2)
                     .foregroundStyle(Brand.textPrimary)
                 // The names stay hidden until asked for, but the way to see them is always in view.
                 if revealed {

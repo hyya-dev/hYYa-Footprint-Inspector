@@ -56,7 +56,7 @@ private struct IdleHome: View {
                 Brand.eyebrow("hYYa Footprint Inspector")
                 AccentRule()
                 Text("What do your apps know about you?")
-                    .font(.system(size: 34, weight: .bold))
+                    .scaledFont(34, weight: .bold, relativeTo: .largeTitle)
                     .foregroundStyle(Brand.ink)
                     .fixedSize(horizontal: false, vertical: true)
                 Text("Four quick checks show what apps can learn about you, then help you fix it.")
@@ -143,16 +143,23 @@ private struct Results: View {
 
         // One score for the whole check, then the four checks that make it up.
         VStack(alignment: .leading, spacing: 18) {
-            HStack(alignment: .center) {
-                ScoreOrb(value: overall.value ?? score.value, size: 128, tint: tint(overall.level))
-                Spacer()
-                LivingMascot(mood: concerning.isEmpty ? .happy : .concerned, size: 132)
+            // Side by side when they fit; stacked at the largest text sizes, where the ring grows.
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .center) {
+                    ScoreOrb(value: overall.value ?? score.value, size: 128, tint: tint(overall.level))
+                    Spacer()
+                    LivingMascot(mood: concerning.isEmpty ? .happy : .concerned, size: 132)
+                }
+                VStack(alignment: .leading, spacing: 12) {
+                    LivingMascot(mood: concerning.isEmpty ? .happy : .concerned, size: 104)
+                    ScoreOrb(value: overall.value ?? score.value, size: 128, tint: tint(overall.level))
+                }
             }
             .padding(.top, 20)
             VStack(alignment: .leading, spacing: 6) {
                 Brand.eyebrow("Your privacy score")
                 Text(overall.level?.title ?? "")
-                    .font(.system(size: 30, weight: .bold))
+                    .scaledFont(30, weight: .bold, relativeTo: .largeTitle)
                     .foregroundStyle(Brand.ink)
                 AccentRule().padding(.vertical, 4)
                 Text(left == 0 ? "All \(overall.total) checks done. Higher is better." :
@@ -190,10 +197,18 @@ private struct Results: View {
                 .amber(seen.filter { $0.severity == .medium }.count, "worth knowing"),
                 .fine(seen.filter { $0.severity == .low }.count, "minor"),
             ], caption: "clues")
-            HStack(spacing: 12) {
-                Button("Scan again") { Task { await scanner.scan() } }
-                    .buttonStyle(PrimaryCTAButtonStyle())
-                ShareCardButton()
+            // Side by side when they fit; stacked at large text sizes.
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 12) {
+                    Button("Scan again") { Task { await scanner.scan() } }
+                        .buttonStyle(PrimaryCTAButtonStyle())
+                    ShareCardButton()
+                }
+                VStack(spacing: 12) {
+                    Button("Scan again") { Task { await scanner.scan() } }
+                        .buttonStyle(PrimaryCTAButtonStyle())
+                    ShareCardButton()
+                }
             }
         }
 

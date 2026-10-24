@@ -117,10 +117,6 @@ enum Brand {
         static let xl: CGFloat = 28
     }
 
-    static func display(_ size: CGFloat, weight: Font.Weight = .semibold) -> Font {
-        .system(size: size, weight: weight)
-    }
-
     static func brandUppercased(_ s: String) -> String {
         s.uppercased().replacingOccurrences(of: "HYYA", with: "hYYa")
     }
@@ -219,11 +215,14 @@ struct PrimaryCTAButtonStyle: ButtonStyle {
         let fill: Color
         let textColor: Color
         @Environment(\.isEnabled) private var isEnabled
+        @Environment(\.dynamicTypeSize) private var typeSize
 
         var body: some View {
             configuration.label
                 .font(.body.weight(.semibold))
-                .lineLimit(1)
+                // One line normally; two at the largest text sizes, so labels never shrink too far.
+                .lineLimit(typeSize.isAccessibilitySize ? 2 : 1)
+                .multilineTextAlignment(.center)
                 .minimumScaleFactor(Brand.shrinkToFitFloor)
                 .foregroundStyle(textColor)
                 .padding(.vertical, 15)
@@ -242,10 +241,12 @@ struct PrimaryCTAButtonStyle: ButtonStyle {
 /// A hairline outline button.
 struct GhostButtonStyle: ButtonStyle {
     var tint: Color = Brand.ink
+    @Environment(\.dynamicTypeSize) private var typeSize
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.body.weight(.medium))
-            .lineLimit(1)
+            .lineLimit(typeSize.isAccessibilitySize ? 2 : 1)
+            .multilineTextAlignment(.center)
             .minimumScaleFactor(Brand.shrinkToFitFloor)
             .foregroundStyle(tint)
             .padding(.vertical, 14)

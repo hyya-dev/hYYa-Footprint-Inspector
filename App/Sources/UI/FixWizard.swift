@@ -88,6 +88,9 @@ private struct ScoreBands: View {
                 band("Light", "75 and up", Tone.fix.tint, .trailing)
             }
         }
+        // Chart labels in one row can't wrap, so they stop growing at the largest standard size;
+        // VoiceOver reads the whole scale from the label below.
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Score \(value) out of 100. Heavy is below 50, moderate 50 to 74, light 75 and above.")
     }

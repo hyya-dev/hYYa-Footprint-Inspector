@@ -150,12 +150,16 @@ struct SummaryRing: View {
     var centre: String? = nil
     var caption: String? = nil
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var shown = false
 
     private var total: Int { max(1, slices.reduce(0) { $0 + $1.count }) }
 
     var body: some View {
-        HStack(spacing: 18) {
+        // Ring beside its legend; ring above it at the largest text sizes, where the legend's
+        // words no longer fit beside the ring.
+        let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 14)) : AnyLayout(HStackLayout(spacing: 18))
+        layout {
             ZStack {
                 Circle().stroke(Color.white.opacity(0.06), lineWidth: 14)
                 ForEach(Array(slices.enumerated()), id: \.offset) { i, s in

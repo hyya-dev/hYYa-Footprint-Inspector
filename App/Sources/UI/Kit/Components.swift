@@ -4,6 +4,28 @@
 
 import SwiftUI
 
+// MARK: - Type that follows the person's text size
+
+/// A system font at its designed size that still grows and shrinks with the person's text size
+/// (Dynamic Type), scaled like the matching text style.
+struct ScaledFont: ViewModifier {
+    @ScaledMetric private var size: CGFloat
+    private let weight: Font.Weight
+
+    init(size: CGFloat, weight: Font.Weight, relativeTo style: Font.TextStyle) {
+        _size = ScaledMetric(wrappedValue: size, relativeTo: style)
+        self.weight = weight
+    }
+
+    func body(content: Content) -> some View { content.font(.system(size: size, weight: weight)) }
+}
+
+extension View {
+    func scaledFont(_ size: CGFloat, weight: Font.Weight = .regular, relativeTo style: Font.TextStyle = .body) -> some View {
+        modifier(ScaledFont(size: size, weight: weight, relativeTo: style))
+    }
+}
+
 // MARK: - Page scaffold
 
 /// Every screen: black ground, one generous column, room for the tab bar.
@@ -60,19 +82,26 @@ struct HeroCard<Trailing: View>: View {
     var mood: LivingMascot.Mood = .idle
     var mascotSize: CGFloat = 110
     @ViewBuilder var trailing: Trailing
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .bottom, spacing: 12) {
+            // At the largest text sizes the mascot sits above the title, so the title gets the
+            // full width instead of breaking mid-word beside it.
+            let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12)) : AnyLayout(HStackLayout(alignment: .bottom, spacing: 12))
+            layout {
+                if typeSize.isAccessibilitySize { LivingMascot(mood: mood, size: mascotSize * 0.8) }
                 VStack(alignment: .leading, spacing: 8) {
                     if let eyebrow { Brand.eyebrow(eyebrow) }
                     Text(title)
-                        .font(.system(size: 32, weight: .bold))
+                        .scaledFont(32, weight: .bold, relativeTo: .largeTitle)
                         .foregroundStyle(Brand.ink)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                Spacer(minLength: 0)
-                LivingMascot(mood: mood, size: mascotSize)
+                if !typeSize.isAccessibilitySize {
+                    Spacer(minLength: 0)
+                    LivingMascot(mood: mood, size: mascotSize)
+                }
             }
             AccentRule()
             if let subtitle {
@@ -147,7 +176,7 @@ struct RowCard<Accessory: View>: View {
     var body: some View {
         HStack(spacing: 14) {
             Image(systemName: symbol)
-                .font(.system(size: 16, weight: .regular))
+                .scaledFont(16, relativeTo: .body)
                 .foregroundStyle(tileFG)
                 .frame(width: 32, height: 32)
                 .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(tileFG.opacity(0.10)))
@@ -247,6 +276,8 @@ struct ScoreOrb: View {
     var size: CGFloat = 132
     var tint: Color = Brand.sand
     var label = "Privacy score"
+    /// The ring and its number grow with the person's text size, up to 1.6 times.
+    @ScaledMetric(relativeTo: .largeTitle) private var scale: CGFloat = 1
 
     var body: some View {
         ZStack {
@@ -261,7 +292,7 @@ struct ScoreOrb: View {
                 .animation(.spring(response: 0.9, dampingFraction: 0.85), value: value)
             VStack(spacing: 0) {
                 Text("\(value)")
-                    .font(.system(size: size * 0.38, weight: .light))
+                    .font(.system(size: size * min(scale, 1.6) * 0.38, weight: .light))
                     .foregroundStyle(Brand.ink)
                     .contentTransition(.numericText(value: Double(value)))
                 Text("of 100")
@@ -269,7 +300,7 @@ struct ScoreOrb: View {
                     .foregroundStyle(Brand.textSubtle)
             }
         }
-        .frame(width: size, height: size)
+        .frame(width: size * min(scale, 1.6), height: size * min(scale, 1.6))
         .tiltParallax(6)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(label) \(value) out of 100")

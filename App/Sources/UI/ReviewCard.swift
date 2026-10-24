@@ -15,10 +15,15 @@ struct ReviewCard: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.requestReview) private var requestReview
     @AppStorage("reviewCardTapped") private var tapped = false
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
-        HStack(alignment: .center, spacing: 14) {
+        // Mascot beside the text; above it at the largest text sizes, as on the page tops.
+        let big = typeSize.isAccessibilitySize
+        let layout = big ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12)) : AnyLayout(HStackLayout(alignment: .center, spacing: 14))
+        let buttons = big ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10)) : AnyLayout(HStackLayout(spacing: 10))
+        layout {
             LivingMascot(mood: .happy, size: 76)
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 3) {
@@ -33,7 +38,7 @@ struct ReviewCard: View {
                     .font(.footnote)
                     .foregroundStyle(Brand.textMuted)
                     .fixedSize(horizontal: false, vertical: true)
-                HStack(spacing: 10) {
+                buttons {
                     Button("Rate the App") { rate() }
                         .buttonStyle(PrimaryCTAButtonStyle(fullWidth: false))
                     if let onDismiss {
@@ -68,11 +73,13 @@ struct ReviewCard: View {
 /// "More from hYYa": the hYYa website, laid out like the rating card above it.
 struct HyyaCard: View {
     @Environment(\.openURL) private var openURL
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
+        let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12)) : AnyLayout(HStackLayout(alignment: .center, spacing: 14))
         Button { Haptics.selection(); openURL(hYYaLinks.website) } label: {
-            HStack(alignment: .center, spacing: 14) {
+            layout {
                 Image("HyyaDev")
                     .resizable()
                     .scaledToFill()

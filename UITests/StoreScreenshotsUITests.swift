@@ -123,6 +123,30 @@ final class StoreScreenshotsUITests: XCTestCase {
 
     func testCaptureStoreScreens() { captureStoreScreens() }
 
+    /// The App Store preview: a calm walk through the four checks, recorded with
+    /// `simctl io recordVideo` while it runs (sample data only). About 30 seconds.
+    func testPreviewTour() {
+        app.launchArguments += ["-sensitiveCategories", "dating,health,circumvention"]
+        app.launch()
+        sleep(3)                                                    // the first page
+        tap("Start with check 1")
+        _ = app.buttons["Scan again"].waitForExistence(timeout: 20)
+        sleep(3)                                                    // the privacy score
+        app.swipeUp(velocity: .slow); sleep(1)
+        let clue = app.buttons.containing(NSPredicate(format: "label CONTAINS 'last restart'")).firstMatch
+        scrollTo(clue, max: 8)
+        if clue.exists { clue.tap(); sleep(3); back(); sleep(1) }  // one finding, in plain words
+        tab("Sensitive apps"); sleep(2)
+        let check = app.buttons.containing(NSPredicate(format: "label BEGINSWITH 'Check '")).firstMatch
+        scrollTo(check, max: 6)
+        if check.exists { check.tap() }
+        sleep(3)                                                    // which apps give you away
+        tab("Tracker"); sleep(3)                                    // what apps really did
+        app.swipeUp(velocity: .slow); sleep(2)
+        tab("Check-up"); sleep(3)                                   // keep spying apps out
+        tab("Footprint"); sleep(3)                                  // back to the score
+    }
+
     /// The same screens sideways, for the iPhone Duo's landscape slides (its controls sit on the
     /// side). Captures come out rotated; `scripts/make-landscape-slides.py` turns them upright.
     func testCaptureStoreScreensLandscape() { captureStoreScreens(landscape: true) }
