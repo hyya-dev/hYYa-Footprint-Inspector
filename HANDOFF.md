@@ -83,8 +83,21 @@ or Play, without the owner's consent.
 - ✅ **Submitted 2026-10-24** on the owner's go-ahead (review submission e8e29d29),
   `WAITING_FOR_REVIEW`, releases automatically. Build 14 expired; local clutter purged (823 MB →
   122 MB, plus this project's DerivedData).
-- Next: Android 1.0.1 for closed testers (ask the owner before sending). macOS stays on hold until
-  1.0.0's verdict. Tell hyya.com once 1.0.1 is live.
+- **Android 1.0.1 (versionCode 8) sent to closed testers on 2026-10-24**, on the owner's standing
+  instruction ("if anything is owed to Android, proceed with submittal for closed testers"). Edit
+  13760887560671845916. It carries:
+  - the same first page, plain words and Check-up steps as iOS
+  - Private space first for apps that give you away
+  - 7 new slides
+  - listing and release notes in 86 languages: "• New: …" above the fixed sentence
+  The device-word checker no longer flags "microphone", so ar, hi-IN, kn-IN, lt, ml-IN, nl-NL and
+  te-IN are translated, not English.
+- **macOS 1.0.1 (15) is on TestFlight, HELD.** It has plain words for the Mac findings and the new
+  Check-up steps. Submit only after 1.0.0's verdict and the owner's go-ahead (a new Mac version
+  record can't exist while 1.0.0 is in review).
+- Clean-up after these submissions: no builds left to expire; local 779 MB → 124 MB; app removed
+  from the borrowed emulator.
+- hyya.com: the 1.0.1 prompt has been given to the owner; it's for once iOS 1.0.1 is live.
 
 **Still to do for 1.0.1 (later):** Mac plain words for Mac findings, and the Mac and Android ports.
 
