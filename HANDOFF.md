@@ -49,14 +49,25 @@ or Play, without the owner's consent.
 - Not yet: Device Hub open poses, or the owner's Duo.
 
 **App Store Connect, iOS 1.0.1 (prepared 2026-10-24, NOT submitted):**
-- Version 1.0.1 is created with build 14 attached and releases automatically after approval.
+- Version 1.0.1 is created with **build 15** attached (replacing 14) and releases automatically
+  after approval.
+- Build 15 carries the owner's 2026-10-24 fixes:
+  - the restart fix leads with "Restart once a week"
+  - hide-and-lock comes first for apps that give you away
+  - Settings search hints (no link can open a specific Settings page on iOS 27.x; re-tested on
+    27.1)
+  - "Analyze my report"
+  - real app names in Tracker, from an offline list of 9,295 App Store chart apps
+    (`scripts/build-app-names.mjs`)
+- App icons would need an online lookup; the owner hasn't decided yet.
 - English and 49 languages: description, promotional text and What's New. What's New reads
   "• Now made for iPhone Duo." above the fixed sentence (owner's rule). Subtitles and keywords
   were kept.
 - Reviewer notes are 3,994 of 4,000 characters.
-- Slides: 7 iPhone, 7 iPad and 7 Duo. The Duo slides are folded-screen captures, in set
-  `APP_IPHONE_DUO`, which isn't in Apple's published API reference but works. Open-screen Duo
-  slides need one Device Hub sitting with the owner (optional; the set takes both sizes).
+- Slides: 7 iPhone and 7 iPad (re-uploaded with build 15's wording), plus 7 Duo portrait slides in
+  set `APP_IPHONE_DUO`. That set isn't in Apple's published API reference but works.
+  - The owner wants **landscape** Duo slides. This needs one Device Hub sitting (folded sideways,
+    then open sideways): `scripts/capture-duo.sh` and `scripts/make-landscape-slides.py` are ready.
 - `scripts/asc-audit-version.mjs` passes every check.
 - New scripts: `asc-prepare-version.mjs` and `asc-audit-version.mjs`. The listing scripts carry
   What's New and skip app info that's locked while macOS is in review.
