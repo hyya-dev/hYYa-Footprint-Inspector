@@ -76,6 +76,22 @@ interfaces on this Mac (every API named below was checked there), and hands-on p
   - If text input is ever added: no `.ignoresSafeArea(.keyboard)`, keep any bar on the keyboard
     itself, and test typing in laptop pose in Device Hub.
 
+- **Centre on the fold, not on the view** (lesson from hYYa ink, found on the owner's Duo). When the
+  Duo is open sideways, the side bar takes width from the app. So "the middle of our view" is
+  about 4% away from the fold, which is the middle of the screen.
+  - Rule: anything we split or centre in book or laptop pose takes its line from the fold's real
+    position: `proxy.reservedRegions(kind: .division, options: .includeInactive)`, the region's
+    frame (`isActive` means partly folded; names checked in the 27.1 SDK). Never from width / 2.
+  - Measure the fold in the view being offset, but in a reader beside the content (ZStack), so
+    the offset doesn't feed back into the measurement. For width w and fold at x: leading inset =
+    2x − w, or trailing inset w − 2x if that's negative.
+  - Where it hits us:
+    - Phase 2 uses the standard `NavigationSplitView`, which Apple says lines its columns up with
+      the fold itself. Still measure where the column edge falls against the screen's middle.
+    - Phase 3 (result on top, buttons below) is a custom split, so it must use the fold region.
+  - How to catch it: in Device Hub and on the owner's Duo, measure the gap against the middle of
+    the screen. Seeing that the split appears isn't enough.
+
 ## What we'll do
 
 ### Phase 1: get the basics right (every pose)
