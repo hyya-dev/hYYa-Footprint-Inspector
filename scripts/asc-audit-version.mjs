@@ -33,7 +33,7 @@ let problems = 0;
 const ok = (cond, label) => { console.log(`${cond ? "✓" : "✗"} ${label}`); if (!cond) problems++; };
 
 const en = JSON.parse(readFileSync(new URL("../store/listing-en-US.json", import.meta.url), "utf8"));
-const v = (await api(`/v1/apps/${APP_ID}/appStoreVersions?filter[platform]=${PLATFORM}&filter[appStoreState]=PREPARE_FOR_SUBMISSION&include=build`));
+const v = (await api(`/v1/apps/${APP_ID}/appStoreVersions?filter[platform]=${PLATFORM}&filter[appStoreState]=PREPARE_FOR_SUBMISSION,DEVELOPER_REJECTED,REJECTED,METADATA_REJECTED&include=build`));
 const version = v.data[0];
 ok(!!version, `${PLATFORM} version ready to submit: ${version?.attributes.versionString}`);
 ok(version.attributes.releaseType === "AFTER_APPROVAL", `releases automatically after approval (${version.attributes.releaseType})`);
