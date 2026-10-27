@@ -10,10 +10,11 @@
 //   ASC_ISSUER_ID=… ASC_KEY_ID=… ASC_PRIVATE_KEY_PATH=… node scripts/asc-upload-preview.mjs
 
 import { readFileSync, statSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { createHash, createSign } from "node:crypto";
 
 const APP_ID = "6824033636";
-const FILE = new URL("../store/previews/iphone-6.9.mov", import.meta.url).pathname;
+const FILE = fileURLToPath(new URL("../store/previews/iphone-6.9.mov", import.meta.url));
 const TYPE = "IPHONE_67"; // the 6.9-inch display group
 const { ASC_ISSUER_ID, ASC_KEY_ID, ASC_PRIVATE_KEY_PATH } = process.env;
 const key = readFileSync(ASC_PRIVATE_KEY_PATH, "utf8");
