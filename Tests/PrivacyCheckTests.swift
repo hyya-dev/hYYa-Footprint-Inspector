@@ -3,6 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import Testing
+import SwiftUI
 import Foundation
 @testable import FootprintInspector
 
@@ -112,5 +113,26 @@ struct ReportHardeningTests {
     @Test func oversizedFilesAreRefused() {
         let big = Data(count: PrivacyReport.maxBytes + 1)
         #expect(throws: PrivacyReport.ReadError.self) { try PrivacyReport.read(big) }
+    }
+}
+
+/// Owner's Duo test of build 19 (2026-10-28): the navbar goes where the Duo puts its own.
+struct NavbarPlacementTests {
+    private func place(_ w: CGFloat, _ h: CGFloat, leading: CGFloat = 0, trailing: CGFloat = 0) -> NavBarRoot<EmptyView>.Place {
+        NavBarRoot<EmptyView>.place(size: CGSize(width: w, height: h), insets: EdgeInsets(top: 0, leading: leading, bottom: 0, trailing: trailing))
+    }
+
+    @Test func followsTheDuo() {
+        #expect(place(360, 678, trailing: 100) == .right)          // folded, upright: strip on the right
+        #expect(place(600, 466, leading: 80) == .leftBelowCamera)  // folded, sideways: camera on the left
+        #expect(place(560, 669, trailing: 100) == .right)          // open, sideways: strip on the right
+        #expect(place(669, 900) == .bottom)                        // open, upright
+    }
+
+    @Test func otherDevicesKeepBottomAndLeft() {
+        #expect(place(375, 667) == .bottom)                         // SE upright
+        #expect(place(667, 375) == .left)                           // SE sideways
+        #expect(place(756, 402, leading: 62, trailing: 62) == .left) // Pro Max sideways, notch both sides
+        #expect(place(1032, 1376) == .bottom)                       // iPad upright
     }
 }

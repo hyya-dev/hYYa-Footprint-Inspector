@@ -72,10 +72,13 @@ final class FlowCheckUITests: XCTestCase {
         app.launch()
         let bar = app.otherElements["navbar"].firstMatch
         let w = app.windows.firstMatch.frame
-        XCTAssertTrue(bar.waitForExistence(timeout: 8) && bar.frame.minY > w.midY, "navbar isn't at the bottom")
+        XCTAssertTrue(bar.waitForExistence(timeout: 8), "no navbar")
+        // At the bottom, or on the folded iPhone Duo down the right in the status strip's column.
+        let atBottom = bar.frame.minY > w.midY, atRight = bar.frame.minX > w.midX
+        XCTAssertTrue(atBottom || atRight, "navbar is neither at the bottom nor on the right")
         for name in ["Score", "Footprint", "Sensitive apps", "Tracker", "Check-up", "Settings"] {
             let b = app.buttons[name].firstMatch
-            XCTAssertTrue(b.exists && b.frame.minX >= w.minX && b.frame.maxX <= w.maxX && b.frame.minY >= bar.frame.minY - 1,
+            XCTAssertTrue(b.exists && b.frame.minX >= w.minX && b.frame.maxX <= w.maxX && b.frame.minY >= w.minY && b.frame.maxY <= w.maxY,
                           "\(name) missing or cut off in the navbar")
         }
         XCTAssertEqual(app.buttons.matching(identifier: "Settings").count, 1, "a second Settings button is on the page")

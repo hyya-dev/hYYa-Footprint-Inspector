@@ -5,35 +5,68 @@
 #if os(iOS)
 import SwiftUI
 
-/// The app's own navbar, the same on every iPhone and iPad (owner, 2026-10-28): along the bottom
-/// when the screen is upright, down the left edge when it's sideways. All six pages, Settings
-/// included, each with an icon and a one-word name. It's drawn here rather than by the system,
-/// whose tab bar moves to the right edge on an iPhone Duo and has room for five.
+/// The app's own navbar: all six pages, Settings included, each with an icon and a one-word name
+/// (owner, 2026-10-28). It goes where the iPhone Duo puts its own:
+/// - beside the system's status strip, when the system keeps a strip down the right edge only
+///   (a Duo folded upright, or open sideways), in the strip's column below the clock;
+/// - down the left edge when sideways otherwise, flush with the edge and below a camera there
+///   (a Duo folded sideways);
+/// - along the bottom when upright otherwise (a Duo open upright, every other iPhone, iPad).
+/// Drawn here rather than by the system tab bar, which has room for five.
 struct NavBarRoot<PageContent: View>: View {
     @Binding var tab: AppTab
     @ViewBuilder let page: (AppTab) -> PageContent
 
+    enum Place: Equatable { case bottom, left, leftBelowCamera, right }
+
+    static func place(size: CGSize, insets: EdgeInsets) -> Place {
+        if insets.trailing > 0 && insets.leading == 0 { return .right }
+        if size.width > size.height { return insets.leading > 0 && insets.trailing == 0 ? .leftBelowCamera : .left }
+        return .bottom
+    }
+
     var body: some View {
         GeometryReader { geo in
-            if geo.size.width > geo.size.height {
-                HStack(spacing: 0) {
-                    bar(vertical: true)
-                        .frame(width: 84)
-                        .background(Brand.surface.ignoresSafeArea())
-                    Rectangle().fill(Brand.rule).frame(width: 0.5).ignoresSafeArea()
-                    current
-                }
-            } else {
+            let insets = geo.safeAreaInsets
+            switch Self.place(size: geo.size, insets: insets) {
+            case .bottom:
                 VStack(spacing: 0) {
                     current
                     Rectangle().fill(Brand.rule).frame(height: 0.5)
                     bar(vertical: false)
-                        // Runs under the home indicator and, on an iPhone Duo, under the side status strip.
+                        // Runs under the home indicator.
                         .background(Brand.surface.ignoresSafeArea(edges: [.bottom, .horizontal]))
+                }
+            case .left:
+                HStack(spacing: 0) {
+                    rail(width: 84, bottomAligned: false)
+                        .background(Brand.surface.ignoresSafeArea())
+                    divider
+                    current
+                }
+            case .leftBelowCamera:
+                // Flush with the left edge, the buttons gathered at the bottom, clear of the camera.
+                HStack(spacing: 0) {
+                    rail(width: max(insets.leading, 76), bottomAligned: true)
+                        .padding(.leading, -insets.leading)
+                        .background(Brand.surface.ignoresSafeArea())
+                    divider
+                    current
+                }
+            case .right:
+                // In the status strip's column, the buttons gathered at the bottom, below the clock.
+                HStack(spacing: 0) {
+                    current
+                    divider
+                    rail(width: max(insets.trailing, 76), bottomAligned: true)
+                        .padding(.trailing, -insets.trailing)
+                        .background(Brand.surface.ignoresSafeArea())
                 }
             }
         }
     }
+
+    private var divider: some View { Rectangle().fill(Brand.rule).frame(width: 0.5).ignoresSafeArea() }
 
     /// Only the chosen page exists, so VoiceOver never reaches a hidden one.
     private var current: some View {
@@ -43,19 +76,35 @@ struct NavBarRoot<PageContent: View>: View {
     }
 
     private func bar(vertical: Bool) -> some View {
-        let layout = vertical ? AnyLayout(VStackLayout(spacing: 2)) : AnyLayout(HStackLayout(spacing: 0))
-        return layout {
-            ForEach(AppTab.allCases) { t in item(t, vertical: vertical) }
+        HStack(spacing: 0) {
+            ForEach(AppTab.allCases) { t in item(t, stretch: false) }
         }
-        .padding(vertical ? .vertical : .top, vertical ? 6 : 4)
-        .fixedSize(horizontal: false, vertical: !vertical)
-        .padding(.horizontal, vertical ? 4 : 2)
-        .frame(maxHeight: vertical ? .infinity : nil)
+        .padding(.top, 4)
+        .padding(.horizontal, 2)
+        .fixedSize(horizontal: false, vertical: true)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("navbar")
     }
 
-    private func item(_ t: AppTab, vertical: Bool) -> some View {
+    /// Down a side: the six share the height, or sit together at the bottom where the top of
+    /// that edge belongs to the clock or a camera.
+    private func rail(width: CGFloat, bottomAligned: Bool) -> some View {
+        VStack(spacing: 2) {
+            if bottomAligned { Spacer(minLength: 0) }
+            ForEach(AppTab.allCases) { t in
+                item(t, stretch: !bottomAligned)
+                    .frame(height: bottomAligned ? 56 : nil)
+            }
+        }
+        .padding(.vertical, 6)
+        .padding(.horizontal, 4)
+        .frame(width: width)
+        .frame(maxHeight: .infinity)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("navbar")
+    }
+
+    private func item(_ t: AppTab, stretch: Bool) -> some View {
         let selected = t == tab
         return Button {
             Haptics.selection()
@@ -70,8 +119,7 @@ struct NavBarRoot<PageContent: View>: View {
                     .minimumScaleFactor(0.75)
             }
             .foregroundStyle(selected ? Brand.sand : Brand.textMuted)
-            // Sideways the six share the rail's height; upright the bar is only as tall as a button.
-            .frame(maxWidth: .infinity, maxHeight: vertical ? .infinity : nil)
+            .frame(maxWidth: .infinity, maxHeight: stretch ? .infinity : nil)
             .padding(.vertical, 6)
             .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(selected ? Brand.surfaceRaised : .clear))
             .contentShape(Rectangle())
