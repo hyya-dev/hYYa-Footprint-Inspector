@@ -21,7 +21,8 @@ shot() { local name=$1; shift
   echo "$name"
 }
 shot store-01-home
-shot store-02-results -autoScan
+shot store-02-results -autoScan -startTab home
+shot store-03-footprint -autoScan
 shot store-04-finding -autoScan -openFinding boot-time
 shot store-05-sensitive -startTab sensitive -sensitiveCategories dating,health,circumvention
 shot store-06-checkup -startTab checkup

@@ -184,7 +184,13 @@ final class StoreScreenshotsUITests: XCTestCase {
         tab("Footprint"); tap("Start with check 1")
         XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 20))
         sleep(2)
+        shot("store-03-footprint")
+        // The Score page with all the checks done so far, the app's first page.
+        tab("Score")
+        sleep(2)
         shot("store-02-results")
+        tab("Footprint")
+        sleep(1)
 
         let clue = app.buttons.containing(NSPredicate(format: "label CONTAINS 'last restart'")).firstMatch
         scrollTo(clue, max: 14)

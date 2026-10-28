@@ -80,7 +80,7 @@ struct CheckUpView: View {
 struct CheckUpStepView: View {
     /// The restart step exists on phones only; a Mac's restart is in its Footprint findings.
     static var restartedRecently: Bool {
-        guard CheckUpGuide.steps.contains(where: { $0.id == "restart" }), let boot = Sysctl.bootTime() else { return false }
+        guard !LaunchOptions.has("-sampleData"), CheckUpGuide.steps.contains(where: { $0.id == "restart" }), let boot = Sysctl.bootTime() else { return false }
         return RecentRestart.isRecent(boot: boot)
     }
 

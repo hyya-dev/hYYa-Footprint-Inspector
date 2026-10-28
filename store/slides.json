@@ -7,6 +7,6 @@
     {"screen": "store-04-finding", "headline": "Every clue in *plain words*", "highlights": ["Straight to the point", "How serious it is", "How to fix it"], "mascot": "left"},
     {"screen": "store-05-sensitive", "headline": "Which apps *give you away?*", "highlights": ["Dating, faith, health, VPN", "Banks can ask too", "Hidden, never saved"], "mascot": "right"},
     {"screen": "store-06-checkup", "headline": "Keep *spying apps* out", "highlights": ["Updates, restarts, passwords", "Health, location, photos", "One area at a time"], "mascot": "left"},
-    {"screen": "store-01-home", "headline": "Private. Yours. *Open source.*", "highlights": ["No account, no ads", "No tracking, ever", "Made by hYYa"], "mascot": "right"}
+    {"screen": "store-03-footprint", "headline": "Private. Yours. *Open source.*", "highlights": ["No account, no ads", "No tracking, ever", "Made by hYYa"], "mascot": "right"}
   ]
 }

@@ -161,7 +161,11 @@ private struct KeepScoreFresh: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .task { if history.latest != nil && !LaunchOptions.autoScan { await scanner.scan(quietly: true) } }
+            .task {
+                // Screenshot runs: scan from launch, whichever page opens first.
+                if LaunchOptions.autoScan && scanner.allFindings.isEmpty { await scanner.scan() }
+                else if history.latest != nil { await scanner.scan(quietly: true) }
+            }
             .onChange(of: scenePhase) { old, phase in
                 if phase == .active && old != .active && scanner.phase == .done { Task { await scanner.scan(quietly: true) } }
             }

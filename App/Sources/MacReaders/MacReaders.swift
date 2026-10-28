@@ -126,7 +126,8 @@ struct MacSystemSource: SignalSource {
                 .formatted(.units(allowed: [.days, .hours, .minutes], width: .abbreviated))
             var restart = SignalReading(id: "mac-boot-time", value: Format.dateTime(boot), items: ["Running for \(up)"])
             // A restart in the last week is the fix itself, so it counts as done.
-            if RecentRestart.isRecent(boot: boot) { restart.severityOverride = .low; restart.note = RecentRestart.note }
+            // Store screenshots show a typical device, one not restarted this week.
+            if RecentRestart.isRecent(boot: boot) && !LaunchOptions.has("-sampleData") { restart.severityOverride = .low; restart.note = RecentRestart.note }
             out.append(restart)
         }
         if let battery = Self.battery() { out.append(battery) }
