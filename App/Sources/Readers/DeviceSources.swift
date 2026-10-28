@@ -29,7 +29,9 @@ struct IdentitySource: SignalSource {
                 "Whose code: apps made by hYYa, the maker of this app.",
                 "Every company gets its own. Gmail, Google Maps and YouTube, for example, all share Google's code, and see only that one.",
                 "This app can't read any other company's code, and they can't read this one.",
-            ], severityOverride: .medium,
+            // Not in the score: nothing the person does changes what this app can see here, and the
+            // score only counts what a scan can see change (owner, 2026-10-28).
+            ], severityOverride: .low,
                note: "Shown here is hYYa's own code, which hYYa never collects. The risk is other companies: each reads its own code to link what you do across all its apps."))
         }
         out.append(.init(id: "device-name", value: device.name))
@@ -59,8 +61,11 @@ struct SystemSource: SignalSource {
                          items: ["Processor cores in use: \(info.activeProcessorCount)",
                                  "Memory: \(info.physicalMemory.formatted(.number)) bytes"]))
         if let boot = Sysctl.bootTime() {
-            let up = Duration.seconds(info.systemUptime).formatted(.units(allowed: [.days, .hours, .minutes], width: .abbreviated))
-            out.append(.init(id: "boot-time", value: Format.dateTime(boot), items: ["Running for \(up)"]))
+            let up = Duration.seconds(Date().timeIntervalSince(boot)).formatted(.units(allowed: [.days, .hours, .minutes], width: .abbreviated))
+            var restart = SignalReading(id: "boot-time", value: Format.dateTime(boot), items: ["Running for \(up)"])
+            // A restart in the last week is the fix itself, so it counts as done.
+            if RecentRestart.isRecent(boot: boot) { restart.severityOverride = .low; restart.note = RecentRestart.note }
+            out.append(restart)
         }
         out.append(.init(id: "low-power", value: Format.onOff(info.isLowPowerModeEnabled)))
 

@@ -28,7 +28,11 @@ enum hYYaLinks {
 }
 
 struct SettingsView: View {
+    /// Set when Settings opens as a sheet from the Score page (phones, where the tab bar has room
+    /// for five pages only).
+    var onClose: (() -> Void)? = nil
     @Environment(HistoryStore.self) private var history
+    @Environment(PrivacyCheck.self) private var check
     @Environment(\.openURL) private var openURL
     @State private var confirmingClear = false
     @AppStorage(ScanReminder.storageKey) private var reminder = ScanReminder.off.rawValue
@@ -39,6 +43,13 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Page {
+                if let onClose {
+                    HStack {
+                        Spacer()
+                        Button(action: onClose) { Label("Close", systemImage: "xmark") }
+                            .buttonStyle(GhostButtonStyle())
+                    }
+                }
                 HeroCard(eyebrow: "Settings", title: "hYYa Footprint Inspector",
                          subtitle: "Everything here stays on this device.", mood: .idle, mascotSize: 96)
 
@@ -83,9 +94,9 @@ struct SettingsView: View {
                         RowCard(symbol: "trash", title: "Clear history", tileFG: Brand.concern) { EmptyView() }
                     }
                     .buttonStyle(PressableCardStyle())
-                    .disabled(history.snapshots.isEmpty)
+                    .disabled(history.snapshots.isEmpty && check.sensitiveFound == nil && check.trackerSharing == nil)
                 }
-                Text("Sensitive-app results are never saved.")
+                Text("Only scores and counts are kept, never which apps you have. Clear history removes them too.")
                     .font(.footnote).foregroundStyle(Brand.textSubtle).padding(.horizontal, 4).padding(.top, -14)
 
                 // Same order as Encrypted Notes. Share and Rate carry subtitles because they're asks;
@@ -151,9 +162,9 @@ struct SettingsView: View {
                 Text("To get a re-scan reminder, allow notifications for hYYa Footprint Inspector in Settings, then choose a reminder again.")
             }
             .confirmationDialog("Clear all saved scans?", isPresented: $confirmingClear, titleVisibility: .visible) {
-                Button("Clear history", role: .destructive) { history.clear(); Haptics.success() }
+                Button("Clear history", role: .destructive) { history.clear(); check.clearSaved(); Haptics.success() }
             } message: {
-                Text("Your score history and before/after comparisons start over.")
+                Text("Your score history, saved check results and before/after comparisons start over.")
             }
         }
     }

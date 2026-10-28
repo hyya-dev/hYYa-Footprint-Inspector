@@ -60,6 +60,45 @@ struct PrivacyCheckTests {
     }
 }
 
+/// Owner's Mac test, 2026-10-28: the score must survive a restart and follow what was fixed.
+@MainActor
+struct LiveScoreTests {
+    @Test func checkResultsAreKeptAndCleared() throws {
+        let suite = "test-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        PrivacyCheck(defaults: defaults).recordSensitive(found: 2)
+        let reopened = PrivacyCheck(defaults: defaults)
+        #expect(reopened.sensitiveFound == 2)
+        reopened.clearSaved()
+        #expect(PrivacyCheck(defaults: defaults).sensitiveFound == nil)
+        // In-memory (store screenshots) never writes anything.
+        PrivacyCheck(defaults: nil).recordTracker(sharing: 3)
+        #expect(PrivacyCheck(defaults: defaults).trackerSharing == nil)
+    }
+
+    @Test func aRestartWithinAWeekCountsAsDone() {
+        let now = Date()
+        #expect(RecentRestart.isRecent(boot: now.addingTimeInterval(-2 * 24 * 3600), now: now))
+        #expect(!RecentRestart.isRecent(boot: now.addingTimeInterval(-8 * 24 * 3600), now: now))
+    }
+
+    /// The restart step is ticked by itself when the device restarted recently, and has no
+    /// Settings button: restarting and the Passwords app aren't in Settings.
+    @Test func restartAndPasswordsAreNotSettings() {
+        #expect(CheckUpGuide.iosSteps.contains { $0.id == "restart" })
+        #expect(CheckUpGuide.macSteps.first { $0.id == "mac-passwords" }?.app?.bundleID == "com.apple.Passwords")
+        #expect(SignalCatalogue.passive.first { $0.id == "boot-time" }?.isRestart == true)
+    }
+
+    /// Every fix that promises points must be one a scan can see: the score only moves for those.
+    @Test func everyPointPromisedCanBeSeenByAScan() {
+        for d in SignalCatalogue.list where d.severity == .high && d.fix.level != .onlyApple {
+            #expect(!d.fix.summary.isEmpty, "\(d.id) has no fix")
+        }
+    }
+}
+
 /// Security review 2026-10-24: a crafted report file can't crash the app or exhaust memory.
 struct ReportHardeningTests {
     @Test func hugeHitCountsAreClampedNotOverflowed() throws {

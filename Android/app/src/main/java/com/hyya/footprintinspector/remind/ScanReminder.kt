@@ -33,8 +33,8 @@ enum class ScanReminder(val title: String, val days: Long) {
         private const val PREF = "scanReminder"
         private const val WORK = "scan-reminder"
         private const val CHANNEL = "reminders"
-        const val TITLE = "Time for a quick re-scan"
-        const val BODY = "Apps, settings and updates change what any app can read. Scan again to see where you stand."
+        const val TITLE = "Time for your privacy check"
+        const val BODY = "Restart your device, then open the app: your score updates by itself."
 
         fun current(c: Context): ScanReminder =
             entries.firstOrNull { it.name == c.getSharedPreferences("app", Context.MODE_PRIVATE).getString(PREF, null) } ?: OFF
@@ -61,6 +61,8 @@ enum class ScanReminder(val title: String, val days: Long) {
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
             val n = NotificationCompat.Builder(c, CHANNEL)
                 .setSmallIcon(R.drawable.ic_notification)
+                // The mascot on the notification card.
+                .setLargeIcon(android.graphics.BitmapFactory.decodeResource(c.resources, R.drawable.mascot_cutout))
                 .setContentTitle(TITLE).setContentText(BODY)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(BODY))
                 .setContentIntent(open).setAutoCancel(true).build()

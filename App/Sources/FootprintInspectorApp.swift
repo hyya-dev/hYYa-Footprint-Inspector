@@ -8,10 +8,13 @@ import SwiftUI
 struct FootprintInspectorApp: App {
     @State private var history: HistoryStore
     @State private var scanner: Scanner
-    @State private var check = PrivacyCheck()
+    @State private var check = PrivacyCheck(defaults: LaunchOptions.has("-sampleData") ? nil : .standard)
 
     init() {
-        let history = HistoryStore()
+        // Store screenshots and UI tests start clean every time, with nothing from earlier runs.
+        let history = LaunchOptions.has("-sampleData")
+            ? HistoryStore(directory: FileManager.default.temporaryDirectory.appending(path: "sample-\(UUID().uuidString)"))
+            : HistoryStore()
         _history = State(initialValue: history)
         _scanner = State(initialValue: Scanner(history: history))
     }
@@ -53,11 +56,16 @@ struct FootprintInspectorApp: App {
 }
 
 struct RootView: View {
-    /// Screenshot runs can open on a given tab with `-startTab footprint|sensitive|tracker|checkup|settings`.
-    @State private var tab: AppTab = LaunchOptions.value(after: "-startTab").flatMap(AppTab.init(launchName:)) ?? .footprint
+    /// Screenshot runs can open on a given tab with `-startTab home|footprint|sensitive|tracker|checkup|settings`.
+    /// With `-autoScan` and no start tab, runs open on Footprint, where the scan shows.
+    @State private var tab: AppTab = LaunchOptions.value(after: "-startTab").flatMap(AppTab.init(launchName:)) ?? (LaunchOptions.autoScan ? .footprint : .home)
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(PrivacyCheck.self) private var check
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    #endif
     #if os(macOS)
     @Environment(\.openSettings) private var openSettings
     #endif
@@ -71,7 +79,7 @@ struct RootView: View {
         // A sidebar on the Mac; Settings lives in its own window (⌘,).
         NavigationSplitView {
             List(selection: Binding<AppTab?>(get: { tab }, set: { if let t = $0 { go(t) } })) {
-                ForEach([AppTab.footprint, .sensitive, .tracker, .checkup]) { t in
+                ForEach([AppTab.home] + AppTab.checks) { t in
                     Label(t.title, systemImage: t.symbol).tag(t)
                 }
             }
@@ -93,30 +101,36 @@ struct RootView: View {
         } detail: {
             Group {
                 switch tab {
+                case .footprint: ScanView()
                 case .sensitive: SensitiveView()
                 case .tracker: MacTrackerView()
                 case .checkup: CheckUpView()
-                default: ScanView()
+                default: ScoreHomeView()
                 }
             }
             .modifier(TabSwitchTransition(tab: tab))
         }
         .environment(\.goToTab, go)
-        .onChange(of: scenePhase) { _, phase in if phase == .background { check.clearSessionResults() } }
+        .modifier(KeepScoreFresh())
         // Store screenshots: a Sensitive check with nothing found, as on iOS.
         .task { if LaunchOptions.has("-sampleData") { check.recordSensitive(found: 0) } }
         .task { if LaunchOptions.has("-openSettings") { openSettings() } }
         #else
-        TabView(selection: Binding(get: { tab }, set: { t in go(t); Haptics.selection() })) {
-            ForEach(AppTab.allCases) { t in
-                Tab(t.title, systemImage: t.symbol, value: t) { page(t) }
+        Group {
+            if horizontalSizeClass == .regular || verticalSizeClass == .compact {
+                // Wide or sideways: named on the left, or an icon rail on the right; Settings at the bottom.
+                SideRail(tab: Binding(get: { tab }, set: { go($0) }), tabs: AppTab.allCases) { page($0) }
+            } else {
+                // Upright on a phone: the tab bar, with Settings on the Score page.
+                TabView(selection: Binding(get: { tab == .settings ? .home : tab }, set: { t in go(t); Haptics.selection() })) {
+                    ForEach([AppTab.home] + AppTab.checks) { t in
+                        Tab(t.title, systemImage: t.symbol, value: t) { page(t, settingsOnScore: true) }
+                    }
+                }
             }
         }
-        // Named pages in a sidebar on wide screens (an open iPhone Duo, iPad); the system's own
-        // tab bar or side strip everywhere else.
-        .tabViewStyle(.sidebarAdaptable)
         .environment(\.goToTab, go)
-        .onChange(of: scenePhase) { _, phase in if phase == .background { check.clearSessionResults() } }
+        .modifier(KeepScoreFresh())
         // Store screenshots: the sample Tracker report and a Sensitive check with nothing found, so
         // every screen can be captured from launch switches alone (the iPhone Duo can't be tapped
         // by tests in every pose).
@@ -125,8 +139,9 @@ struct RootView: View {
     }
 
     #if os(iOS)
-    @ViewBuilder private func page(_ t: AppTab) -> some View {
+    @ViewBuilder private func page(_ t: AppTab, settingsOnScore: Bool = false) -> some View {
         switch t {
+        case .home: ScoreHomeView(showsSettingsButton: settingsOnScore)
         case .footprint: ScanView()
         case .sensitive: SensitiveView()
         case .tracker: PrivacyReportView(onNext: { go(.checkup) })
@@ -135,6 +150,22 @@ struct RootView: View {
         }
     }
     #endif
+}
+
+/// Keeps the Footprint part of the score current: on launch, and each time the app comes back to
+/// the screen (after changing a setting, say), it re-reads quietly if a scan was done before.
+private struct KeepScoreFresh: ViewModifier {
+    @Environment(Scanner.self) private var scanner
+    @Environment(HistoryStore.self) private var history
+    @Environment(\.scenePhase) private var scenePhase
+
+    func body(content: Content) -> some View {
+        content
+            .task { if history.latest != nil && !LaunchOptions.autoScan { await scanner.scan(quietly: true) } }
+            .onChange(of: scenePhase) { old, phase in
+                if phase == .active && old != .active && scanner.phase == .done { Task { await scanner.scan(quietly: true) } }
+            }
+    }
 }
 
 /// Launch switches used only to take store screenshots and run UI tests without clicking through

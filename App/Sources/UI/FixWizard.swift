@@ -100,7 +100,6 @@ private struct ScoreBands: View {
 /// No app can change these settings for you, so this is the fastest honest way through them.
 struct FixWizard: View {
     let fixes: [Finding]
-    let onFinish: () -> Void
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.verticalSizeClass) private var verticalSizeClass
@@ -141,12 +140,15 @@ struct FixWizard: View {
             } content: {
                 Text(f.definition.fix.summary).font(.body).foregroundStyle(Brand.ink).fixedSize(horizontal: false, vertical: true)
                 if !f.definition.fix.steps.isEmpty { StepList(steps: f.definition.fix.steps, tint: Tone.fix.tint) }
+                if f.definition.isRestart { WeeklyReminderToggle() }
                 #if os(macOS)
                 if let pane = f.definition.fix.settingsPane {
                     Button("Open in System Settings") { SettingsLink.open(pane: pane) }.buttonStyle(GhostButtonStyle())
                 }
                 #else
-                Button("Open Settings") { SettingsLink.openSettingsHome() }.buttonStyle(GhostButtonStyle()).frame(maxWidth: .infinity)
+                if !f.definition.isRestart {
+                    Button("Open Settings") { SettingsLink.openSettingsHome() }.buttonStyle(GhostButtonStyle()).frame(maxWidth: .infinity)
+                }
                 #endif
             }
         }
@@ -174,9 +176,9 @@ struct FixWizard: View {
     private var finished: some View {
         Page {
             MascotSays(line: done.isEmpty ? "No changes this time. You can come back whenever you like." :
-                        "Nice work: you changed \(done.count) setting\(done.count == 1 ? "" : "s"). Scan again to see your new score.",
+                        "Nice work: you changed \(done.count) setting\(done.count == 1 ? "" : "s"). I'll check again as you close this, and your score updates by itself.",
                        mood: .happy, size: 72, tone: .fix)
-            Button("Scan again") { dismiss(); onFinish() }
+            Button("See my new score") { dismiss() }
                 .buttonStyle(PrimaryCTAButtonStyle())
         }
     }

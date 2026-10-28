@@ -237,7 +237,7 @@ fun SummaryRing(slices: List<Slice>, caption: String? = null, centre: String? = 
  * done, and its part of the score. Tapping one goes to that page; step 1 starts the scan.
  */
 @Composable
-fun ChecksPanel(overall: com.hyya.footprintinspector.model.OverallScore, scanner: com.hyya.footprintinspector.scan.Scanner, checkUpDone: Int, onScan: (() -> Unit)?) {
+fun ChecksPanel(overall: com.hyya.footprintinspector.model.OverallScore, scanner: com.hyya.footprintinspector.scan.Scanner, checkUpDone: Int) {
     val go = LocalGoTo.current
     val parts = overall.parts
     val tabs = listOf(Tab.SCAN to com.hyya.footprintinspector.model.OverallScore.Part.FOOTPRINT,
@@ -254,13 +254,17 @@ fun ChecksPanel(overall: com.hyya.footprintinspector.model.OverallScore, scanner
                     val n = scanner.findings(com.hyya.footprintinspector.model.Section.WATCH).count { it.isConcerning }
                     if (n == 0) "Nothing worth a look" else if (n == 1) "1 power worth a look" else "$n powers worth a look"
                 }
-                Tab.CHECKUP -> if (checkUpDone == 0) "Not started" else "$checkUpDone of ${com.hyya.footprintinspector.catalogue.CheckUp.steps.size} areas checked"
-                Tab.SETTINGS -> ""
+                Tab.CHECKUP -> if (checkUpDone == com.hyya.footprintinspector.catalogue.CheckUp.steps.size) "Every area checked" else if (checkUpDone == 0) "Not started" else "$checkUpDone of ${com.hyya.footprintinspector.catalogue.CheckUp.steps.size} areas checked"
+                Tab.HOME, Tab.SETTINGS -> ""
             }
             val done = value != null
             Column {
                 Row(
-                    Modifier.fillMaxWidth().pressable { if (tab == Tab.SCAN) onScan?.invoke() else go(tab) }.padding(horizontal = 14.dp, vertical = 12.dp),
+                    Modifier.fillMaxWidth().pressable {
+                        go(tab)
+                        // Footprint before its first scan: start it on the way there.
+                        if (tab == Tab.SCAN && value == null && scanner.phase == com.hyya.footprintinspector.scan.Phase.IDLE) scanner.scan()
+                    }.padding(horizontal = 14.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Box(Modifier.size(32.dp).clip(CircleShape).background(if (done) Tone.FIX.tint.copy(alpha = 0.16f) else Brand.sand.copy(alpha = 0.12f)),
@@ -275,7 +279,7 @@ fun ChecksPanel(overall: com.hyya.footprintinspector.model.OverallScore, scanner
                         Text(status, color = if (done) Tone.FIX.tint else Brand.sand, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                     }
                     if (value != null) Text("$value", color = Brand.ink, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
-                    else if (!(tab == Tab.SCAN && onScan == null)) Icon(androidx.compose.material.icons.Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = Brand.textSubtle)
+                    Icon(androidx.compose.material.icons.Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = Brand.textSubtle)
                 }
                 if (i < tabs.lastIndex) androidx.compose.material3.HorizontalDivider(Modifier.padding(start = 58.dp), color = Brand.rule, thickness = 0.5.dp)
             }

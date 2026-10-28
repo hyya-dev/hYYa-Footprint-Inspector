@@ -63,7 +63,7 @@ final class StoreScreenshotsUITests: XCTestCase {
         let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         app.launch()
         sleep(2)
-        tap("Start with check 1")
+        tab("Footprint"); tap("Start with check 1")
         XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 20))
         for group in ["Remembered after deleting", "Location", "Photos", "Contacts", "Web fingerprint", "Account and App Store"] {
             app.swipeDown(velocity: .fast); app.swipeDown(velocity: .fast)
@@ -93,7 +93,7 @@ final class StoreScreenshotsUITests: XCTestCase {
     func testCaptureReview() {
         app.launch()
         sleep(2)
-        tap("Start with check 1")
+        tab("Footprint"); tap("Start with check 1")
         XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 20))
         for group in ["Device identity", "Motion sensors", "Graphics and mobile network"] {
             app.swipeDown(velocity: .fast); app.swipeDown(velocity: .fast)
@@ -129,7 +129,7 @@ final class StoreScreenshotsUITests: XCTestCase {
         app.launchArguments += ["-sensitiveCategories", "dating,health,circumvention"]
         app.launch()
         sleep(3)                                                    // the first page
-        tap("Start with check 1")
+        tab("Footprint"); tap("Start with check 1")
         _ = app.buttons["Scan again"].waitForExistence(timeout: 20)
         sleep(3)                                                    // the privacy score
         app.swipeUp(velocity: .slow); sleep(1)
@@ -181,7 +181,7 @@ final class StoreScreenshotsUITests: XCTestCase {
         shot("store-06-checkup")
 
         tab("Footprint")
-        tap("Start with check 1")
+        tab("Footprint"); tap("Start with check 1")
         XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 20))
         sleep(2)
         shot("store-02-results")

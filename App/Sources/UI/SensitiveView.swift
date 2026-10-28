@@ -32,7 +32,11 @@ struct SensitiveView: View {
     static let othersLine = "Any app on this device can run this same check, including banking, government, employer and ID apps."
     #endif
     /// No organisation is named: we can't see which apps check, so we don't claim any does.
+    #if os(macOS)
+    static let websiteLine = "On a phone or tablet you can hide an app and lock it with Face ID, but Apple doesn't offer that on a Mac yet. So the best way here is to use an organisation's website in your browser instead of its app: a website can't see which apps you have."
+    #else
     static let websiteLine = "If you'd rather an organisation couldn't, use its website in your browser instead of its app. A website can't see which apps you have."
+    #endif
 
     private var foundCount: Int { results?.values.reduce(0) { $0 + $1.count } ?? 0 }
 

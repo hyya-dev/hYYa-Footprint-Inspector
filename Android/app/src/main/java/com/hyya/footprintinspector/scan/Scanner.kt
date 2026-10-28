@@ -56,11 +56,27 @@ class Scanner(app: Application) : AndroidViewModel(app) {
     val concerning: List<Finding> get() = findings.filter { it.isConcerning }
     val score: FootprintScore get() = FootprintScore.of(findings)
 
+    private val prefs = app.getSharedPreferences("app", Context.MODE_PRIVATE)
+    /** Store screenshots keep nothing between runs. */
+    private val keep = !Sample.on
+
     /**
-     * Sensitive apps: how many answered the last check. Memory only, cleared when the app leaves
-     * the screen, like the result itself: never saved.
+     * Sensitive apps: how many answered the last check. Only the count is kept, never which apps,
+     * so the score is still there after a restart (owner, 2026-10-28). Clear history removes it.
      */
-    var sensitiveFound by mutableStateOf<Int?>(null)
+    var sensitiveFound by mutableStateOf(if (keep && prefs.contains(SENSITIVE)) prefs.getInt(SENSITIVE, 0) else null)
+        private set
+
+    fun recordSensitive(found: Int) {
+        sensitiveFound = found
+        if (keep) prefs.edit().putInt(SENSITIVE, found).apply()
+    }
+
+    fun clearSaved() {
+        sensitiveFound = null
+        prefs.edit().remove(SENSITIVE).apply()
+        history.clear()
+    }
 
     /** The four checks as one score, for the first page. */
     fun overall(context: Context): OverallScore {
@@ -76,9 +92,15 @@ class Scanner(app: Application) : AndroidViewModel(app) {
         )
     }
 
-    fun scan() {
+    /**
+     * `quietly` re-reads in place, without the scanning screen: when the app comes back to the
+     * screen and after the fix walk-through, so a fix shows in the score straight away. A quiet
+     * scan is saved to history only when something changed.
+     */
+    fun scan(quietly: Boolean = false) {
         if (phase == Phase.SCANNING) return
-        phase = Phase.SCANNING
+        val before = history.latest
+        if (!quietly) phase = Phase.SCANNING
         progress = 0f
         viewModelScope.launch {
             val ctx = getApplication<Application>()
@@ -88,12 +110,15 @@ class Scanner(app: Application) : AndroidViewModel(app) {
                 val got = withContext(Dispatchers.Default) { runCatching { r.read(ctx) }.getOrDefault(emptyList()) }
                 got.forEach { out[it.id] = it }
                 progress = (i + 1f) / readers.size
-                delay(60)
+                if (!quietly) delay(60)
             }
             readings = out
             val snapshot = history.snapshot(findings, score)
-            comparison = history.latest?.let { Comparison(it, snapshot) }
-            history.append(snapshot)
+            val unchanged = before != null && before.score == snapshot.score && before.concerningIds == snapshot.concerningIds
+            if (!(quietly && unchanged)) {
+                comparison = before?.let { Comparison(it, snapshot) }
+                history.append(snapshot)
+            }
             phase = Phase.DONE
         }
     }
@@ -108,6 +133,8 @@ class Scanner(app: Application) : AndroidViewModel(app) {
         }
     }
 }
+
+private const val SENSITIVE = "sensitiveFound"
 
 data class Snapshot(val date: Long, val score: Int, val findingCount: Int, val concerningIds: List<String>, val hashes: Map<String, String>)
 

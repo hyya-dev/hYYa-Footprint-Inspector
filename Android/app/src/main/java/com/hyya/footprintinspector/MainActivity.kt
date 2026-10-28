@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
         // installed app could otherwise start it with made-up, reassuring results.
         val dev = BuildConfig.DEBUG
         Sample.on = dev && intent.getBooleanExtra("sampleData", false)
-        val startTab = (if (dev) intent.getStringExtra("startTab") else null)?.let { name -> Tab.entries.firstOrNull { it.name.equals(name, true) } } ?: Tab.SCAN
+        val startTab = (if (dev) intent.getStringExtra("startTab") else null)?.let { name -> Tab.entries.firstOrNull { it.name.equals(name, true) } } ?: Tab.HOME
         val autoScan = dev && intent.getBooleanExtra("autoScan", false)
         if (dev) intent.getStringExtra("sensitiveCategories")?.let { ids ->
             getSharedPreferences("app", MODE_PRIVATE).edit().putStringSet("sensitiveCategories", ids.split(",").toSet()).apply()

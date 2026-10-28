@@ -13,6 +13,8 @@ enum MacSignalCatalogue {
         static let privacy = "com.apple.settings.PrivacySecurity.extension"
         static let users = "com.apple.Users-Groups-Settings.extension"
         static let sharing = "com.apple.Sharing-Settings.extension"
+        /// General › About, where the Mac's name is set (it moved out of Sharing).
+        static let about = "com.apple.SystemProfiler.AboutExtension"
         static let language = "com.apple.Localization-Settings.extension"
         static let keyboard = "com.apple.Keyboard-Settings.extension"
         static let appearance = "com.apple.Appearance-Settings.extension"
@@ -85,10 +87,9 @@ enum MacSignalCatalogue {
               reveals: "Your Mac's name and its name on the network, often something like \"Sam's MacBook Pro\". That hands over a first name, and nearby devices on your network see it too.",
               why: "So you can tell your Macs apart when sharing files or using AirDrop.",
               persistence: .untilYouChangeIt, severity: .high,
-              fix: .settings("Give your Mac a name that doesn't include yours, such as \"MacBook\".", pane: Pane.sharing, [
-                  "Open System Settings › General › Sharing.",
-                  "Change Computer name at the bottom.",
-                  "Under Local hostname, click Edit and change that too.",
+              fix: .settings("Give your Mac a name that doesn't include yours, such as \"MacBook\".", pane: Pane.about, [
+                  "Open System Settings › General › About, click Name and type the new name.",
+                  "Then open General › Sharing, scroll to Local hostname, click Edit and change it to match.",
               ])),
         .init(id: "mac-graphics", section: .identity, title: "Graphics chip",
               reveals: "Your graphics chip and what it can do, which points to how new your Mac is.",
@@ -235,7 +236,9 @@ enum MacSignalCatalogue {
               reveals: "A full list of the apps you have installed. There's no limit on a Mac, unlike on a phone. Your apps can reveal your work, health, faith, dating life and money.",
               why: "So apps can open files and links with the right app.",
               persistence: .untilYouChangeIt, severity: .high,
-              fix: .guided("Delete apps you no longer use. An app you've deleted can't give you away.", [
+              // No setting hides the list, so this isn't in the score: deleting apps shortens it
+              // but never makes it go away, and the score must only promise what a scan can see.
+              fix: Fix(level: .onlyApple, summary: "No setting hides your app list; only Apple could stop apps reading it. Deleting apps you no longer use keeps it short: an app you've deleted can't give you away.", steps: [
                   "Open Finder › Applications.",
                   "Drag apps you no longer use to the Bin (Trash).",
               ])),

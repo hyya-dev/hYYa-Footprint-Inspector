@@ -238,3 +238,17 @@ struct SignalReading: Identifiable, Sendable, Equatable {
     /// A one-line, calm explanation of why this reading was raised.
     var note: String? = nil
 }
+
+extension SignalDefinition {
+    /// The last-restart finding, whose fix is a weekly restart.
+    var isRestart: Bool { id == "boot-time" || id == "mac-boot-time" }
+}
+
+/// A restart within this long counts as done: the restart time is fresh enough that it changes
+/// again before apps can lean on it, and the weekly-restart advice has been followed.
+enum RecentRestart {
+    static let window: TimeInterval = 7 * 24 * 3600
+    static let note = "Restarted within the last week, so this changes again soon. Nothing to do."
+    /// From the boot date, not the uptime, which stops while the device sleeps.
+    static func isRecent(boot: Date, now: Date = Date()) -> Bool { now.timeIntervalSince(boot) < window }
+}

@@ -122,9 +122,12 @@ struct MacSystemSource: SignalSource {
     func read() async -> [SignalReading] {
         var out: [SignalReading] = []
         if let boot = Sysctl.bootTime() {
-            let up = Duration.seconds(ProcessInfo.processInfo.systemUptime)
+            let up = Duration.seconds(Date().timeIntervalSince(boot))
                 .formatted(.units(allowed: [.days, .hours, .minutes], width: .abbreviated))
-            out.append(.init(id: "mac-boot-time", value: Format.dateTime(boot), items: ["Running for \(up)"]))
+            var restart = SignalReading(id: "mac-boot-time", value: Format.dateTime(boot), items: ["Running for \(up)"])
+            // A restart in the last week is the fix itself, so it counts as done.
+            if RecentRestart.isRecent(boot: boot) { restart.severityOverride = .low; restart.note = RecentRestart.note }
+            out.append(restart)
         }
         if let battery = Self.battery() { out.append(battery) }
         return out
@@ -326,7 +329,13 @@ struct MacNetworkSource: SignalSource {
 
         let hw = MacSample.on ? ["Wi-Fi: 3c:22:fb:00:00:01", "Thunderbolt Ethernet: 3c:22:fb:00:00:02"] : Self.hardwareAddresses()
         if !hw.isEmpty {
-            out.append(.init(id: "mac-hardware-addresses", value: "\(hw.count) address\(hw.count == 1 ? "" : "es")", items: hw))
+            var addresses = SignalReading(id: "mac-hardware-addresses", value: "\(hw.count) address\(hw.count == 1 ? "" : "es")", items: hw)
+            // Wi-Fi's private address is the fix; once it's on, what's left only Apple can hide.
+            if hw.contains(where: { $0.hasPrefix("Wi-Fi: ") && Self.isPrivate($0) }) {
+                addresses.severityOverride = .low
+                addresses.note = "Wi-Fi already uses a private address. Wired ports keep theirs, and only Apple could hide those."
+            }
+            out.append(addresses)
         }
 
         var dnsItems: [String] = []
@@ -367,6 +376,12 @@ struct MacNetworkSource: SignalSource {
                 if once.claim() { monitor.cancel(); continuation.resume(returning: "Unknown") }
             }
         }
+    }
+
+    /// A private (randomised) address has the "locally administered" bit set in its first byte.
+    static func isPrivate(_ entry: String) -> Bool {
+        guard let mac = entry.split(separator: " ").last, let first = UInt8(mac.prefix(2), radix: 16) else { return false }
+        return first & 0x02 != 0
     }
 
     /// Link-layer (hardware) addresses of the built-in and wired ports.

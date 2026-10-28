@@ -187,12 +187,15 @@ struct FindingDetailView: View {
                     #endif
                     cleared = true
                     Haptics.success()
-                    Task { await scanner.scan() }
+                    Task { await scanner.scan(quietly: true) }
                 }
                 .buttonStyle(PrimaryCTAButtonStyle(fill: Brand.green, depthColor: Color(hex: 0x0E8A56)))
                 .disabled(cleared)
             }
-            if fixable {
+            if def.isRestart {
+                // A restart isn't a setting, so there's no Settings page to open.
+                WeeklyReminderToggle()
+            } else if fixable {
                 #if os(macOS)
                 if let pane = def.fix.settingsPane {
                     Button("Open in System Settings") { SettingsLink.open(pane: pane) }

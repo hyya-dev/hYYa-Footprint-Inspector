@@ -151,7 +151,7 @@ fun SensitiveScreen(scanner: com.hyya.footprintinspector.scan.Scanner) {
                     color = Brand.textSubtle, fontSize = 12.sp, lineHeight = 16.sp)
             }
             PrimaryButton(if (chosen.isEmpty()) "Pick at least one kind" else "Check ${chosen.size} kind${if (chosen.size == 1) "" else "s"}") {
-                if (chosen.isNotEmpty()) { val r = Sensitive.scan(context, chosen); results = r; revealed = false; scanner.sensitiveFound = r.values.sumOf { it.size } }
+                if (chosen.isNotEmpty()) { val r = Sensitive.scan(context, chosen); results = r; revealed = false; scanner.recordSensitive(r.values.sumOf { it.size }) }
             }
         }
     }
@@ -272,6 +272,11 @@ private fun TrackerRow(f: com.hyya.footprintinspector.model.Finding, nav: Nav, d
 @Composable
 fun CheckUpScreen(nav: Nav) {
     val context = LocalContext.current
+    // A restart in the last week is the restart step done: tick it without asking.
+    if (restartedRecently()) {
+        val set = prefs(context).getStringSet("checkUpDone", emptySet())!!
+        if ("restart" !in set) prefs(context).edit().putStringSet("checkUpDone", set + "restart").apply()
+    }
     val done = prefs(context).getStringSet("checkUpDone", emptySet())!!
     Page {
         HeroCard("Check-up", if (done.size == CheckUp.steps.size) "All checked!" else "${done.size} of ${CheckUp.steps.size} checked",
@@ -300,8 +305,23 @@ fun CheckUpStepScreen(index: Int, nav: Nav) {
         BackBar(step.title, nav)
         HeroCard("Step ${index + 1}", step.title, step.why)
         InfoCard("Where to go", Tone.CONTEXT, Icons.Outlined.Settings) { Text(step.path, color = Tone.CONTEXT.tint, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, lineHeight = 20.sp) }
-        InfoCard("What to do", Tone.FIX, Icons.Outlined.Checklist) { StepList(step.actions, Tone.FIX.tint) }
-        GhostButton("Open Settings") { openSettings(context, step.action) }
+        if (step.id == "restart" && restartedRecently()) {
+            val days = android.os.SystemClock.elapsedRealtime() / 86_400_000
+            InfoCard("Already done", Tone.FIX, Icons.Outlined.CheckCircle) {
+                Text("This device last restarted ${if (days == 0L) "today" else if (days == 1L) "yesterday" else "$days days ago"}. That counts, so I've ticked it for you.",
+                    color = Brand.ink, fontSize = 15.sp, lineHeight = 21.sp)
+            }
+        }
+        InfoCard("What to do", Tone.FIX, Icons.Outlined.Checklist) {
+            StepList(step.actions, Tone.FIX.tint)
+            if (step.id == "restart") WeeklyReminderSwitch()
+        }
+        // Restarting isn't a setting, and Password Checkup is Google's own page.
+        when (step.id) {
+            "restart" -> {}
+            "passwords" -> GhostButton("Open Password Checkup") { openUrl(context, "https://passwords.google.com/checkup") }
+            else -> GhostButton("Open Settings") { openSettings(context, step.action) }
+        }
         PrimaryButton(if (done) "Checked ✓" else "I've checked this", fill = if (done) Brand.green else androidx.compose.ui.graphics.Color.White) {
             done = !done
             val set = prefs(context).getStringSet("checkUpDone", emptySet())!!.toMutableSet()
@@ -346,9 +366,9 @@ fun SettingsScreen(scanner: Scanner) {
             RowCard(Icons.Outlined.History, "Scan history") { Text("$count", color = Brand.textSubtle) }
             ReminderRow()
             RowCard(Icons.Outlined.Delete, "Clear history", tint = Brand.concern, showDivider = false,
-                onClick = { scanner.history.clear(); count = 0 })
+                onClick = { scanner.clearSaved(); count = 0 })
         }
-        Text("Sensitive-app results are never saved.", color = Brand.textSubtle, fontSize = 12.sp)
+        Text("Only scores and counts are kept, never which apps you have. Clear history removes them too.", color = Brand.textSubtle, fontSize = 12.sp)
         SectionTitle("Support hYYa")
         Panel {
             RowCard(Icons.Outlined.Share, "Share", "Help your friends take back their digital privacy.", onClick = {
@@ -401,3 +421,6 @@ private fun PromoRow(image: Int, title: String, tagline: String, divider: Boolea
         if (divider) androidx.compose.material3.HorizontalDivider(Modifier.padding(start = 70.dp), color = Brand.rule, thickness = 0.5.dp)
     }
 }
+
+/** Restarted within the last week (owner, 2026-10-28). */
+fun restartedRecently() = com.hyya.footprintinspector.scan.RecentRestart.isRecent(android.os.SystemClock.elapsedRealtime())

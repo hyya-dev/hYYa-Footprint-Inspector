@@ -59,6 +59,8 @@ struct CheckUpView: View {
             .inlineTitle()
             .clearNavigationBar()
             .sensoryFeedback(.success, trigger: done.count == total)
+            // A restart in the last week is the restart step done: tick it without asking.
+            .task { if CheckUpStepView.restartedRecently { binding(for: "restart").wrappedValue = true } }
         } placeholder: {
             DetailPlaceholder(line: "Pick an area to see where to go and what to do.")
         }
@@ -76,6 +78,12 @@ struct CheckUpView: View {
 }
 
 struct CheckUpStepView: View {
+    /// The restart step exists on phones only; a Mac's restart is in its Footprint findings.
+    static var restartedRecently: Bool {
+        guard CheckUpGuide.steps.contains(where: { $0.id == "restart" }), let boot = Sysctl.bootTime() else { return false }
+        return RecentRestart.isRecent(boot: boot)
+    }
+
     /// "Settings › Privacy & Security › Location Services" → "Location Services".
     static func searchTerm(_ path: String) -> String? {
         guard path.hasPrefix("Settings ›") else { return nil }
@@ -109,8 +117,15 @@ struct CheckUpStepView: View {
                 }
                 #endif
             }
+            if step.id == "restart", Self.restartedRecently, let boot = Sysctl.bootTime() {
+                ToneCard(tone: .fix, title: "Already done", symbol: "checkmark.seal") {
+                    Text("This device last restarted \(boot.formatted(.relative(presentation: .named))). That counts, so I've ticked it for you.")
+                        .font(.body).foregroundStyle(Brand.ink).fixedSize(horizontal: false, vertical: true)
+                }
+            }
             ToneCard(tone: .fix, title: "What to do", symbol: "checklist") {
                 StepList(steps: step.actions, tint: Tone.fix.tint)
+                if step.id == "restart" { WeeklyReminderToggle() }
             }
             #if os(iOS)
             if step.id == "privacy-report" {
@@ -118,13 +133,27 @@ struct CheckUpStepView: View {
             }
             #endif
             #if os(macOS)
-            Button("Open in System Settings") {
-                if let pane = step.pane { SettingsLink.open(pane: pane) } else { SettingsLink.openSettingsHome() }
+            if let app = step.app {
+                // Not a setting: open the app itself.
+                Button(app.title) { SettingsLink.openApp(bundleID: app.bundleID) }
+                    .buttonStyle(GhostButtonStyle())
+                    .frame(maxWidth: .infinity)
+            } else {
+                HStack(spacing: 12) {
+                    Button("Open in System Settings") {
+                        if let pane = step.pane { SettingsLink.open(pane: pane) } else { SettingsLink.openSettingsHome() }
+                    }
+                    .buttonStyle(GhostButtonStyle())
+                    if let second = step.secondPane {
+                        Button(second.title) { SettingsLink.open(pane: second.pane) }
+                            .buttonStyle(GhostButtonStyle())
+                    }
+                }
+                .frame(maxWidth: .infinity)
             }
-            .buttonStyle(GhostButtonStyle())
-            .frame(maxWidth: .infinity)
             #else
-            if step.id != "restart" {
+            // Restarting and the Passwords app aren't in Settings, so there's no Settings button.
+            if step.id != "restart" && step.id != "passwords" {
                 Button("Open Settings") { SettingsLink.openSettingsHome() }
                     .buttonStyle(GhostButtonStyle())
                     .frame(maxWidth: .infinity)

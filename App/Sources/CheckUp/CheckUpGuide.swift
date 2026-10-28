@@ -18,6 +18,10 @@ struct CheckUpStep: Identifiable, Sendable {
     let actions: [String]
     /// Mac only: the System Settings page "Open in System Settings" goes to.
     var pane: String? = nil
+    /// Mac only: a second page this area needs, with its button title.
+    var secondPane: (title: String, pane: String)? = nil
+    /// An app to open instead of Settings, when the area isn't in Settings at all (Passwords).
+    var app: (title: String, bundleID: String)? = nil
 }
 
 enum CheckUpGuide {
@@ -123,7 +127,8 @@ enum CheckUpGuide {
         .init(id: "mac-passwords", title: "Check for leaked passwords", symbol: "key",
               why: "Apple's Passwords app warns you when a saved password has turned up in a known data leak. It checks without revealing your passwords, and this app sees nothing.",
               path: "Passwords app › Security",
-              actions: ["Open the Passwords app and click Security.", "Change any password marked as leaked or reused."]),
+              actions: ["Open the Passwords app and click Security.", "Change any password marked as leaked or reused."],
+              app: ("Open Passwords", "com.apple.Passwords")),
         .init(id: "mac-lockdown", title: "Protection from targeted spyware", symbol: "lock.shield",
               why: "Lockdown Mode is Apple's strongest defence against rare, targeted spyware. Most people never need it; journalists, activists and officials should consider it.",
               path: "System Settings › Privacy & Security › Lockdown Mode",
@@ -186,9 +191,11 @@ enum CheckUpGuide {
               pane: privacy("Privacy_Pasteboard")),
         .init(id: "mac-sharing", title: "Your Mac's name", symbol: "laptopcomputer",
               why: "Your Mac's name is visible to every app and to other devices on your network.",
-              path: "System Settings › General › Sharing",
-              actions: ["Change Computer name so it doesn't include yours.", "Edit Local hostname to match."],
-              pane: MacSignalCatalogue.Pane.sharing),
+              path: "System Settings › General › About, then General › Sharing",
+              actions: ["In About, click Name and type a name that doesn't include yours, such as \"MacBook\".",
+                        "In Sharing, scroll to Local hostname at the bottom, click Edit and change it to match."],
+              pane: MacSignalCatalogue.Pane.about,
+              secondPane: ("Open Sharing", MacSignalCatalogue.Pane.sharing)),
         .init(id: "mac-login-items", title: "Login items", symbol: "power",
               why: "These apps start every time you log in and can run in the background all day.",
               path: "System Settings › General › Login Items & Extensions",

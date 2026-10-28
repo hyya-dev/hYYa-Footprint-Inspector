@@ -50,8 +50,13 @@ final class Scanner {
     #endif
 
     /// Reads every passive and advanced signal, plus any permission category already granted.
-    func scan() async {
-        phase = .scanning
+    /// `quietly` re-reads in place, without the scanning screen: used when the app comes back to
+    /// the screen and after the fix walk-through, so a fix shows in the score straight away. A
+    /// quiet scan is saved to history only when something changed.
+    func scan(quietly: Bool = false) async {
+        guard phase != .scanning else { return }
+        let before = history.latest
+        if !quietly { phase = .scanning }
         progress = 0
         var fresh: [String: SignalReading] = [:]
         for (i, source) in passiveSources.enumerated() {
@@ -66,8 +71,11 @@ final class Scanner {
         lastScan = Date()
         let snapshot = history.makeSnapshot(findings: allFindings, score: score,
                                             osVersion: ProcessInfo.processInfo.operatingSystemVersionString)
-        comparison = history.latest.map { ScanComparison(previous: $0, current: snapshot) }
-        history.append(snapshot)
+        let unchanged = before.map { $0.score == snapshot.score && $0.concerningIDs == snapshot.concerningIDs } ?? false
+        if !(quietly && unchanged) {
+            comparison = before.map { ScanComparison(previous: $0, current: snapshot) }
+            history.append(snapshot)
+        }
         phase = .done
     }
 

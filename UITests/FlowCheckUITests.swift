@@ -15,6 +15,8 @@ final class FlowCheckUITests: XCTestCase {
         continueAfterFailure = true
         app = XCUIApplication()
         app.launchArguments = ["-sampleData"]
+        // A test that stopped sideways must not leave the next one sideways.
+        XCUIDevice.shared.orientation = .portrait
     }
 
     private func shot(_ name: String) {
@@ -45,20 +47,38 @@ final class FlowCheckUITests: XCTestCase {
         sleep(1)
     }
 
-    private func scrollUntil(_ el: XCUIElement, max: Int = 12) {
+    /// Short drags until the element is fully on screen; a swipe can overshoot on a short screen
+    /// held sideways and leave it half off the top.
+    private func scrollUntil(_ el: XCUIElement, max: Int = 16) {
         var i = 0
-        while !el.isHittable && i < max { app.swipeUp(velocity: .slow); i += 1 }
+        func onScreen() -> Bool {
+            guard el.exists else { return false }
+            let w = app.windows.firstMatch.frame, f = el.frame
+            return f.minY >= w.minY && f.maxY <= w.maxY - 20
+        }
+        while !onScreen() && i < max {
+            let w = app.windows.firstMatch
+            let from = w.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.75))
+            from.press(forDuration: 0.05, thenDragTo: w.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.5)))
+            i += 1
+        }
     }
 
     func testFootprintFlow() {
         app.launch()
+        tab("Footprint")
         let start = app.buttons["Start with check 1"]
         assertVisible(start, "Start with check 1")
         shot("footprint-start")
         start.tap()
         XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 25), "scan didn't finish")
-        assertVisible(text("checks"), "overall score line")
+        XCTAssertFalse(app.buttons["Share my result"].exists, "Share belongs on the Score page only")
         shot("footprint-result")
+        tab("Score")
+        assertVisible(text("checks"), "overall score line")
+        assertVisible(app.buttons["Share my result"].firstMatch, "Share my result")
+        shot("score-page")
+        tab("Footprint")
 
         let fix = app.buttons["Fix them with me"]
         scrollUntil(fix)
@@ -114,7 +134,10 @@ final class FlowCheckUITests: XCTestCase {
         XCUIDevice.shared.orientation = .landscapeLeft
         XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 25), "scan didn't finish")
         shot("sideways-footprint")
-        for name in ["Sensitive apps", "Tracker", "Check-up", "Settings"] {
+        // The pages sit down the right edge when sideways (owner, 2026-10-28).
+        let rail = app.buttons["Score"].firstMatch
+        XCTAssertTrue(rail.waitForExistence(timeout: 5) && rail.frame.midX > app.windows.firstMatch.frame.midX, "pages aren't on the right")
+        for name in ["Score", "Sensitive apps", "Tracker", "Check-up", "Settings"] {
             tab(name)
             shot("sideways-\(name)")
         }
@@ -124,7 +147,7 @@ final class FlowCheckUITests: XCTestCase {
     /// Dynamic Type (1.0.2): at the largest accessibility text size nothing on any page runs off
     /// the screen's edge.
     func testNothingClippedAtLargestText() {
-        for tab in ["footprint", "sensitive", "tracker", "checkup", "settings"] {
+        for tab in ["home", "footprint", "sensitive", "tracker", "checkup", "settings"] {
             app.terminate()
             app.launchArguments = ["-sampleData", "-autoScan", "-startTab", tab,
                                    "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
@@ -192,7 +215,9 @@ final class FlowCheckUITests: XCTestCase {
         scrollUntil(done)
         done.tap()
         sleep(1)
-        assertVisible(text("1 of"), "back on the list with one ticked")
+        // A recent restart is ticked by itself, so one or two areas are ticked now.
+        let ticked1 = text("1 of"), ticked2 = text("2 of")
+        assertVisible(ticked1.waitForExistence(timeout: 3) ? ticked1 : ticked2, "back on the list with the area ticked")
         shot("checkup-after")
     }
 

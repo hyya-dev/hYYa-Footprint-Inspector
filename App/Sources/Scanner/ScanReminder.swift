@@ -4,6 +4,11 @@
 
 import Foundation
 import UserNotifications
+#if os(iOS)
+import UIKit
+#else
+import AppKit
+#endif
 
 /// A reminder to scan again, weekly or monthly. It's a local notification scheduled on this
 /// device: no server, nothing sent. Off unless the person turns it on in Settings.
@@ -21,8 +26,8 @@ enum ScanReminder: String, CaseIterable, Identifiable, Sendable {
 
     static let storageKey = "scanReminder"
     static let identifier = "scan-reminder"
-    static let notificationTitle = "Time for a quick re-scan"
-    static let notificationBody = "Apps, settings and updates change what any app can read. Scan again to see where you stand."
+    static let notificationTitle = "Time for your privacy check"
+    static let notificationBody = "Restart your device, then open the app: your score updates by itself."
 
     /// The repeating trigger at 10:00. It's anchored on the day before today, so the first
     /// reminder comes about a week (or a month) after turning it on, not later the same day.
@@ -50,7 +55,22 @@ enum ScanReminder: String, CaseIterable, Identifiable, Sendable {
         content.title = Self.notificationTitle
         content.body = Self.notificationBody
         content.sound = .default
+        if let mascot = Self.mascotAttachment() { content.attachments = [mascot] }
         try? await center.add(UNNotificationRequest(identifier: Self.identifier, content: content, trigger: trigger))
         return true
+    }
+
+    /// The mascot on the notification card. The system takes over the file it's given, so a fresh
+    /// copy of the picture is written each time.
+    private static func mascotAttachment() -> UNNotificationAttachment? {
+        #if os(iOS)
+        guard let data = UIImage(named: "MascotCutout")?.pngData() else { return nil }
+        #else
+        guard let tiff = NSImage(named: "MascotCutout")?.tiffRepresentation,
+              let data = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) else { return nil }
+        #endif
+        let url = FileManager.default.temporaryDirectory.appending(path: "reminder-mascot-\(UUID().uuidString).png")
+        guard (try? data.write(to: url)) != nil else { return nil }
+        return try? UNNotificationAttachment(identifier: "mascot", url: url)
     }
 }

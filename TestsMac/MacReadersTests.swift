@@ -75,3 +75,38 @@ final class MacPlainWordsTests: XCTestCase {
         }
     }
 }
+
+/// Owner's Mac test, 2026-10-28.
+@MainActor
+final class MacLiveScoreTests: XCTestCase {
+    /// Tracker counts on a Mac once every place is ticked, and never before.
+    func testTrackerCountsOnceEveryPlaceIsChecked() {
+        let partway = OverallScore.current(scanner: Scanner(history: HistoryStore(directory: FileManager.default.temporaryDirectory.appending(path: UUID().uuidString))),
+                                           history: HistoryStore(directory: FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)),
+                                           check: PrivacyCheck(defaults: nil), checkUpStored: "", trackerStored: "screen,files")
+        XCTAssertNil(partway.parts[.tracker])
+        let all = OverallScore(footprint: 44, sensitiveFound: nil, trackerSharing: nil, trackerReviewed: true, checkUpDone: 0, checkUpTotal: 17)
+        XCTAssertEqual(all.parts[.tracker], 100)
+        XCTAssertEqual(all.total, 4)
+    }
+
+    /// A private Wi-Fi address has the locally administered bit set.
+    func testPrivateWiFiAddressIsRecognised() {
+        XCTAssertTrue(MacNetworkSource.isPrivate("Wi-Fi: 3e:22:fb:00:00:01"))
+        XCTAssertFalse(MacNetworkSource.isPrivate("Wi-Fi: 3c:22:fb:00:00:01"))
+    }
+
+    /// The app list can't be hidden by any setting, so it promises no points.
+    func testAppListIsNotInTheScore() {
+        let def = MacSignalCatalogue.list.first { $0.id == "mac-installed-apps" }
+        XCTAssertEqual(def?.fix.level, .onlyApple)
+    }
+
+    /// The Mac's name is set in General › About now, and Passwords opens its own app.
+    func testNameAndPasswordsGoToTheRightPlace() {
+        XCTAssertEqual(MacSignalCatalogue.list.first { $0.id == "mac-computer-name" }?.fix.settingsPane, MacSignalCatalogue.Pane.about)
+        let name = CheckUpGuide.macSteps.first { $0.id == "mac-sharing" }
+        XCTAssertEqual(name?.pane, MacSignalCatalogue.Pane.about)
+        XCTAssertEqual(name?.secondPane?.pane, MacSignalCatalogue.Pane.sharing)
+    }
+}

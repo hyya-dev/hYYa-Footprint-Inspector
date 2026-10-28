@@ -42,24 +42,27 @@ struct ScanView: View {
 
 private struct IdleHome: View {
     @Environment(Scanner.self) private var scanner
-    @Environment(HistoryStore.self) private var history
-    @Environment(PrivacyCheck.self) private var check
-    @AppStorage("checkUpDone") private var checkUpStored = ""
+    #if os(iOS)
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+    private var short: Bool { verticalSizeClass == .compact }
+    #else
+    private let short = false
+    #endif
 
     var body: some View {
-        let overall = OverallScore.current(scanner: scanner, history: history, check: check, checkUpStored: checkUpStored)
-        VStack(alignment: .leading, spacing: 24) {
-            LivingMascot(mood: .idle, size: 200)
+        VStack(alignment: .leading, spacing: short ? 14 : 24) {
+            // Sideways on a phone the mascot shrinks, so the scan button stays on screen.
+            LivingMascot(mood: .idle, size: short ? 80 : 180)
                 .frame(maxWidth: .infinity)
-                .padding(.top, 24)
+                .padding(.top, short ? 0 : 24)
             VStack(alignment: .leading, spacing: 12) {
-                Brand.eyebrow("hYYa Footprint Inspector")
+                Brand.eyebrow("Check 1 · Footprint")
                 AccentRule()
-                Text("What do your apps know about you?")
-                    .scaledFont(34, weight: .bold, relativeTo: .largeTitle)
+                Text("What can any app read about this device?")
+                    .scaledFont(30, weight: .bold, relativeTo: .largeTitle)
                     .foregroundStyle(Brand.ink)
                     .fixedSize(horizontal: false, vertical: true)
-                Text("Four quick checks show what apps can learn about you, then help you fix it.")
+                Text("A quick scan reads only what any app could, without asking you. Then I'll help you fix what you can.")
                     .font(.body)
                     .foregroundStyle(Brand.textMuted)
                     .lineSpacing(2)
@@ -73,8 +76,6 @@ private struct IdleHome: View {
                     .foregroundStyle(Brand.textSubtle)
                     .frame(maxWidth: .infinity)
             }
-            SectionTitle(title: "Your checks", trailing: "\(overall.doneCount) of \(overall.total)")
-            ChecksPanel(overall: overall) { Task { await scanner.scan() } }
         }
     }
 }
@@ -131,59 +132,18 @@ private struct Results: View {
     @Environment(\.goToTab) private var goToTab
     @Namespace private var zoom
 
-    @Environment(HistoryStore.self) private var history
-    @Environment(PrivacyCheck.self) private var check
-    @AppStorage("checkUpDone") private var checkUpStored = ""
-
     var body: some View {
         let score = scanner.score
         let concerning = scanner.concerning
-        let overall = OverallScore.current(scanner: scanner, history: history, check: check, checkUpStored: checkUpStored)
-        let left = overall.total - overall.doneCount
 
-        // One score for the whole check, then the four checks that make it up.
-        VStack(alignment: .leading, spacing: 18) {
-            // Side by side when they fit; stacked at the largest text sizes, where the ring grows.
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .center) {
-                    ScoreOrb(value: overall.value ?? score.value, size: 128, tint: tint(overall.level))
-                    Spacer()
-                    LivingMascot(mood: concerning.isEmpty ? .happy : .concerned, size: 132)
-                }
-                VStack(alignment: .leading, spacing: 12) {
-                    LivingMascot(mood: concerning.isEmpty ? .happy : .concerned, size: 104)
-                    ScoreOrb(value: overall.value ?? score.value, size: 128, tint: tint(overall.level))
-                }
-            }
-            .padding(.top, 20)
-            VStack(alignment: .leading, spacing: 6) {
-                Brand.eyebrow("Your privacy score")
-                Text(overall.level?.title ?? "")
-                    .scaledFont(30, weight: .bold, relativeTo: .largeTitle)
-                    .foregroundStyle(Brand.ink)
-                AccentRule().padding(.vertical, 4)
-                Text(left == 0 ? "All \(overall.total) checks done. Higher is better." :
-                        "Based on \(overall.doneCount) of \(overall.total) checks. Do the other \(left) to complete your score.")
-                    .font(.body)
-                    .foregroundStyle(Brand.textMuted)
-                    .lineSpacing(2)
-                    .fixedSize(horizontal: false, vertical: true)
-                Button("How the score works") { showingFormula = true }
-                    .buttonStyle(.plain)
-                    .font(.footnote)
-                    .foregroundStyle(Brand.textSubtle)
-                    .padding(.top, 2)
-            }
-            ChecksPanel(overall: overall)
-        }
-        .sheet(isPresented: $showingFormula) { FormulaSheet() }
-        .sheet(isPresented: $fixing) { FixWizard(fixes: fixes) { Task { await scanner.scan() } } }
+        // Check 1 in detail: the footprint score and its clues. The overall score is on the Score page.
+        Color.clear.frame(height: 4)
+            .sheet(isPresented: $showingFormula) { FormulaSheet() }
+            .sheet(isPresented: $fixing, onDismiss: { Task { await scanner.scan(quietly: true) } }) { FixWizard(fixes: fixes) }
 
-        SectionDivider()
-
-        // Check 1 in detail: the footprint score and its clues.
         VStack(alignment: .leading, spacing: 14) {
             Brand.eyebrow("Check 1 · Footprint")
+                .padding(.top, 20)
             Text("\(score.level.title): \(score.value)")
                 .font(.title2.weight(.bold))
                 .foregroundStyle(Brand.ink)
@@ -197,19 +157,13 @@ private struct Results: View {
                 .amber(seen.filter { $0.severity == .medium }.count, "worth knowing"),
                 .fine(seen.filter { $0.severity == .low }.count, "minor"),
             ], caption: "clues")
-            // Side by side when they fit; stacked at large text sizes.
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 12) {
-                    Button("Scan again") { Task { await scanner.scan() } }
-                        .buttonStyle(PrimaryCTAButtonStyle())
-                    ShareCardButton()
-                }
-                VStack(spacing: 12) {
-                    Button("Scan again") { Task { await scanner.scan() } }
-                        .buttonStyle(PrimaryCTAButtonStyle())
-                    ShareCardButton()
-                }
-            }
+            Button("Scan again") { Task { await scanner.scan() } }
+                .buttonStyle(PrimaryCTAButtonStyle())
+            Button("How the score works") { showingFormula = true }
+                .buttonStyle(.plain)
+                .font(.footnote)
+                .foregroundStyle(Brand.textSubtle)
+                .frame(maxWidth: .infinity)
         }
 
         ScoreGuideCard(score: score, fixes: fixes, all: scanner.allFindings) { fixing = true }
@@ -255,14 +209,6 @@ private struct Results: View {
         }
 
         NextStepCard(step: .sensitive) { goToTab(.sensitive) }
-    }
-
-    private func tint(_ level: OverallScore.Level?) -> Color {
-        switch level {
-        case .good?: Tone.fix.tint
-        case .fair?: Brand.sand
-        default: Tone.alert.tint
-        }
     }
 
     @ViewBuilder
@@ -326,7 +272,7 @@ struct CategoryTile: View {
     }
 }
 
-private struct FormulaSheet: View {
+struct FormulaSheet: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         NavigationStack {

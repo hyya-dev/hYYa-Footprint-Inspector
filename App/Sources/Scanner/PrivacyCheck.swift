@@ -5,9 +5,10 @@
 import Foundation
 import Observation
 
-/// The four checks as one journey, so the first page can show one overall score and where to go
-/// next. The sensitive-app and Tracker results are held in memory only and cleared when the app
-/// leaves the screen, like the results themselves: nothing here is ever saved.
+/// The four checks as one journey, so the Score page can show one overall score and where to go
+/// next. Only counts are kept, never which apps were found or what they shared, and they're saved
+/// on this device so the score is still there after a restart (owner, 2026-10-28). Settings ›
+/// Clear history removes them.
 @MainActor
 @Observable
 final class PrivacyCheck {
@@ -16,12 +17,25 @@ final class PrivacyCheck {
     /// Tracker: how many apps shared data with outside advertising or analytics companies.
     private(set) var trackerSharing: Int?
 
-    func recordSensitive(found: Int) { sensitiveFound = found }
-    func recordTracker(sharing: Int) { trackerSharing = sharing }
+    /// Where the counts are kept. `nil` keeps them in memory only (store screenshots, tests).
+    private let defaults: UserDefaults?
+    static let sensitiveKey = "result.sensitiveFound"
+    static let trackerKey = "result.trackerSharing"
 
-    func clearSessionResults() {
+    init(defaults: UserDefaults? = .standard) {
+        self.defaults = defaults
+        sensitiveFound = defaults?.object(forKey: Self.sensitiveKey) as? Int
+        trackerSharing = defaults?.object(forKey: Self.trackerKey) as? Int
+    }
+
+    func recordSensitive(found: Int) { sensitiveFound = found; defaults?.set(found, forKey: Self.sensitiveKey) }
+    func recordTracker(sharing: Int) { trackerSharing = sharing; defaults?.set(sharing, forKey: Self.trackerKey) }
+
+    func clearSaved() {
         sensitiveFound = nil
         trackerSharing = nil
+        defaults?.removeObject(forKey: Self.sensitiveKey)
+        defaults?.removeObject(forKey: Self.trackerKey)
     }
 }
 
@@ -31,24 +45,21 @@ struct OverallScore: Equatable, Sendable {
     enum Part: String, CaseIterable, Sendable {
         case footprint, sensitive, tracker, checkup
 
-        /// The Mac has no App Privacy Report to read, so its Tracker page is guidance, not a check.
-        static var onThisPlatform: [Part] {
-            #if os(macOS)
-            [.footprint, .sensitive, .checkup]
-            #else
-            allCases
-            #endif
-        }
+        static var onThisPlatform: [Part] { allCases }
     }
 
     /// The score of each check that has been done.
     let parts: [Part: Int]
 
-    init(footprint: Int?, sensitiveFound: Int?, trackerSharing: Int?, checkUpDone: Int, checkUpTotal: Int) {
+    /// `trackerReviewed`: the Mac has no App Privacy Report to read, so its Tracker check counts
+    /// as 100 once every place that shows powerful access has been looked through, like Check-up.
+    init(footprint: Int?, sensitiveFound: Int?, trackerSharing: Int?, trackerReviewed: Bool = false, checkUpDone: Int, checkUpTotal: Int) {
         var p: [Part: Int] = [:]
         p[.footprint] = footprint
         p[.sensitive] = sensitiveFound.map(Self.sensitivePart)
-        #if os(iOS)
+        #if os(macOS)
+        if trackerReviewed { p[.tracker] = 100 }
+        #else
         p[.tracker] = trackerSharing.map(Self.trackerPart)
         #endif
         // Check-up counts once every area is done, so ticking an area never lowers the score.
@@ -89,14 +100,19 @@ struct OverallScore: Equatable, Sendable {
     static func sensitivePart(_ found: Int) -> Int { max(20, 100 - 25 * found) }
     /// Every app that shares with outside ad or analytics companies costs 20 points, down to 20.
     static func trackerPart(_ sharing: Int) -> Int { max(20, 100 - 20 * sharing) }
+    #if os(macOS)
+    static let trackerLine = "counts as 100 once you've looked through every place that shows which apps can watch you. Until then it isn't in the score."
+    #else
+    static let trackerLine = "100 if no app shared your data with outside advertising or analytics companies, then 20 less for each app that did."
+    #endif
     static let explanation = """
     Your privacy score is the average of the checks you've done, out of 100. Higher is better.
 
     • Footprint: how much any app can read about this device. Everyone starts at 100; each thing worth a look that you can fix costs 10 points, each smaller one 2, and every 40 points lost halve it, so it never hits zero.
     • Sensitive apps: 100 if none of the apps you checked can be spotted, then 25 less for each one that can.
-    • Tracker: 100 if no app shared your data with outside advertising or analytics companies, then 20 less for each app that did.
+    • Tracker: \(trackerLine)
     • Check-up: counts as 100 once you've been through every Settings area. Until then it isn't in the score, so ticking areas off never lowers it.
 
-    Sensitive apps and Tracker never go below 20. Things only Apple can fix don't count, because nothing you do changes them. The score isn't a measure of how unique your device is: that would need data from other devices, and this app never sends or receives any.
+    Sensitive apps and Tracker never go below 20. Only these numbers are saved on this device, never which apps you have. Things only Apple can fix don't count, because nothing you do changes them. The score isn't a measure of how unique your device is: that would need data from other devices, and this app never sends or receives any.
     """
 }

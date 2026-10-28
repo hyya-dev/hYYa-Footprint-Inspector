@@ -4,14 +4,19 @@
 
 import SwiftUI
 
-/// The app's four steps, in order. Each page ends by pointing to the next, so nobody is left
-/// wondering where to go: see what's readable, what gives you away, what apps did, then fix.
+/// The Score page, then the app's four steps in order. Each page ends by pointing to the next, so
+/// nobody is left wondering where to go: see what's readable, what gives you away, what apps did,
+/// then fix.
 enum AppTab: String, CaseIterable, Identifiable, Hashable {
-    case footprint, sensitive, tracker, checkup, settings
+    case home, footprint, sensitive, tracker, checkup, settings
+
+    /// The four checks, in order.
+    static let checks: [AppTab] = [.footprint, .sensitive, .tracker, .checkup]
     var id: String { rawValue }
 
     var title: String {
         switch self {
+        case .home: "Score"
         case .footprint: "Footprint"
         case .sensitive: "Sensitive apps"
         case .tracker: "Tracker"
@@ -22,6 +27,7 @@ enum AppTab: String, CaseIterable, Identifiable, Hashable {
 
     var symbol: String {
         switch self {
+        case .home: "gauge.with.needle"
         case .footprint: "pawprint"
         case .sensitive: "eye.slash"
         case .tracker: "antenna.radiowaves.left.and.right"
@@ -37,7 +43,7 @@ enum AppTab: String, CaseIterable, Identifiable, Hashable {
         case .sensitive: 2
         case .tracker: 3
         case .checkup: 4
-        case .settings: nil
+        case .home, .settings: nil
         }
     }
 
@@ -47,13 +53,14 @@ enum AppTab: String, CaseIterable, Identifiable, Hashable {
         case .sensitive: "See which of your apps any app can spot, and what that says about you."
         case .tracker: "See which apps used your data and who they talked to."
         case .checkup: "Go through Settings one area at a time and take access back."
-        case .settings: ""
+        case .home, .settings: ""
         }
     }
 
     /// Accepts the old launch names used by screenshot scripts.
     init?(launchName: String) {
         switch launchName {
+        case "home", "score": self = .home
         case "scan", "footprint": self = .footprint
         case "sensitive": self = .sensitive
         case "tracker", "report": self = .tracker
@@ -148,42 +155,56 @@ extension View {
 // MARK: - The four checks, on the first page
 
 extension OverallScore {
-    /// Everything done so far: the Footprint scan (this one, or the last saved score), the
-    /// sensitive-app and Tracker results held in memory, and the Check-up areas ticked.
-    @MainActor static func current(scanner: Scanner, history: HistoryStore, check: PrivacyCheck, checkUpStored: String) -> OverallScore {
+    /// Everything done so far: the Footprint scan (this one, or the last saved score), the saved
+    /// sensitive-app and Tracker counts, the Check-up areas ticked and, on a Mac, the Tracker
+    /// places looked through.
+    @MainActor static func current(scanner: Scanner, history: HistoryStore, check: PrivacyCheck, checkUpStored: String, trackerStored: String = "") -> OverallScore {
         let ticked = Set(checkUpStored.split(separator: ",").map(String.init))
         let ids = Set(CheckUpGuide.steps.map(\.id))
+        let reviewed = Set(trackerStored.split(separator: ",").map(String.init)).intersection(TrackerPlaces.ids).count
         return OverallScore(footprint: scanner.phase == .done ? scanner.score.value : history.latest?.score,
                             sensitiveFound: check.sensitiveFound,
                             trackerSharing: check.trackerSharing,
+                            trackerReviewed: !TrackerPlaces.ids.isEmpty && reviewed == TrackerPlaces.ids.count,
                             checkUpDone: ticked.intersection(ids).count,
                             checkUpTotal: ids.count)
     }
 }
 
+/// The Mac's Tracker places, by id (MacTrackerView). Elsewhere the Tracker check reads a report.
+enum TrackerPlaces {
+    static let storageKey = "trackerChecked"
+    #if os(macOS)
+    static let ids: Set<String> = ["screen", "accessibility", "input", "files", "management", "login"]
+    #else
+    static let ids: Set<String> = []
+    #endif
+}
+
 /// The four checks as rows: what each one does, whether it's done, and its part of the score.
-/// Tapping one goes to that page, so the first page is also the map of the whole app.
+/// Tapping one goes to that page, so the Score page is also the map of the whole app.
 struct ChecksPanel: View {
     let overall: OverallScore
-    /// Step 1 starts the scan here instead of moving to another page.
-    var onScan: (() -> Void)? = nil
     @Environment(\.goToTab) private var goToTab
+    @Environment(Scanner.self) private var scanner
     @Environment(PrivacyCheck.self) private var check
     @AppStorage("checkUpDone") private var checkUpStored = ""
-
-    private let tabs: [AppTab] = [.footprint, .sensitive, .tracker, .checkup]
+    @AppStorage(TrackerPlaces.storageKey) private var trackerStored = ""
 
     var body: some View {
         Panel {
-            ForEach(Array(tabs.enumerated()), id: \.element) { i, tab in
+            ForEach(Array(AppTab.checks.enumerated()), id: \.element) { i, tab in
                 Button {
                     Haptics.selection()
-                    if tab == .footprint { onScan?() } else { goToTab(tab) }
+                    goToTab(tab)
+                    // Footprint before its first scan: start it on the way there.
+                    if tab == .footprint && scanner.phase == .idle && overall.parts[.footprint] == nil {
+                        Task { await scanner.scan() }
+                    }
                 } label: {
                     row(number: i + 1, tab: tab)
                 }
                 .buttonStyle(PressableCardStyle())
-                .disabled(tab == .footprint && onScan == nil)
             }
         }
     }
@@ -194,7 +215,7 @@ struct ChecksPanel: View {
         case .sensitive: .sensitive
         case .tracker: .tracker
         case .checkup: .checkup
-        case .settings: nil
+        case .home, .settings: nil
         }
     }
 
@@ -207,15 +228,16 @@ struct ChecksPanel: View {
             return n == 0 ? "No app can spot them" : (n == 1 ? "1 app can be spotted" : "\(n) apps can be spotted")
         case .tracker:
             #if os(macOS)
-            return "Where to look on this Mac"
+            let n = Set(trackerStored.split(separator: ",").map(String.init)).intersection(TrackerPlaces.ids).count
+            return n == TrackerPlaces.ids.count ? "Every place checked" : (n == 0 ? "Not checked yet" : "\(n) of \(TrackerPlaces.ids.count) places checked")
             #else
             guard let n = check.trackerSharing else { return "Not checked yet" }
             return n == 0 ? "No app shared your data" : (n == 1 ? "1 app shared your data" : "\(n) apps shared your data")
             #endif
         case .checkup:
             let ticked = Set(checkUpStored.split(separator: ",").map(String.init)).intersection(CheckUpGuide.steps.map(\.id)).count
-            return ticked == 0 ? "Not started" : "\(ticked) of \(CheckUpGuide.steps.count) areas checked"
-        case .settings:
+            return ticked == CheckUpGuide.steps.count ? "Every area checked" : (ticked == 0 ? "Not started" : "\(ticked) of \(CheckUpGuide.steps.count) areas checked")
+        case .home, .settings:
             return ""
         }
     }
@@ -244,9 +266,8 @@ struct ChecksPanel: View {
             Spacer(minLength: 8)
             if let value {
                 Text("\(value)").font(.title3.weight(.semibold).monospacedDigit()).foregroundStyle(Brand.ink)
-            } else if !(tab == .footprint && onScan == nil) {
-                Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(Brand.textSubtle)
             }
+            Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(Brand.textSubtle)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)

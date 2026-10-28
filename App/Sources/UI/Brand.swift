@@ -357,6 +357,12 @@ enum SettingsLink {
     static func open(pane: String) {
         if let url = URL(string: "x-apple.systempreferences:\(pane)") { NSWorkspace.shared.open(url) }
     }
+
+    /// For areas that live in an app rather than in System Settings, such as Passwords.
+    static func openApp(bundleID: String) {
+        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else { openSettingsHome(); return }
+        NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
+    }
 }
 #endif
 

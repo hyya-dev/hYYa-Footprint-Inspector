@@ -117,20 +117,16 @@ fun BackBar(title: String, nav: Nav) {
 fun ScanScreen(scanner: Scanner, nav: Nav) {
     when (scanner.phase) {
         Phase.IDLE -> Page {
-            val context = LocalContext.current
-            val overall = scanner.overall(context)
             Spacer(Modifier.padding(top = 16.dp))
-            Mascot(180, Modifier.align(Alignment.CenterHorizontally))
-            Eyebrow("hYYa Footprint Inspector")
+            Mascot(170, Modifier.align(Alignment.CenterHorizontally))
+            Eyebrow("Check 1 · Footprint")
             AccentRule()
-            Text("What do your apps know about you?", color = Brand.ink, fontSize = 30.sp, fontWeight = FontWeight.Bold, lineHeight = 34.sp)
-            Text("Four quick checks show what apps can learn about you, then help you fix it.",
+            Text("What can any app read about this device?", color = Brand.ink, fontSize = 28.sp, fontWeight = FontWeight.Bold, lineHeight = 32.sp)
+            Text("A quick scan reads only what any app could, without asking you. Then I'll help you fix what you can.",
                 color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
             PrimaryButton("Start with check 1") { scanner.scan() }
             Text("Nothing leaves your device · Open source", color = Brand.textSubtle, fontSize = 12.sp,
                 textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-            SectionTitle("Your checks", "${overall.doneCount} of ${overall.total}")
-            ChecksPanel(overall, scanner, checkUpDoneCount(context)) { scanner.scan() }
         }
         Phase.SCANNING -> Page {
             Spacer(Modifier.padding(top = 60.dp))
@@ -149,26 +145,9 @@ fun ScanScreen(scanner: Scanner, nav: Nav) {
 private fun Results(scanner: Scanner, nav: Nav) {
     val score = scanner.score
     val concerning = scanner.concerning
-    val context = LocalContext.current
-    val overall = scanner.overall(context)
-    val left = overall.total - overall.doneCount
     Page {
-        // One score for the whole check, then the four checks that make it up.
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            ScoreOrb(overall.value ?: score.value)
-            Spacer(Modifier.weight(1f))
-            Mascot(96)
-        }
-        Eyebrow("Your privacy score")
-        Text(overall.level?.title ?: "", color = Brand.ink, fontSize = 26.sp, fontWeight = FontWeight.Bold)
-        AccentRule()
-        Text(if (left == 0) "All ${overall.total} checks done. Higher is better."
-            else "Based on ${overall.doneCount} of ${overall.total} checks. Do the other $left to complete your score.",
-            color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
-        Text("How the score works", color = Brand.sand, fontSize = 13.sp, modifier = Modifier.clickableNoRipple { nav.push(Route.ScoreRoute) })
-        ChecksPanel(overall, scanner, checkUpDoneCount(context), null)
-        androidx.compose.material3.HorizontalDivider(color = Brand.rule, thickness = 0.5.dp)
-        // Check 1 in detail: the footprint score and its clues.
+        // Check 1 in detail: the footprint score and its clues. The overall score is on the Score page.
+        Spacer(Modifier.padding(top = 8.dp))
         Eyebrow("Check 1 · Footprint")
         Text("${score.level.title}: ${score.value}", color = Brand.ink, fontSize = 22.sp, fontWeight = FontWeight.Bold)
         Text("Any app can read ${scanner.findings.size} clues about this device. " +
@@ -181,6 +160,8 @@ private fun Results(scanner: Scanner, nav: Nav) {
             Slice("minor", seen.count { it.severity == Severity.LOW }, Tone.FIX.tint),
         ), "clues")
         PrimaryButton("Scan again") { scanner.scan() }
+        Text("How the score works", color = Brand.sand, fontSize = 13.sp, textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().clickableNoRipple { nav.push(Route.ScoreRoute) })
         ScoreGuide(scanner, nav)
         scanner.comparison?.let { cmp ->
             InfoCard("Since your last scan", Tone.CONTEXT, Icons.Outlined.History) {
@@ -337,7 +318,9 @@ fun FindingScreen(scanner: Scanner, id: String, nav: Nav) {
             trailing = if (d.fix.fixable && f.isConcerning) ({ ToneBadge("+${FootprintScore.HIGH_WEIGHT} points", Tone.FIX) }) else null) {
             Text(d.fix.summary, color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
             if (d.fix.steps.isNotEmpty()) StepList(d.fix.steps, fixTone.tint)
-            if (d.fix.fixable) PrimaryButton("Open Settings") { openSettings(context, d.fix.settingsAction) }
+            // A restart isn't a setting, so there's no Settings page to open.
+            if (d.id == "boot-time") WeeklyReminderSwitch()
+            else if (d.fix.fixable) PrimaryButton("Open Settings") { openSettings(context, d.fix.settingsAction) }
         }
         // The fuller explanation, for anyone who wants it, out of the way of the answer.
         ToneCard(Tone.EXPLAIN) {
@@ -434,14 +417,108 @@ fun FixScreen(scanner: Scanner, nav: Nav) {
             ToneCard(Tone.FIX, f.definition.fixTitle, Icons.Outlined.Build, trailing = { ToneBadge("+${FootprintScore.points(f)} points", Tone.FIX) }) {
                 Text(f.definition.fix.summary, color = Brand.ink, fontSize = 15.sp, lineHeight = 21.sp)
                 if (f.definition.fix.steps.isNotEmpty()) StepList(f.definition.fix.steps, Tone.FIX.tint)
-                GhostButton("Open Settings") { openSettings(context, f.definition.fix.settingsAction) }
+                if (f.id == "boot-time") WeeklyReminderSwitch()
+                else GhostButton("Open Settings") { openSettings(context, f.definition.fix.settingsAction) }
             }
             PrimaryButton("Done, next", fill = Tone.FIX.tint) { done++; index++ }
             GhostButton("Skip this one") { index++ }
         } else {
             MascotNote(if (done == 0) "No changes this time. You can come back whenever you like."
-                else "Nice work: you changed $done setting${if (done == 1) "" else "s"}. Scan again to see your new score.", Tone.FIX)
-            PrimaryButton("Scan again") { nav.pop(); scanner.scan() }
+                else "Nice work: you changed $done setting${if (done == 1) "" else "s"}. I'll check again as you close this, and your score updates by itself.", Tone.FIX)
+            PrimaryButton("See my new score") { nav.pop(); scanner.scan(quietly = true) }
         }
     }
+}
+
+/**
+ * The home page: one privacy score for all four checks, each check's own part, and the way to
+ * share it. The score is kept between launches and moves as soon as any check changes
+ * (owner, 2026-10-28).
+ */
+@Composable
+fun HomeScreen(scanner: Scanner, nav: Nav, settingsButton: Boolean) {
+    val context = LocalContext.current
+    val go = LocalGoTo.current
+    val overall = scanner.overall(context)
+    Page {
+        if (settingsButton) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            Text("Settings", color = Brand.sand, fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.pressable { go(Tab.SETTINGS) }.padding(horizontal = 12.dp, vertical = 8.dp))
+        }
+        val value = overall.value
+        if (value == null) {
+            Mascot(180, Modifier.align(Alignment.CenterHorizontally))
+            Eyebrow("hYYa Footprint Inspector")
+            AccentRule()
+            Text("What do your apps know about you?", color = Brand.ink, fontSize = 30.sp, fontWeight = FontWeight.Bold, lineHeight = 34.sp)
+            Text("Four quick checks show what apps can learn about you, then help you fix it.",
+                color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
+            PrimaryButton("Start with check 1") { go(Tab.SCAN); scanner.scan() }
+            Text("Nothing leaves your device · Open source", color = Brand.textSubtle, fontSize = 12.sp,
+                textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        } else {
+            val left = overall.total - overall.doneCount
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                ScoreOrb(value)
+                Spacer(Modifier.weight(1f))
+                Mascot(110)
+            }
+            Eyebrow("Your privacy score")
+            Text(overall.level?.title ?: "", color = Brand.ink, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+            AccentRule()
+            Text(if (left == 0) "All ${overall.total} checks done. Higher is better."
+                else "Based on ${overall.doneCount} of ${overall.total} checks. Do the other $left to complete your score.",
+                color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
+            Text("How the score works", color = Brand.sand, fontSize = 13.sp, modifier = Modifier.clickableNoRipple { nav.push(Route.ScoreRoute) })
+            GhostButton("Share my result") { shareResult(context, overall) }
+        }
+        SectionTitle("Your checks", "${overall.doneCount} of ${overall.total}")
+        ChecksPanel(overall, scanner, checkUpDoneCount(context))
+        if (value != null) {
+            InfoCard("Stay on top of it", Tone.CONTEXT, Icons.Outlined.Schedule) {
+                Text("A restart once a week clears some kinds of spyware and gives apps a new restart time. I can remind you.",
+                    color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp)
+                WeeklyReminderSwitch()
+            }
+        }
+    }
+}
+
+/** The score and each check's part as text: no values from this device, no app names. */
+private fun shareResult(context: android.content.Context, overall: com.hyya.footprintinspector.model.OverallScore) {
+    val p = overall.parts
+    fun line(name: String, part: com.hyya.footprintinspector.model.OverallScore.Part) = "• $name: ${p[part]?.toString() ?: "not done yet"}"
+    val text = listOf(
+        "My privacy score: ${overall.value}/100 (${overall.level?.title})",
+        line("Footprint", com.hyya.footprintinspector.model.OverallScore.Part.FOOTPRINT),
+        line("Sensitive apps", com.hyya.footprintinspector.model.OverallScore.Part.SENSITIVE),
+        line("Tracker", com.hyya.footprintinspector.model.OverallScore.Part.TRACKER),
+        line("Check-up", com.hyya.footprintinspector.model.OverallScore.Part.CHECKUP),
+        "",
+        "Check yours with hYYa Footprint Inspector. Free, open source, and nothing leaves your device.",
+        Links.PLAY,
+    ).joinToString("\n")
+    context.startActivity(android.content.Intent.createChooser(
+        android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain").putExtra(android.content.Intent.EXTRA_TEXT, text), null)
+        .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+}
+
+/** "Remind me every week": the same reminder as Settings, offered where a weekly restart is suggested. */
+@Composable
+fun WeeklyReminderSwitch() {
+    val context = LocalContext.current
+    var on by remember { mutableStateOf(com.hyya.footprintinspector.remind.ScanReminder.current(context) != com.hyya.footprintinspector.remind.ScanReminder.OFF) }
+    var declined by remember { mutableStateOf(false) }
+    val ask = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) { com.hyya.footprintinspector.remind.ScanReminder.apply(context, com.hyya.footprintinspector.remind.ScanReminder.WEEKLY); on = true; declined = false } else declined = true
+    }
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+        Text("Remind me every week", color = Brand.ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+        androidx.compose.material3.Switch(checked = on, onCheckedChange = { want ->
+            if (!want) { com.hyya.footprintinspector.remind.ScanReminder.apply(context, com.hyya.footprintinspector.remind.ScanReminder.OFF); on = false }
+            else if (com.hyya.footprintinspector.remind.ScanReminder.canNotify(context)) { com.hyya.footprintinspector.remind.ScanReminder.apply(context, com.hyya.footprintinspector.remind.ScanReminder.WEEKLY); on = true }
+            else ask.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }, colors = androidx.compose.material3.SwitchDefaults.colors(checkedTrackColor = Tone.FIX.tint))
+    }
+    if (declined) Text("Notifications are off for this app. Allow them in Settings, then try again.", color = Brand.concern, fontSize = 12.sp)
 }

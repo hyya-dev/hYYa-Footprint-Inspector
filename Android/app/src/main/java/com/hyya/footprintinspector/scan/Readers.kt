@@ -90,7 +90,10 @@ private fun system(c: Context): List<Reading> {
     val upHours = SystemClock.elapsedRealtime() / 3_600_000
     val boots = Settings.Global.getInt(c.contentResolver, Settings.Global.BOOT_COUNT, -1)
     return listOf(
-        Reading("boot-time", dateTime(boot), listOf("Running for ${upHours / 24} days, ${upHours % 24} h")),
+        // A restart in the last week is the fix itself, so it counts as done.
+        Reading("boot-time", dateTime(boot), listOf("Running for ${upHours / 24} days, ${upHours % 24} h"),
+            severityOverride = if (RecentRestart.isRecent(SystemClock.elapsedRealtime())) Severity.LOW else null,
+            note = if (RecentRestart.isRecent(SystemClock.elapsedRealtime())) RecentRestart.NOTE else null),
         Reading("boot-count", if (boots >= 0) "Started $boots times" else "Hidden on this device",
             severityOverride = if (boots < 0) Severity.LOW else null),
         Reading("battery", if (level != null) "$level%${if (charging) ", charging" else ""}" else "Unknown"),
@@ -266,4 +269,11 @@ private fun reinstall(c: Context): List<Reading> {
 object SampleData {
     val apps = listOf("Calendar", "Camera", "Chrome", "Clock", "Contacts", "Drive", "Files", "Gmail", "Maps", "Messages",
         "Phone", "Photos", "Play Store", "Settings", "hYYa Footprint Inspector")
+}
+
+/** A restart within a week counts as done (owner, 2026-10-28). Elapsed time includes deep sleep. */
+object RecentRestart {
+    const val WINDOW_MS = 7L * 24 * 3600 * 1000
+    const val NOTE = "Restarted within the last week, so this changes again soon. Nothing to do."
+    fun isRecent(elapsedMs: Long) = elapsedMs < WINDOW_MS
 }

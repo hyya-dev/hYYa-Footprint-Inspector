@@ -74,6 +74,9 @@ final class DeviceWalkthroughUITests: XCTestCase {
     func launchAndScan() -> String {
         app.launch()
         handleSystemAlert(context: "launch")
+        // The app opens on the Score page; the scan starts from Footprint.
+        let footprint = app.tabBars.buttons["Footprint"]
+        if footprint.waitForExistence(timeout: 5) { footprint.tap() } else { app.buttons["Footprint"].firstMatch.tap() }
         let start = app.buttons["Start with check 1"]
         let again = app.buttons["Scan again"]
         XCTAssertTrue(start.waitForExistence(timeout: 15), "Start scan button missing")

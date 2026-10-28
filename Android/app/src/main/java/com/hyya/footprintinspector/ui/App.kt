@@ -20,6 +20,7 @@ import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Pets
 import androidx.compose.material.icons.outlined.Sensors
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -41,8 +42,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hyya.footprintinspector.model.Section
 import com.hyya.footprintinspector.scan.Scanner
 
-/** The four steps in order, then Settings, as on iOS (App/Sources/UI/Kit/Journey.swift). */
+/** The Score page, the four steps in order, then Settings, as on iOS (App/Sources/UI/Kit/Journey.swift). */
 enum class Tab(val label: String, val icon: ImageVector, val step: Int, val pitch: String) {
+    HOME("Score", Icons.Outlined.Speed, 0, ""),
     SCAN("Footprint", Icons.Outlined.Pets, 1, "See what any app can read about this device."),
     SENSITIVE("Sensitive apps", Icons.Outlined.VisibilityOff, 2, "See which of your apps any app can spot, and what that says about you."),
     TRACKER("Tracker", Icons.Outlined.Sensors, 3, "See which apps can watch you, and what apps actually used."),
@@ -66,34 +68,42 @@ class Nav {
 }
 
 @Composable
-fun App(startTab: Tab = Tab.SCAN, autoScan: Boolean = false, openFinding: String? = null, openFix: Boolean = false) {
+fun App(startTab: Tab = Tab.HOME, autoScan: Boolean = false, openFinding: String? = null, openFix: Boolean = false) {
     val scanner: Scanner = viewModel()
     var tab by rememberSaveable { mutableStateOf(startTab) }
     val nav = remember { Nav().also { n -> openFinding?.let { n.push(Route.FindingRoute(it)) }; if (openFix) n.push(Route.FixRoute) } }
     if (autoScan && scanner.findings.isEmpty()) androidx.compose.runtime.LaunchedEffect(Unit) { scanner.scan() }
     // Store screenshots: a Sensitive check with nothing found, so the score can show three checks.
-    if (com.hyya.footprintinspector.scan.Sample.on && scanner.sensitiveFound == null) scanner.sensitiveFound = 0
+    if (com.hyya.footprintinspector.scan.Sample.on && scanner.sensitiveFound == null) scanner.recordSensitive(0)
 
     BackHandler(enabled = nav.stack.isNotEmpty()) { nav.pop() }
-    // The sensitive-app result counts in the score only while the app is on screen, like the
-    // result itself; it's never saved.
+    // Keeps the score current: on launch and each time the app comes back to the screen (after
+    // changing a setting, say), it re-reads quietly if a scan was done before.
     val owner = androidx.compose.ui.platform.LocalLifecycleOwner.current
     androidx.compose.runtime.DisposableEffect(owner) {
-        val obs = androidx.lifecycle.LifecycleEventObserver { _, e -> if (e == androidx.lifecycle.Lifecycle.Event.ON_STOP) scanner.sensitiveFound = null }
+        val obs = androidx.lifecycle.LifecycleEventObserver { _, e ->
+            if (e == androidx.lifecycle.Lifecycle.Event.ON_START && !autoScan && scanner.history.latest != null) scanner.scan(quietly = true)
+        }
         owner.lifecycle.addObserver(obs)
         onDispose { owner.lifecycle.removeObserver(obs) }
     }
     val view = androidx.compose.ui.platform.LocalView.current
     val goTo: (Tab) -> Unit = { t -> tab = t; nav.stack.clear() }
 
+    // Wide or sideways: the pages down the right edge, Settings included. Upright on a phone: the
+    // bottom bar, with Settings on the Score page.
+    val config = androidx.compose.ui.platform.LocalConfiguration.current
+    val rail = config.screenWidthDp >= 600 || config.screenWidthDp > config.screenHeightDp
+    val select: (Tab) -> Unit = { t -> tab = t; nav.stack.clear(); view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
+
     Scaffold(
         containerColor = Color.Black,
         bottomBar = {
-            NavigationBar(containerColor = Brand.surface) {
-                Tab.entries.forEach { t ->
+            if (!rail) NavigationBar(containerColor = Brand.surface) {
+                Tab.entries.filter { it != Tab.SETTINGS }.forEach { t ->
                     NavigationBarItem(
                         selected = tab == t,
-                        onClick = { tab = t; nav.stack.clear(); view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) },
+                        onClick = { select(t) },
                         icon = { Icon(t.icon, contentDescription = null) },
                         label = { Text(t.label) },
                         colors = NavigationBarItemDefaults.colors(
@@ -105,7 +115,8 @@ fun App(startTab: Tab = Tab.SCAN, autoScan: Boolean = false, openFinding: String
             }
         },
     ) { inner ->
-        Box(Modifier.fillMaxSize().background(Color.Black).padding(inner)) {
+        androidx.compose.foundation.layout.Row(Modifier.fillMaxSize().background(Color.Black).padding(inner)) {
+        Box(Modifier.weight(1f).fillMaxSize()) {
             androidx.compose.runtime.CompositionLocalProvider(LocalGoTo provides goTo) {
                 // Pushing a page slides it in from the side; switching tabs cross-fades with a slight
                 // lift. Android scales both by the system's animation setting (off when Remove
@@ -136,6 +147,7 @@ fun App(startTab: Tab = Tab.SCAN, autoScan: Boolean = false, openFinding: String
                         Route.ScoreRoute -> ScoreScreen(nav)
                         Route.FixRoute -> FixScreen(scanner, nav)
                         null -> when (t) {
+                            Tab.HOME -> HomeScreen(scanner, nav, settingsButton = !rail)
                             Tab.SCAN -> ScanScreen(scanner, nav)
                             Tab.SENSITIVE -> SensitiveScreen(scanner)
                             Tab.TRACKER -> TrackerScreen(scanner, nav)
@@ -145,6 +157,12 @@ fun App(startTab: Tab = Tab.SCAN, autoScan: Boolean = false, openFinding: String
                     }
                 }
             }
+        }
+        if (rail) androidx.compose.material3.NavigationRail(containerColor = Brand.surface) {
+            Tab.entries.filter { it != Tab.SETTINGS }.forEach { t -> RailItem(t, tab == t) { select(t) } }
+            androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
+            RailItem(Tab.SETTINGS, tab == Tab.SETTINGS) { select(Tab.SETTINGS) }
+        }
         }
     }
 }
@@ -161,4 +179,17 @@ fun openSettings(context: Context, action: String?) {
 
 fun openUrl(context: Context, url: String) {
     try { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) } catch (_: ActivityNotFoundException) { }
+}
+
+@Composable
+private fun RailItem(t: Tab, selected: Boolean, onClick: () -> Unit) {
+    androidx.compose.material3.NavigationRailItem(
+        selected = selected, onClick = onClick,
+        icon = { Icon(t.icon, contentDescription = null) },
+        label = { Text(t.label) },
+        colors = androidx.compose.material3.NavigationRailItemDefaults.colors(
+            selectedIconColor = Brand.sand, selectedTextColor = Brand.sand,
+            indicatorColor = Brand.tile, unselectedIconColor = Brand.textMuted, unselectedTextColor = Brand.textMuted,
+        ),
+    )
 }
