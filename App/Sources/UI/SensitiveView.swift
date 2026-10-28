@@ -74,7 +74,7 @@ struct SensitiveView: View {
 
                     HStack(alignment: .top, spacing: 8) {
                         Image(systemName: "lock.fill").foregroundStyle(Brand.sand)
-                        Text("Runs only on this device. The result stays hidden until you tap it, and is gone when you leave. Nothing is saved or sent.")
+                        Text("Runs only on this device and nothing is sent. The result stays hidden until you tap it. For your score, only the number found is kept, never which apps.")
                             .font(.footnote)
                             .foregroundStyle(Brand.textSubtle)
                             .fixedSize(horizontal: false, vertical: true)
@@ -88,8 +88,9 @@ struct SensitiveView: View {
 
             }
             .navigationTitle("Sensitive apps")
-            .inlineTitle()
-            .clearNavigationBar()
+            // The page's own heading names it; no second title bar above it, as on Score,
+            // Footprint and Settings.
+            .hiddenNavigationBar()
             .task {
                 if let preset = LaunchOptions.value(after: "-sensitiveCategories") { storedChoice = preset }
             }

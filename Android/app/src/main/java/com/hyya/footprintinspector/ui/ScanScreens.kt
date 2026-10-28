@@ -117,8 +117,10 @@ fun BackBar(title: String, nav: Nav) {
 fun ScanScreen(scanner: Scanner, nav: Nav) {
     when (scanner.phase) {
         Phase.IDLE -> Page {
-            Spacer(Modifier.padding(top = 16.dp))
-            Mascot(170, Modifier.align(Alignment.CenterHorizontally))
+            // Sideways the mascot shrinks, so the scan button stays on screen.
+            val short = androidx.compose.ui.platform.LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }
+            Spacer(Modifier.padding(top = if (short) 0.dp else 16.dp))
+            if (!short) Mascot(170, Modifier.align(Alignment.CenterHorizontally))
             Eyebrow("Check 1 · Footprint")
             AccentRule()
             Text("What can any app read about this device?", color = Brand.ink, fontSize = 28.sp, fontWeight = FontWeight.Bold, lineHeight = 32.sp)
@@ -443,7 +445,8 @@ fun HomeScreen(scanner: Scanner, nav: Nav) {
     Page {
         val value = overall.value
         if (value == null) {
-            Mascot(180, Modifier.align(Alignment.CenterHorizontally))
+            val short = androidx.compose.ui.platform.LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }
+            if (!short) Mascot(180, Modifier.align(Alignment.CenterHorizontally))
             Eyebrow("hYYa Footprint Inspector")
             AccentRule()
             Text("What do your apps know about you?", color = Brand.ink, fontSize = 30.sp, fontWeight = FontWeight.Bold, lineHeight = 34.sp)

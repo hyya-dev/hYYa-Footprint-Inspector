@@ -147,7 +147,7 @@ fun SensitiveScreen(scanner: com.hyya.footprintinspector.scan.Scanner) {
             Row(verticalAlignment = Alignment.Top) {
                 Icon(Icons.Outlined.Lock, null, tint = Brand.sand, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Runs only on this device. The result stays hidden until you tap it, and is gone when you leave. Nothing is saved or sent.",
+                Text("Runs only on this device and nothing is sent. The result stays hidden until you tap it. For your score, only the number found is kept, never which apps.",
                     color = Brand.textSubtle, fontSize = 12.sp, lineHeight = 16.sp)
             }
             PrimaryButton(if (chosen.isEmpty()) "Pick at least one kind" else "Check ${chosen.size} kind${if (chosen.size == 1) "" else "s"}") {

@@ -56,8 +56,9 @@ struct CheckUpView: View {
                 }
             }
             .navigationTitle("Check-up")
-            .inlineTitle()
-            .clearNavigationBar()
+            // The page's own heading names it; no second title bar above it, as on Score,
+            // Footprint and Settings.
+            .hiddenNavigationBar()
             .sensoryFeedback(.success, trigger: done.count == total)
             // A restart in the last week is the restart step done: tick it without asking.
             .task { if CheckUpStepView.restartedRecently { binding(for: "restart").wrappedValue = true } }

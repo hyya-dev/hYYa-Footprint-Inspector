@@ -49,7 +49,7 @@ struct PrivacyReportView: View {
                     Button("Analyze my report") { importing = true }
                         .buttonStyle(PrimaryCTAButtonStyle())
                     Label {
-                        Text("Read only on this device. Nothing is saved or sent, and it's cleared when you leave.")
+                        Text("Read only on this device and never sent. For your score, only the number of apps that shared your data is kept, never the report itself.")
                             .fixedSize(horizontal: false, vertical: true)
                     } icon: { Image(systemName: "lock.fill").foregroundStyle(Brand.sand) }
                     .font(.footnote)
@@ -63,8 +63,9 @@ struct PrivacyReportView: View {
                 if let onNext, report != nil { NextStepCard(step: .checkup, action: onNext) }
             }
             .navigationTitle("Tracker")
-            .inlineTitle()
-            .clearNavigationBar()
+            // The page's own heading names it; no second title bar above it, as on Score,
+            // Footprint and Settings.
+            .hiddenNavigationBar()
             .fileImporter(isPresented: $importing, allowedContentTypes: Self.types) { result in load(result) }
             .onChange(of: scenePhase) { _, phase in if phase == .background { report = nil } }
             .onChange(of: report?.sharing.count) { _, n in if let n { check.recordTracker(sharing: n) } }

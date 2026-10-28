@@ -284,26 +284,31 @@ struct ChecksPanel: View {
 
 // MARK: - List and detail side by side
 
-/// A page with a list (clues, Check-up areas) whose rows open a detail. On a regular-width screen
-/// (an open iPhone Duo, iPad) the detail sits beside the list, as Mail does; folded or on a
-/// regular iPhone it collapses to one pane and rows push as before. The system sizes the columns
-/// and evens them out around the fold. The Mac's pages already sit inside its own sidebar.
+/// A page with a list (Check-up areas) whose rows open a detail. Only on a wide screen held
+/// sideways (an open iPhone Duo, iPad) does the detail sit beside the list, both always showing;
+/// everywhere else, including an open Duo held upright, it's one column and rows push. A split
+/// that hides its list behind a button left an open Duo upright on a blank page (owner,
+/// 2026-10-28). The Mac's pages already sit inside its own sidebar.
 struct ListDetailStack<Content: View, Placeholder: View>: View {
     @ViewBuilder var content: Content
     @ViewBuilder var placeholder: Placeholder
-    #if os(iOS)
-    @State private var column: NavigationSplitViewColumn = .sidebar
-    #endif
 
     var body: some View {
         #if os(iOS)
-        NavigationSplitView(preferredCompactColumn: $column) {
-            content
-                .navigationSplitViewColumnWidth(min: 340, ideal: 420, max: 520)
-        } detail: {
-            NavigationStack { placeholder }
+        GeometryReader { geo in
+            if geo.size.width > geo.size.height && geo.size.width >= 700 {
+                NavigationSplitView(columnVisibility: .constant(.all)) {
+                    content
+                        .navigationSplitViewColumnWidth(min: 320, ideal: 400, max: 480)
+                        .toolbar(removing: .sidebarToggle)
+                } detail: {
+                    NavigationStack { placeholder }
+                }
+                .navigationSplitViewStyle(.balanced)
+            } else {
+                NavigationStack { content }
+            }
         }
-        .navigationSplitViewStyle(.balanced)
         #else
         NavigationStack { content }
         #endif

@@ -128,7 +128,6 @@ private struct Results: View {
         scanner.concerning.filter { FootprintScore.isFixable($0) && FootprintScore.points(for: $0) > 0 }
             .sorted { FootprintScore.points(for: $0) > FootprintScore.points(for: $1) }
     }
-    @AppStorage("reviewCardDismissed") private var reviewCardDismissed = false
     @Environment(\.goToTab) private var goToTab
     @Namespace private var zoom
 
@@ -192,22 +191,7 @@ private struct Results: View {
         group(.advanced, title: "Clever tricks")
         group(.permission, title: "Seen once you allow it")
 
-        if scanner.history.snapshots.count >= 2 && !reviewCardDismissed {
-            ReviewCard { withAnimation { reviewCardDismissed = true } }
-        }
-
-        SectionTitle(title: "Over time")
-        Panel {
-            NavigationLink { ScoreboardView() } label: {
-                RowCard(symbol: "checkmark.seal", title: "Privacy scoreboard", subtitle: "What Apple has fixed, and what's still open")
-            }
-            .buttonStyle(PressableCardStyle())
-            NavigationLink { HistoryView() } label: {
-                RowCard(symbol: "chart.line.uptrend.xyaxis", title: "Scan history", subtitle: "Kept only on this device")
-            }
-            .buttonStyle(PressableCardStyle())
-        }
-
+        // Rating, scan history and the scoreboard live in Settings, not on a check's page.
         NextStepCard(step: .sensitive) { goToTab(.sensitive) }
     }
 
