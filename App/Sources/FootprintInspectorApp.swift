@@ -62,10 +62,6 @@ struct RootView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(PrivacyCheck.self) private var check
-    #if os(iOS)
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @Environment(\.verticalSizeClass) private var verticalSizeClass
-    #endif
     #if os(macOS)
     @Environment(\.openSettings) private var openSettings
     #endif
@@ -116,19 +112,8 @@ struct RootView: View {
         .task { if LaunchOptions.has("-sampleData") { check.recordSensitive(found: 0) } }
         .task { if LaunchOptions.has("-openSettings") { openSettings() } }
         #else
-        Group {
-            if horizontalSizeClass == .regular || verticalSizeClass == .compact {
-                // Wide or sideways: named on the left, or an icon rail on the right; Settings at the bottom.
-                SideRail(tab: Binding(get: { tab }, set: { go($0) }), tabs: AppTab.allCases) { page($0) }
-            } else {
-                // Upright on a phone: the tab bar, with Settings on the Score page.
-                TabView(selection: Binding(get: { tab == .settings ? .home : tab }, set: { t in go(t); Haptics.selection() })) {
-                    ForEach([AppTab.home] + AppTab.checks) { t in
-                        Tab(t.title, systemImage: t.symbol, value: t) { page(t, settingsOnScore: true) }
-                    }
-                }
-            }
-        }
+        // Our own navbar: along the bottom upright, down the left edge sideways, all six pages.
+        NavBarRoot(tab: Binding(get: { tab }, set: { go($0) })) { page($0) }
         .environment(\.goToTab, go)
         .modifier(KeepScoreFresh())
         // Store screenshots: the sample Tracker report and a Sensitive check with nothing found, so
@@ -139,9 +124,9 @@ struct RootView: View {
     }
 
     #if os(iOS)
-    @ViewBuilder private func page(_ t: AppTab, settingsOnScore: Bool = false) -> some View {
+    @ViewBuilder private func page(_ t: AppTab) -> some View {
         switch t {
-        case .home: ScoreHomeView(showsSettingsButton: settingsOnScore)
+        case .home: ScoreHomeView()
         case .footprint: ScanView()
         case .sensitive: SensitiveView()
         case .tracker: PrivacyReportView(onNext: { go(.checkup) })

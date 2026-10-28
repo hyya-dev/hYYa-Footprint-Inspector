@@ -28,9 +28,6 @@ enum hYYaLinks {
 }
 
 struct SettingsView: View {
-    /// Set when Settings opens as a sheet from the Score page (phones, where the tab bar has room
-    /// for five pages only).
-    var onClose: (() -> Void)? = nil
     @Environment(HistoryStore.self) private var history
     @Environment(PrivacyCheck.self) private var check
     @Environment(\.openURL) private var openURL
@@ -43,13 +40,6 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Page {
-                if let onClose {
-                    HStack {
-                        Spacer()
-                        Button(action: onClose) { Label("Close", systemImage: "xmark") }
-                            .buttonStyle(GhostButtonStyle())
-                    }
-                }
                 HeroCard(eyebrow: "Settings", title: "hYYa Footprint Inspector",
                          subtitle: "Everything here stays on this device.", mood: .idle, mascotSize: 96)
 

@@ -436,15 +436,11 @@ fun FixScreen(scanner: Scanner, nav: Nav) {
  * (owner, 2026-10-28).
  */
 @Composable
-fun HomeScreen(scanner: Scanner, nav: Nav, settingsButton: Boolean) {
+fun HomeScreen(scanner: Scanner, nav: Nav) {
     val context = LocalContext.current
     val go = LocalGoTo.current
     val overall = scanner.overall(context)
     Page {
-        if (settingsButton) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            Text("Settings", color = Brand.sand, fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.pressable { go(Tab.SETTINGS) }.padding(horizontal = 12.dp, vertical = 8.dp))
-        }
         val value = overall.value
         if (value == null) {
             Mascot(180, Modifier.align(Alignment.CenterHorizontally))

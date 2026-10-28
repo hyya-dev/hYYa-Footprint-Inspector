@@ -14,6 +14,16 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Checklist
@@ -50,6 +60,10 @@ enum class Tab(val label: String, val icon: ImageVector, val step: Int, val pitc
     TRACKER("Tracker", Icons.Outlined.Sensors, 3, "See which apps can watch you, and what apps actually used."),
     CHECKUP("Check-up", Icons.Outlined.Checklist, 4, "Go through Settings one area at a time and take access back."),
     SETTINGS("Settings", Icons.Outlined.Settings, 0, ""),
+    ;
+
+    /** One word, for the navbar: six fit side by side on the smallest phone. */
+    val short: String get() = if (this == SENSITIVE) "Sensitive" else label
 }
 
 /** A screen pushed on top of a tab. */
@@ -90,32 +104,31 @@ fun App(startTab: Tab = Tab.HOME, autoScan: Boolean = false, openFinding: String
     val view = androidx.compose.ui.platform.LocalView.current
     val goTo: (Tab) -> Unit = { t -> tab = t; nav.stack.clear() }
 
-    // Wide or sideways: the pages down the right edge, Settings included. Upright on a phone: the
-    // bottom bar, with Settings on the Score page.
+    // The navbar (owner, 2026-10-28): along the bottom upright, down the left edge sideways, all
+    // six pages with one-word names, Settings included.
     val config = androidx.compose.ui.platform.LocalConfiguration.current
-    val rail = config.screenWidthDp >= 600 || config.screenWidthDp > config.screenHeightDp
+    val rail = config.screenWidthDp > config.screenHeightDp
     val select: (Tab) -> Unit = { t -> tab = t; nav.stack.clear(); view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
 
     Scaffold(
         containerColor = Color.Black,
         bottomBar = {
-            if (!rail) NavigationBar(containerColor = Brand.surface) {
-                Tab.entries.filter { it != Tab.SETTINGS }.forEach { t ->
-                    NavigationBarItem(
-                        selected = tab == t,
-                        onClick = { select(t) },
-                        icon = { Icon(t.icon, contentDescription = null) },
-                        label = { Text(t.label) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Brand.sand, selectedTextColor = Brand.sand,
-                            indicatorColor = Brand.tile, unselectedIconColor = Brand.textMuted, unselectedTextColor = Brand.textMuted,
-                        ),
-                    )
+            if (!rail) androidx.compose.foundation.layout.Column(Modifier.background(Brand.surface).navigationBarsPadding()) {
+                androidx.compose.material3.HorizontalDivider(color = Brand.rule, thickness = 0.5.dp)
+                androidx.compose.foundation.layout.Row(Modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 4.dp)) {
+                    Tab.entries.forEach { t -> NavItem(t, tab == t, Modifier.weight(1f)) { select(t) } }
                 }
             }
         },
     ) { inner ->
         androidx.compose.foundation.layout.Row(Modifier.fillMaxSize().background(Color.Black).padding(inner)) {
+        if (rail) androidx.compose.foundation.layout.Column(
+            Modifier.fillMaxHeight().width(76.dp).background(Brand.surface).padding(vertical = 4.dp),
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceEvenly,
+        ) {
+            // Six equal shares of the height, so all fit on a small phone held sideways.
+            Tab.entries.forEach { t -> NavItem(t, tab == t, Modifier.weight(1f).fillMaxWidth().padding(horizontal = 4.dp, vertical = 1.dp)) { select(t) } }
+        }
         Box(Modifier.weight(1f).fillMaxSize()) {
             androidx.compose.runtime.CompositionLocalProvider(LocalGoTo provides goTo) {
                 // Pushing a page slides it in from the side; switching tabs cross-fades with a slight
@@ -147,7 +160,7 @@ fun App(startTab: Tab = Tab.HOME, autoScan: Boolean = false, openFinding: String
                         Route.ScoreRoute -> ScoreScreen(nav)
                         Route.FixRoute -> FixScreen(scanner, nav)
                         null -> when (t) {
-                            Tab.HOME -> HomeScreen(scanner, nav, settingsButton = !rail)
+                            Tab.HOME -> HomeScreen(scanner, nav)
                             Tab.SCAN -> ScanScreen(scanner, nav)
                             Tab.SENSITIVE -> SensitiveScreen(scanner)
                             Tab.TRACKER -> TrackerScreen(scanner, nav)
@@ -157,11 +170,6 @@ fun App(startTab: Tab = Tab.HOME, autoScan: Boolean = false, openFinding: String
                     }
                 }
             }
-        }
-        if (rail) androidx.compose.material3.NavigationRail(containerColor = Brand.surface) {
-            Tab.entries.filter { it != Tab.SETTINGS }.forEach { t -> RailItem(t, tab == t) { select(t) } }
-            androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
-            RailItem(Tab.SETTINGS, tab == Tab.SETTINGS) { select(Tab.SETTINGS) }
         }
         }
     }
@@ -181,15 +189,21 @@ fun openUrl(context: Context, url: String) {
     try { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) } catch (_: ActivityNotFoundException) { }
 }
 
+/** One navbar button: icon over a one-word name, compact enough for six on the smallest phone. */
 @Composable
-private fun RailItem(t: Tab, selected: Boolean, onClick: () -> Unit) {
-    androidx.compose.material3.NavigationRailItem(
-        selected = selected, onClick = onClick,
-        icon = { Icon(t.icon, contentDescription = null) },
-        label = { Text(t.label) },
-        colors = androidx.compose.material3.NavigationRailItemDefaults.colors(
-            selectedIconColor = Brand.sand, selectedTextColor = Brand.sand,
-            indicatorColor = Brand.tile, unselectedIconColor = Brand.textMuted, unselectedTextColor = Brand.textMuted,
-        ),
-    )
+private fun NavItem(t: Tab, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    val tint = if (selected) Brand.sand else Brand.textMuted
+    androidx.compose.foundation.layout.Column(
+        modifier.clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+            .background(if (selected) Brand.tile else Color.Transparent)
+            .pressable(onClick)
+            .semantics { contentDescription = t.label }
+            .padding(vertical = 3.dp, horizontal = 2.dp),
+        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+    ) {
+        Icon(t.icon, contentDescription = null, tint = tint, modifier = Modifier.size(22.dp))
+        Text(t.short, color = tint, fontSize = 10.sp, maxLines = 1, softWrap = false,
+            fontWeight = if (selected) androidx.compose.ui.text.font.FontWeight.SemiBold else androidx.compose.ui.text.font.FontWeight.Medium)
+    }
 }

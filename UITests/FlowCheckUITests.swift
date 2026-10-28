@@ -31,7 +31,9 @@ final class FlowCheckUITests: XCTestCase {
     private func assertVisible(_ el: XCUIElement, _ what: String, timeout: TimeInterval = 8, file: StaticString = #filePath, line: UInt = #line) {
         guard el.waitForExistence(timeout: timeout) else { XCTFail("\(what): not found", file: file, line: line); return }
         let window = app.windows.firstMatch.frame
-        let tabBarTop = app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame.minY : window.maxY
+        // Upright, the app's own navbar runs along the bottom; nothing may hide under it.
+        let bar = app.otherElements["navbar"].firstMatch
+        let tabBarTop = bar.exists && bar.frame.minY > window.midY ? bar.frame.minY : window.maxY
         let f = el.frame
         XCTAssertTrue(f.minY >= window.minY && f.minY < tabBarTop - 20,
                       "\(what): off screen (top at \(Int(f.minY)), visible area \(Int(window.minY))–\(Int(tabBarTop)))", file: file, line: line)
@@ -62,6 +64,22 @@ final class FlowCheckUITests: XCTestCase {
             from.press(forDuration: 0.05, thenDragTo: w.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.5)))
             i += 1
         }
+    }
+
+    /// Upright the navbar runs along the bottom with all six pages fully on screen, and the
+    /// Score page has no Settings button at its top (owner, 2026-10-28).
+    func testNavbarUpright() {
+        app.launch()
+        let bar = app.otherElements["navbar"].firstMatch
+        let w = app.windows.firstMatch.frame
+        XCTAssertTrue(bar.waitForExistence(timeout: 8) && bar.frame.minY > w.midY, "navbar isn't at the bottom")
+        for name in ["Score", "Footprint", "Sensitive apps", "Tracker", "Check-up", "Settings"] {
+            let b = app.buttons[name].firstMatch
+            XCTAssertTrue(b.exists && b.frame.minX >= w.minX && b.frame.maxX <= w.maxX && b.frame.minY >= bar.frame.minY - 1,
+                          "\(name) missing or cut off in the navbar")
+        }
+        XCTAssertEqual(app.buttons.matching(identifier: "Settings").count, 1, "a second Settings button is on the page")
+        shot("navbar-upright")
     }
 
     func testFootprintFlow() {
@@ -134,9 +152,13 @@ final class FlowCheckUITests: XCTestCase {
         XCUIDevice.shared.orientation = .landscapeLeft
         XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 25), "scan didn't finish")
         shot("sideways-footprint")
-        // The pages sit down the right edge when sideways (owner, 2026-10-28).
-        let rail = app.buttons["Score"].firstMatch
-        XCTAssertTrue(rail.waitForExistence(timeout: 5) && rail.frame.midX > app.windows.firstMatch.frame.midX, "pages aren't on the right")
+        // Sideways the navbar runs down the left edge (owner, 2026-10-28), all six pages on screen.
+        let rail = app.otherElements["navbar"].firstMatch
+        XCTAssertTrue(rail.waitForExistence(timeout: 5) && rail.frame.maxX < app.windows.firstMatch.frame.midX, "navbar isn't on the left")
+        for name in ["Score", "Footprint", "Sensitive apps", "Tracker", "Check-up", "Settings"] {
+            let b = app.buttons[name].firstMatch
+            XCTAssertTrue(b.exists && b.frame.minY >= 0 && b.frame.maxY <= app.windows.firstMatch.frame.maxY, "\(name) cut off in the navbar")
+        }
         for name in ["Score", "Sensitive apps", "Tracker", "Check-up", "Settings"] {
             tab(name)
             shot("sideways-\(name)")

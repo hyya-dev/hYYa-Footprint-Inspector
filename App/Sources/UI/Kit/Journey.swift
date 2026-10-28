@@ -25,6 +25,10 @@ enum AppTab: String, CaseIterable, Identifiable, Hashable {
         }
     }
 
+    /// One word, for the navbar: six buttons fit side by side on the smallest iPhone (owner,
+    /// 2026-10-28).
+    var shortTitle: String { self == .sensitive ? "Sensitive" : title }
+
     var symbol: String {
         switch self {
         case .home: "gauge.with.needle"

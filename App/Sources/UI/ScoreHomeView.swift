@@ -8,8 +8,6 @@ import SwiftUI
 /// share it. The score is kept between launches and moves as soon as any check changes
 /// (owner, 2026-10-28).
 struct ScoreHomeView: View {
-    /// Phones only: Settings opens from here, because the tab bar has room for five pages.
-    var showsSettingsButton = false
     @Environment(Scanner.self) private var scanner
     @Environment(HistoryStore.self) private var history
     @Environment(PrivacyCheck.self) private var check
@@ -23,20 +21,12 @@ struct ScoreHomeView: View {
     #else
     private let short = false
     #endif
-    @State private var showingSettings = LaunchOptions.value(after: "-startTab") == "settings"
 
     var body: some View {
         let overall = OverallScore.current(scanner: scanner, history: history, check: check,
                                            checkUpStored: checkUpStored, trackerStored: trackerStored)
         NavigationStack {
             Page {
-                if showsSettingsButton {
-                    HStack {
-                        Spacer()
-                        Button { showingSettings = true } label: { Label("Settings", systemImage: "gearshape") }
-                            .buttonStyle(GhostButtonStyle())
-                    }
-                }
                 if let value = overall.value {
                     scoreHeader(overall, value: value)
                 } else {
@@ -54,9 +44,6 @@ struct ScoreHomeView: View {
             }
             .hiddenNavigationBar()
             .sheet(isPresented: $showingFormula) { FormulaSheet() }
-            #if os(iOS)
-            .sheet(isPresented: $showingSettings) { SettingsView(onClose: { showingSettings = false }) }
-            #endif
         }
     }
 
