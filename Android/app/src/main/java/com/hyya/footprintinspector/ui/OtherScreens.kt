@@ -346,10 +346,11 @@ object Links {
 }
 
 @Composable
-fun SettingsScreen(scanner: Scanner) {
+fun SettingsScreen(scanner: Scanner, nav: Nav) {
     val context = LocalContext.current
     var count by remember { mutableIntStateOf(scanner.history.snapshots.size) }
     Page {
+        if (nav.stack.isNotEmpty()) BackBar("Settings", nav)
         HeroCard("Settings", "hYYa Footprint Inspector", "Everything here stays on this device.")
         // Rating card, as on iOS.
         InfoCard("Enjoying hYYa Footprint Inspector?") {

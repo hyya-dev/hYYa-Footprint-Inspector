@@ -99,12 +99,31 @@ private struct ScoreBands: View {
 /// "Fix them with me": one clue at a time, the steps and the right Settings page, then the next.
 /// No app can change these settings for you, so this is the fastest honest way through them.
 struct FixWizard: View {
-    let fixes: [Finding]
+    /// The fixes when the walk-through opened. They're kept by id, with the step reached, so the
+    /// walk-through carries on where it was after the person changes a setting, even if iOS quit
+    /// the app meanwhile, and a fix that took effect doesn't shift the steps (owner, 2026-10-28).
+    let opening: [Finding]
+    @AppStorage("fix.ids") private var savedIDs = ""
+    @AppStorage("fix.index") private var index = 0
+    @Environment(Scanner.self) private var scanner
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.verticalSizeClass) private var verticalSizeClass
-    @State private var index = 0
     @State private var done: Set<String> = []
+
+    init(fixes: [Finding]) { opening = fixes }
+
+    /// Called when the walk-through closes, so the next one starts from the top.
+    static func forget() {
+        UserDefaults.standard.removeObject(forKey: "fix.ids")
+        UserDefaults.standard.removeObject(forKey: "fix.index")
+    }
+
+    private var fixes: [Finding] {
+        let ids = savedIDs.split(separator: ",").map(String.init)
+        guard !ids.isEmpty else { return opening }
+        return ids.compactMap { id in scanner.allFindings.first { $0.id == id } ?? opening.first { $0.id == id } }
+    }
 
     var body: some View {
         NavigationStack {
@@ -121,6 +140,7 @@ struct FixWizard: View {
             }
         }
         .sensoryFeedback(.selection, trigger: index)
+        .onAppear { if savedIDs.isEmpty { savedIDs = opening.map(\.id).joined(separator: ","); index = 0 } }
         #if os(macOS)
         .frame(minWidth: 520, minHeight: 620)
         #endif

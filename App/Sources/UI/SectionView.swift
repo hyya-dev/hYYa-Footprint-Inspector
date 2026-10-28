@@ -45,7 +45,7 @@ struct SectionView: View {
                 MascotSays(line: "Nothing to read here on this device.", mood: .thinking)
             }
         }
-        .navigationTitle(section.title)
+        .navigationTitle("")
         .inlineTitle()
     }
 

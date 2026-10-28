@@ -62,8 +62,13 @@ enum class Tab(val label: String, val icon: ImageVector, val step: Int, val pitc
     SETTINGS("Settings", Icons.Outlined.Settings, 0, ""),
     ;
 
-    /** One word, for the navbar: six fit side by side on the smallest phone. */
+    /** One word, for the navigation bar. */
     val short: String get() = if (this == SENSITIVE) "Sensitive" else label
+
+    companion object {
+        /** The navigation bar's destinations; Settings opens from the Score page. */
+        val bar = listOf(HOME, SCAN, SENSITIVE, TRACKER, CHECKUP)
+    }
 }
 
 /** A screen pushed on top of a tab. */
@@ -73,19 +78,52 @@ sealed interface Route {
     data class CheckUpRoute(val index: Int) : Route
     data object ScoreRoute : Route
     data object FixRoute : Route
+    data object SettingsRoute : Route
 }
 
 class Nav {
     val stack = mutableStateListOf<Route>()
     fun push(r: Route) { stack.add(r) }
     fun pop() { if (stack.isNotEmpty()) stack.removeAt(stack.lastIndex) }
+
+    companion object {
+        /**
+         * The open screens, kept by Android with the activity: it often stops the app in the
+         * background while the person changes a setting, and coming back must land on the same
+         * screen (owner, 2026-10-28).
+         */
+        val Saver: androidx.compose.runtime.saveable.Saver<Nav, ArrayList<String>> = androidx.compose.runtime.saveable.Saver(
+            save = { nav -> ArrayList(nav.stack.map { encode(it) }) },
+            restore = { saved -> Nav().also { n -> saved.mapNotNull(::decode).forEach(n::push) } },
+        )
+        private fun encode(r: Route) = when (r) {
+            is Route.SectionRoute -> "section:${r.section.name}"
+            is Route.FindingRoute -> "finding:${r.id}"
+            is Route.CheckUpRoute -> "checkup:${r.index}"
+            Route.ScoreRoute -> "score"
+            Route.FixRoute -> "fix"
+            Route.SettingsRoute -> "settings"
+        }
+        private fun decode(s: String): Route? {
+            val (kind, arg) = s.substringBefore(':') to s.substringAfter(':', "")
+            return when (kind) {
+                "section" -> Section.entries.firstOrNull { it.name == arg }?.let { Route.SectionRoute(it) }
+                "finding" -> Route.FindingRoute(arg)
+                "checkup" -> arg.toIntOrNull()?.let { Route.CheckUpRoute(it) }
+                "score" -> Route.ScoreRoute
+                "fix" -> Route.FixRoute
+                "settings" -> Route.SettingsRoute
+                else -> null
+            }
+        }
+    }
 }
 
 @Composable
 fun App(startTab: Tab = Tab.HOME, autoScan: Boolean = false, openFinding: String? = null, openFix: Boolean = false) {
     val scanner: Scanner = viewModel()
     var tab by rememberSaveable { mutableStateOf(startTab) }
-    val nav = remember { Nav().also { n -> openFinding?.let { n.push(Route.FindingRoute(it)) }; if (openFix) n.push(Route.FixRoute) } }
+    val nav = rememberSaveable(saver = Nav.Saver) { Nav().also { n -> openFinding?.let { n.push(Route.FindingRoute(it)) }; if (openFix) n.push(Route.FixRoute) } }
     if (autoScan && scanner.findings.isEmpty()) androidx.compose.runtime.LaunchedEffect(Unit) { scanner.scan() }
     // Store screenshots: a Sensitive check with nothing found, so the score can show three checks.
     if (com.hyya.footprintinspector.scan.Sample.on && scanner.sensitiveFound == null) scanner.recordSensitive(0)
@@ -113,21 +151,40 @@ fun App(startTab: Tab = Tab.HOME, autoScan: Boolean = false, openFinding: String
     Scaffold(
         containerColor = Color.Black,
         bottomBar = {
-            if (!rail) androidx.compose.foundation.layout.Column(Modifier.background(Brand.surface).navigationBarsPadding()) {
-                androidx.compose.material3.HorizontalDivider(color = Brand.rule, thickness = 0.5.dp)
-                androidx.compose.foundation.layout.Row(Modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 4.dp)) {
-                    Tab.entries.forEach { t -> NavItem(t, tab == t, Modifier.weight(1f)) { select(t) } }
+            // Google's standard navigation bar: Score and the four checks (Material's limit is
+            // five). Settings is the Score page's last row (owner, 2026-10-28).
+            if (!rail) NavigationBar(containerColor = Brand.surface) {
+                Tab.bar.forEach { t ->
+                    NavigationBarItem(
+                        selected = tab == t, onClick = { select(t) },
+                        icon = { Icon(t.icon, contentDescription = null) },
+                        label = { Text(t.short, maxLines = 1, softWrap = false) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Brand.sand, selectedTextColor = Brand.sand,
+                            indicatorColor = Brand.tile, unselectedIconColor = Brand.textMuted, unselectedTextColor = Brand.textMuted,
+                        ),
+                    )
                 }
             }
         },
     ) { inner ->
         androidx.compose.foundation.layout.Row(Modifier.fillMaxSize().background(Color.Black).padding(inner)) {
-        if (rail) androidx.compose.foundation.layout.Column(
-            Modifier.fillMaxHeight().width(76.dp).background(Brand.surface).padding(vertical = 4.dp),
-            verticalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceEvenly,
-        ) {
-            // Six equal shares of the height, so all fit on a small phone held sideways.
-            Tab.entries.forEach { t -> NavItem(t, tab == t, Modifier.weight(1f).fillMaxWidth().padding(horizontal = 4.dp, vertical = 1.dp)) { select(t) } }
+        // Sideways, Google's standard navigation rail down the left edge.
+        if (rail) androidx.compose.material3.NavigationRail(containerColor = Brand.surface) {
+            Tab.bar.forEach { t ->
+                androidx.compose.material3.NavigationRailItem(
+                    selected = tab == t, onClick = { select(t) },
+                    // On a short screen five labelled items don't fit; Material's own option is to
+                    // label only the selected one, so they never overlap.
+                    alwaysShowLabel = config.screenHeightDp >= 480,
+                    icon = { Icon(t.icon, contentDescription = null) },
+                    label = { Text(t.short, maxLines = 1, softWrap = false) },
+                    colors = androidx.compose.material3.NavigationRailItemDefaults.colors(
+                        selectedIconColor = Brand.sand, selectedTextColor = Brand.sand,
+                        indicatorColor = Brand.tile, unselectedIconColor = Brand.textMuted, unselectedTextColor = Brand.textMuted,
+                    ),
+                )
+            }
         }
         Box(Modifier.weight(1f).fillMaxSize()) {
             androidx.compose.runtime.CompositionLocalProvider(LocalGoTo provides goTo) {
@@ -158,6 +215,7 @@ fun App(startTab: Tab = Tab.HOME, autoScan: Boolean = false, openFinding: String
                         is Route.FindingRoute -> FindingScreen(scanner, top.id, nav)
                         is Route.CheckUpRoute -> CheckUpStepScreen(top.index, nav)
                         Route.ScoreRoute -> ScoreScreen(nav)
+                        Route.SettingsRoute -> SettingsScreen(scanner, nav)
                         Route.FixRoute -> FixScreen(scanner, nav)
                         null -> when (t) {
                             Tab.HOME -> HomeScreen(scanner, nav)
@@ -165,7 +223,7 @@ fun App(startTab: Tab = Tab.HOME, autoScan: Boolean = false, openFinding: String
                             Tab.SENSITIVE -> SensitiveScreen(scanner)
                             Tab.TRACKER -> TrackerScreen(scanner, nav)
                             Tab.CHECKUP -> CheckUpScreen(nav)
-                            Tab.SETTINGS -> SettingsScreen(scanner)
+                            Tab.SETTINGS -> SettingsScreen(scanner, nav)
                         }
                     }
                 }
@@ -189,21 +247,3 @@ fun openUrl(context: Context, url: String) {
     try { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) } catch (_: ActivityNotFoundException) { }
 }
 
-/** One navbar button: icon over a one-word name, compact enough for six on the smallest phone. */
-@Composable
-private fun NavItem(t: Tab, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    val tint = if (selected) Brand.sand else Brand.textMuted
-    androidx.compose.foundation.layout.Column(
-        modifier.clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
-            .background(if (selected) Brand.tile else Color.Transparent)
-            .pressable(onClick)
-            .semantics { contentDescription = t.label }
-            .padding(vertical = 3.dp, horizontal = 2.dp),
-        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
-    ) {
-        Icon(t.icon, contentDescription = null, tint = tint, modifier = Modifier.size(22.dp))
-        Text(t.short, color = tint, fontSize = 10.sp, maxLines = 1, softWrap = false,
-            fontWeight = if (selected) androidx.compose.ui.text.font.FontWeight.SemiBold else androidx.compose.ui.text.font.FontWeight.Medium)
-    }
-}

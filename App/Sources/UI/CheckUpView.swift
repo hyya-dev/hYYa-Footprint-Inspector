@@ -13,6 +13,9 @@ struct CheckUpView: View {
 
     /// Ticked steps, remembered on this phone only so the user can pick up where they left off.
     @AppStorage("checkUpDone") private var stored = ""
+    /// The open area, saved on this device so it's still open after the person goes to Settings,
+    /// even if iOS quit the app meanwhile (owner, 2026-10-28).
+    @AppStorage("nav.checkup") private var openStep = ""
 
     private var done: Set<String> { Set(stored.split(separator: ",").map(String.init)) }
 
@@ -33,9 +36,7 @@ struct CheckUpView: View {
 
                 Panel {
                     ForEach(Array(CheckUpGuide.steps.enumerated()), id: \.element.id) { index, step in
-                        NavigationLink {
-                            CheckUpStepView(step: step, number: index + 1, isDone: binding(for: step.id))
-                        } label: {
+                        Button { openStep = step.id } label: {
                             RowCard(symbol: done.contains(step.id) ? "checkmark" : step.symbol,
                                     title: step.title,
                                     subtitle: step.path,
@@ -60,6 +61,11 @@ struct CheckUpView: View {
             // Footprint and Settings.
             .hiddenNavigationBar()
             .sensoryFeedback(.success, trigger: done.count == total)
+            .navigationDestination(item: Binding(get: { openStep.isEmpty ? nil : openStep }, set: { openStep = $0 ?? "" })) { id in
+                if let i = CheckUpGuide.steps.firstIndex(where: { $0.id == id }) {
+                    CheckUpStepView(step: CheckUpGuide.steps[i], number: i + 1, isDone: binding(for: id))
+                }
+            }
             // A restart in the last week is the restart step done: tick it without asking.
             .task { if CheckUpStepView.restartedRecently { binding(for: "restart").wrappedValue = true } }
         } placeholder: {
@@ -168,7 +174,7 @@ struct CheckUpStepView: View {
             .buttonStyle(PrimaryCTAButtonStyle(fill: isDone ? Brand.green : Brand.cta,
                                                depthColor: isDone ? Color(hex: 0x0E8A56) : Brand.ctaDepth))
         }
-        .navigationTitle(step.title)
+        .navigationTitle("")
         .inlineTitle()
     }
 }

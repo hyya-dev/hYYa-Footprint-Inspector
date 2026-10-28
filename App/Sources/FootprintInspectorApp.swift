@@ -11,9 +11,17 @@ struct FootprintInspectorApp: App {
     @State private var check = PrivacyCheck(defaults: LaunchOptions.has("-sampleData") ? nil : .standard)
 
     init() {
+        // Sample-data runs (store screenshots, UI tests) start on the Score page every time, not
+        // where an earlier run left off, unless a test of returning asks to keep the place.
+        if LaunchOptions.has("-sampleData") && !LaunchOptions.has("-keepPlace") {
+            for key in ["nav.tab", "nav.finding", "nav.section", "nav.fixing", "nav.checkup", "nav.settings", "fix.ids", "fix.index"] {
+                UserDefaults.standard.removeObject(forKey: key)
+            }
+        }
         // Store screenshots and UI tests start clean every time, with nothing from earlier runs.
         let history = LaunchOptions.has("-sampleData")
-            ? HistoryStore(directory: FileManager.default.temporaryDirectory.appending(path: "sample-\(UUID().uuidString)"))
+            // A test of returning keeps its scans across the quit, as a real device does.
+            ? HistoryStore(directory: FileManager.default.temporaryDirectory.appending(path: LaunchOptions.has("-keepPlace") || LaunchOptions.has("-keepScans") ? "sample-keep" : "sample-\(UUID().uuidString)"))
             : HistoryStore()
         _history = State(initialValue: history)
         _scanner = State(initialValue: Scanner(history: history))
@@ -59,6 +67,9 @@ struct RootView: View {
     /// Screenshot runs can open on a given tab with `-startTab home|footprint|sensitive|tracker|checkup|settings`.
     /// With `-autoScan` and no start tab, runs open on Footprint, where the scan shows.
     @State private var tab: AppTab = LaunchOptions.value(after: "-startTab").flatMap(AppTab.init(launchName:)) ?? (LaunchOptions.autoScan ? .footprint : .home)
+    /// The page, saved on this device: iOS often quits a background app while the
+    /// person changes a setting, and coming back must land on the same page (owner, 2026-10-28).
+    @AppStorage("nav.tab") private var savedTab = ""
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(PrivacyCheck.self) private var check
@@ -68,6 +79,14 @@ struct RootView: View {
 
     private func go(_ t: AppTab) {
         withAnimation(reduceMotion ? nil : .smooth(duration: 0.32)) { tab = t }
+        savedTab = t.rawValue
+    }
+
+    /// Back where the person was, unless a screenshot run asked for a page.
+    private func restore() {
+        guard LaunchOptions.value(after: "-startTab") == nil, !LaunchOptions.autoScan,
+              let t = AppTab(rawValue: savedTab), t != .settings else { return }
+        tab = t
     }
 
     var body: some View {
@@ -107,14 +126,23 @@ struct RootView: View {
             .modifier(TabSwitchTransition(tab: tab))
         }
         .environment(\.goToTab, go)
+        .onAppear(perform: restore)
         .modifier(KeepScoreFresh())
         // Store screenshots: a Sensitive check with nothing found, as on iOS.
         .task { if LaunchOptions.has("-sampleData") { check.recordSensitive(found: 0) } }
         .task { if LaunchOptions.has("-openSettings") { openSettings() } }
         #else
-        // Our own navbar: along the bottom upright, down the left edge sideways, all six pages.
-        NavBarRoot(tab: Binding(get: { tab }, set: { go($0) })) { page($0) }
+        // Apple's own tab bar (owner, 2026-10-28, after reading Apple's iPhone Duo guidance): the
+        // system places it in every pose, in the Duo's vertical strip or along the bottom, and
+        // keeps it clear of the clock and camera. Score and the four checks; Settings is the
+        // Score page's last row.
+        TabView(selection: Binding(get: { tab == .settings ? .home : tab }, set: { t in go(t); Haptics.selection() })) {
+            ForEach([AppTab.home] + AppTab.checks) { t in
+                Tab(t.shortTitle, systemImage: t.symbol, value: t) { page(t) }
+            }
+        }
         .environment(\.goToTab, go)
+        .onAppear(perform: restore)
         .modifier(KeepScoreFresh())
         // Store screenshots: the sample Tracker report and a Sensitive check with nothing found, so
         // every screen can be captured from launch switches alone (the iPhone Duo can't be tapped
@@ -126,12 +154,11 @@ struct RootView: View {
     #if os(iOS)
     @ViewBuilder private func page(_ t: AppTab) -> some View {
         switch t {
-        case .home: ScoreHomeView()
+        case .home, .settings: ScoreHomeView()
         case .footprint: ScanView()
         case .sensitive: SensitiveView()
         case .tracker: PrivacyReportView(onNext: { go(.checkup) })
         case .checkup: CheckUpView()
-        case .settings: SettingsView()
         }
     }
     #endif

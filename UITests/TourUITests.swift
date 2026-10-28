@@ -39,6 +39,17 @@ final class TourUITests: XCTestCase {
     func testTourSideways() { tour(sideways: true) }
 
     @discardableResult
+    /// Settings is the Score page's last row: the system tab bar holds Score and the four checks.
+    private func openSettings() {
+        app.buttons["Score"].firstMatch.tap()
+        sleep(1)
+        let row = app.buttons.containing(NSPredicate(format: "label BEGINSWITH 'Settings'")).firstMatch
+        var i = 0
+        while !(row.exists && row.isHittable) && i < 14 { app.swipeUp(velocity: .slow); i += 1 }
+        row.tap()
+        sleep(1)
+    }
+
     private func shot(_ name: String) -> Data {
         sleep(1)
         n += 1
@@ -120,7 +131,7 @@ final class TourUITests: XCTestCase {
         tab("Score")
         page("score-after-scan", screens: 4)
 
-        tab("Sensitive apps")
+        tab("Sensitive")
         page("sensitive", screens: 4)
         let check = find("label BEGINSWITH %@", "Check ")
         if check.exists { check.tap(); sleep(2); page("sensitive-result", screens: 4) }
@@ -136,7 +147,7 @@ final class TourUITests: XCTestCase {
             if row.exists { row.tap(); sleep(1); page("checkup-\(step)", screens: 3); back() }
         }
 
-        tab("Settings")
+        openSettings()
         page("settings", screens: 6)
         for row in ["Scan history", "Privacy scoreboard"] {
             for _ in 0..<12 { app.swipeDown(velocity: .fast) }

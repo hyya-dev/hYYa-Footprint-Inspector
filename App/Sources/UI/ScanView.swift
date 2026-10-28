@@ -6,8 +6,14 @@ import SwiftUI
 
 struct ScanView: View {
     @Environment(Scanner.self) private var scanner
-    /// Screenshot runs can open one finding with `-openFinding <id>`.
-    @State private var openedFindingID: String?
+    /// The open finding or category, saved on this device so it's still open after iOS quits the
+    /// app while the person changes a setting. Screenshot runs can open one with `-openFinding <id>`.
+    @AppStorage("nav.finding") private var openedFinding = ""
+    @AppStorage("nav.section") private var openedSection = ""
+
+    private func stored(_ value: Binding<String>) -> Binding<String?> {
+        Binding(get: { value.wrappedValue.isEmpty ? nil : value.wrappedValue }, set: { value.wrappedValue = $0 ?? "" })
+    }
 
     var body: some View {
         NavigationStack {
@@ -15,18 +21,23 @@ struct ScanView: View {
                 switch scanner.phase {
                 case .idle: IdleHome()
                 case .scanning: ScanningView()
-                case .done: Results()
+                case .done: Results(openFinding: { openedFinding = $0 }, openSection: { openedSection = $0 })
                 }
             }
             .hiddenNavigationBar()
             .task {
                 if LaunchOptions.autoScan, scanner.allFindings.isEmpty { await scanner.scan() }
-                openedFindingID = LaunchOptions.value(after: "-openFinding")
+                if let id = LaunchOptions.value(after: "-openFinding") { openedFinding = id }
             }
-            .navigationDestination(item: $openedFindingID) { id in
+            .navigationDestination(item: stored($openedFinding)) { id in
                 if let finding = scanner.allFindings.first(where: { $0.id == id }) {
                     FindingDetailView(finding: finding)
+                } else {
+                    ProgressView().tint(Brand.ink)
                 }
+            }
+            .navigationDestination(item: stored($openedSection)) { id in
+                if let section = SignalSection(rawValue: id) { SectionView(section: section) }
             }
             .sensoryFeedback(.impact(weight: .light, intensity: 0.4), trigger: Int(scanner.progress * 16))
             .sensoryFeedback(trigger: scanner.phase) { _, new in
@@ -51,22 +62,28 @@ private struct IdleHome: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: short ? 14 : 24) {
-            // Sideways on a phone the mascot shrinks, so the scan button stays on screen.
-            LivingMascot(mood: .idle, size: short ? 80 : 180)
-                .frame(maxWidth: .infinity)
-                .padding(.top, short ? 0 : 24)
-            VStack(alignment: .leading, spacing: 12) {
-                Brand.eyebrow("Check 1 · Footprint")
-                AccentRule()
-                Text("What can any app read about this device?")
-                    .scaledFont(30, weight: .bold, relativeTo: .largeTitle)
-                    .foregroundStyle(Brand.ink)
-                    .fixedSize(horizontal: false, vertical: true)
-                Text("A quick scan reads only what any app could, without asking you. Then I'll help you fix what you can.")
-                    .font(.body)
-                    .foregroundStyle(Brand.textMuted)
-                    .lineSpacing(2)
-                    .fixedSize(horizontal: false, vertical: true)
+            if !short {
+                LivingMascot(mood: .idle, size: 180)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 24)
+            }
+            // Sideways on a phone the mascot sits beside the heading, so the scan button
+            // stays above the tab bar.
+            HStack(alignment: .top, spacing: 16) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Brand.eyebrow("Check 1 · Footprint")
+                    AccentRule()
+                    Text("What can any app read about this device?")
+                        .scaledFont(30, weight: .bold, relativeTo: .largeTitle)
+                        .foregroundStyle(Brand.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("A quick scan reads only what any app could, without asking you. Then I'll help you fix what you can.")
+                        .font(.body)
+                        .foregroundStyle(Brand.textMuted)
+                        .lineSpacing(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if short { LivingMascot(mood: .idle, size: 90) }
             }
             VStack(spacing: 14) {
                 Button("Start with check 1") { Task { await scanner.scan() } }
@@ -120,16 +137,18 @@ private struct ScanningView: View {
 // MARK: - Results
 
 private struct Results: View {
+    let openFinding: (String) -> Void
+    let openSection: (String) -> Void
     @Environment(Scanner.self) private var scanner
     @State private var showingFormula = false
-    @State private var fixing = false
+    /// Saved on this device, like the open page, so the walk-through is still open on return.
+    @AppStorage("nav.fixing") private var fixing = false
     /// The clues you can fix, most points first.
     private var fixes: [Finding] {
         scanner.concerning.filter { FootprintScore.isFixable($0) && FootprintScore.points(for: $0) > 0 }
             .sorted { FootprintScore.points(for: $0) > FootprintScore.points(for: $1) }
     }
     @Environment(\.goToTab) private var goToTab
-    @Namespace private var zoom
 
     var body: some View {
         let score = scanner.score
@@ -138,7 +157,7 @@ private struct Results: View {
         // Check 1 in detail: the footprint score and its clues. The overall score is on the Score page.
         Color.clear.frame(height: 4)
             .sheet(isPresented: $showingFormula) { FormulaSheet() }
-            .sheet(isPresented: $fixing, onDismiss: { Task { await scanner.scan(quietly: true) } }) { FixWizard(fixes: fixes) }
+            .sheet(isPresented: $fixing, onDismiss: { FixWizard.forget(); Task { await scanner.scan(quietly: true) } }) { FixWizard(fixes: fixes) }
 
         VStack(alignment: .leading, spacing: 14) {
             Brand.eyebrow("Check 1 · Footprint")
@@ -165,8 +184,8 @@ private struct Results: View {
                 .frame(maxWidth: .infinity)
         }
 
-        ScoreGuideCard(score: score, fixes: fixes, all: scanner.allFindings) { fixing = true }
-            .task { if LaunchOptions.has("-openFix") && !fixes.isEmpty { fixing = true } }
+        ScoreGuideCard(score: score, fixes: fixes, all: scanner.allFindings) { FixWizard.forget(); fixing = true }
+            .task { if LaunchOptions.has("-openFix") && !fixes.isEmpty { FixWizard.forget(); fixing = true } }
 
 
         SectionDivider()
@@ -179,8 +198,8 @@ private struct Results: View {
             SectionTitle(title: "Worth a look", trailing: "\(concerning.count)")
             Panel {
                 ForEach(concerning) { finding in
-                    NavigationLink { FindingDetailView(finding: finding).zoomFrom(finding.id, in: zoom) } label: {
-                        ClueRow(finding: finding).zoomSource(finding.id, in: zoom)
+                    Button { openFinding(finding.id) } label: {
+                        ClueRow(finding: finding)
                     }
                     .buttonStyle(PressableCardStyle())
                 }
@@ -200,8 +219,8 @@ private struct Results: View {
         SectionTitle(title: title)
         Panel {
             ForEach(SignalSection.onThisPlatform.filter { $0.group == group }) { section in
-                NavigationLink { SectionView(section: section).zoomFrom(section.id, in: zoom) } label: {
-                    CategoryTile(section: section).zoomSource(section.id, in: zoom)
+                Button { openSection(section.rawValue) } label: {
+                    CategoryTile(section: section)
                 }
                 .buttonStyle(PressableCardStyle())
             }

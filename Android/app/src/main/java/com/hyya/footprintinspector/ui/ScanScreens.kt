@@ -407,9 +407,14 @@ private fun ScoreGuide(scanner: Scanner, nav: Nav) {
 @Composable
 fun FixScreen(scanner: Scanner, nav: Nav) {
     val context = LocalContext.current
-    val fixes = remember(scanner.findings.size) { fixesOf(scanner) }
-    var index by remember { mutableStateOf(0) }
-    var done by remember { mutableStateOf(0) }
+    // The fixes when the walk-through opened, by id, and the step reached: both survive Android
+    // stopping the app while the person is in Settings, and a fix that took effect doesn't shift
+    // the steps.
+    var ids by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(fixesOf(scanner).map { it.id }) }
+    if (ids.isEmpty() && scanner.findings.isNotEmpty()) ids = fixesOf(scanner).map { it.id }
+    val fixes = ids.mapNotNull { id -> scanner.findings.firstOrNull { it.id == id } }
+    var index by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(0) }
+    var done by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(0) }
     Page {
         BackBar(if (index < fixes.size) "Fix ${index + 1} of ${fixes.size}" else "All done", nav)
         if (index < fixes.size) {
@@ -478,6 +483,13 @@ fun HomeScreen(scanner: Scanner, nav: Nav) {
                 Text("A restart once a week clears some kinds of spyware and gives apps a new restart time. I can remind you.",
                     color = Brand.textMuted, fontSize = 14.sp, lineHeight = 19.sp)
                 WeeklyReminderSwitch()
+            }
+        }
+        // Settings is the last row here: the navigation bar holds Score and the four checks.
+        Panel {
+            RowCard(Icons.Outlined.Tune, "Settings", "Reminders, history, sharing and more from hYYa", showDivider = false,
+                onClick = { nav.push(Route.SettingsRoute) }) {
+                Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = Brand.textSubtle)
             }
         }
     }
