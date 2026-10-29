@@ -127,6 +127,7 @@ struct NavbarPlacementTests {
         #expect(place(600, 466, leading: 80) == .leftBelowCamera)  // folded, sideways: camera on the left
         #expect(place(560, 669, trailing: 100) == .right)          // open, sideways: strip on the right
         #expect(place(669, 900) == .bottom)                        // open, upright
+        #expect(place(678, 466, trailing: 62) == .rightAboveCamera) // folded, sideways: camera bottom right
     }
 
     @Test func otherDevicesKeepBottomAndLeft() {

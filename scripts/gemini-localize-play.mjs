@@ -10,6 +10,8 @@
 // are copied from their source rather than translated twice.
 //
 //   node scripts/gemini-localize-play.mjs [play code …] [--model name] [--force]
+//   node scripts/gemini-localize-play.mjs --notes-only   (redo the release note only; each
+//     language keeps its own descriptions)
 //
 // The key comes from GEMINI_API_KEY in the environment or in the gitignored .env file.
 
@@ -20,6 +22,8 @@ const opt = (name, fallback) => { const i = argv.indexOf(name); return i >= 0 ? 
 const MODEL = opt("--model", "gemini-3.7-flash");
 const FORCE = argv.includes("--force");
 if (FORCE) argv.splice(argv.indexOf("--force"), 1);
+const NOTES_ONLY = argv.includes("--notes-only");
+if (NOTES_ONLY) argv.splice(argv.indexOf("--notes-only"), 1);
 const envFile = new URL("../.env", import.meta.url);
 const KEY = process.env.GEMINI_API_KEY || (existsSync(envFile) ? (readFileSync(envFile, "utf8").split("\n")
   .find((l) => l.startsWith("GEMINI_API_KEY=")) ?? "").slice(15).trim() : "");
@@ -91,15 +95,17 @@ Rules:
 - shortDescription: at most 80 characters. Same message as the English: see what apps know about your device, then fix it; free, open source, private.
 - fullDescription: at most 4000 characters, plain text. Keep the structure: paragraphs, the UPPERCASE section headings (translated, still uppercase where the script has case) and the • bullets. Keep "${BRAND}" and "hYYa" unchanged. "Settings" is the system's own localised name for the Settings app. Keep "Android" and "Google" where the English has them, but never name iPhone, iPad, iOS or Mac.
 - Stay device-neutral: the listing is for phones and tablets alike, so say "device" (the local neutral word) wherever the English says "device". Never write "phone", "mobile", "smartphone", "cell" or "tablet".
-- releaseNotes: the release note. Keep its two lines: the "• New:" line, and on the second line a faithful translation of the fixed sentence "This release contains general bug fixes and stability improvements."
+- releaseNotes: the release note. Keep its two lines: the "•" feature line, and on the second line a faithful translation of the fixed sentence "This release contains general bug fixes and stability improvements."
 - Never mention other apps or companies (other than Google and Android as in the English), viruses, malware or spyware, and make no ranking claims.
 ${feedback ? `\nYour previous attempt had these problems; fix all of them:\n- ${feedback.join("\n- ")}\n` : ""}
 English listing (JSON):
-${JSON.stringify(en, null, 1)}`;
+${JSON.stringify(NOTES_ONLY ? { releaseNotes: en.releaseNotes } : en, null, 1)}`;
 }
 
-const schema = { type: "OBJECT", required: ["shortDescription", "fullDescription", "releaseNotes"], properties: {
-  shortDescription: { type: "STRING" }, fullDescription: { type: "STRING" }, releaseNotes: { type: "STRING" } } };
+const schema = NOTES_ONLY
+  ? { type: "OBJECT", required: ["releaseNotes"], properties: { releaseNotes: { type: "STRING" } } }
+  : { type: "OBJECT", required: ["shortDescription", "fullDescription", "releaseNotes"], properties: {
+      shortDescription: { type: "STRING" }, fullDescription: { type: "STRING" }, releaseNotes: { type: "STRING" } } };
 
 async function gemini(text) {
   for (let a = 1; a <= 5; a++) {
@@ -119,16 +125,19 @@ const write = (code, l) => writeFileSync(new URL(`${code}.json`, OUT),
   JSON.stringify({ language: code, title: BRAND, shortDescription: l.shortDescription, fullDescription: l.fullDescription, releaseNotes: l.releaseNotes }, null, 2) + "\n");
 
 async function localise(code) {
-  if (!FORCE && existsSync(new URL(`${code}.json`, OUT))) return `${code}: kept`;
+  const file = new URL(`${code}.json`, OUT);
+  if (!FORCE && !NOTES_ONLY && existsSync(file)) return `${code}: kept`;
+  const kept = NOTES_ONLY && existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : null;
   let result, issues;
   for (let attempt = 1; attempt <= 4; attempt++) {
     result = await gemini(prompt(LANGUAGES[code], issues));
+    if (kept) result = { ...kept, releaseNotes: result.releaseNotes };
     issues = check(result);
     if (!issues.length) break;
   }
   if (issues.length) return `${code}: ✗ ${issues.join("; ")}`;
   write(code, result);
-  return `${code}: ✓ ${result.shortDescription}`;
+  return `${code}: ✓ ${NOTES_ONLY ? result.releaseNotes.split("\n")[0] : result.shortDescription}`;
 }
 
 const wanted = argv.length ? argv.filter((c) => LANGUAGES[c]) : Object.keys(LANGUAGES);

@@ -9,6 +9,8 @@ import SwiftUI
 /// (owner, 2026-10-28). It goes where the iPhone Duo puts its own:
 /// - beside the system's status strip, when the system keeps a strip down the right edge only
 ///   (a Duo folded upright, or open sideways), in the strip's column below the clock;
+/// - in that right strip, gathered at the bottom but lifted just clear of the camera, when the screen
+///   is wider than tall (a Duo folded sideways with its camera at the bottom right);
 /// - down the left edge when sideways otherwise, flush with the edge and below a camera there
 ///   (a Duo folded sideways);
 /// - along the bottom when upright otherwise (a Duo open upright, every other iPhone, iPad).
@@ -17,10 +19,15 @@ struct NavBarRoot<PageContent: View>: View {
     @Binding var tab: AppTab
     @ViewBuilder let page: (AppTab) -> PageContent
 
-    enum Place: Equatable { case bottom, left, leftBelowCamera, right }
+    /// How far the bar rises above the Duo's camera when the camera is at the bottom of the strip.
+    static var cameraClearance: CGFloat { 36 }
+
+    enum Place: Equatable { case bottom, left, leftBelowCamera, right, rightAboveCamera }
 
     static func place(size: CGSize, insets: EdgeInsets) -> Place {
-        if insets.trailing > 0 && insets.leading == 0 { return .right }
+        // Folded sideways the camera sits at one end of the strip: top left one way round,
+        // bottom right the other (owner's Duo, 2026-10-29: Settings went under it).
+        if insets.trailing > 0 && insets.leading == 0 { return size.width > size.height ? .rightAboveCamera : .right }
         if size.width > size.height { return insets.leading > 0 && insets.trailing == 0 ? .leftBelowCamera : .left }
         return .bottom
     }
@@ -39,7 +46,7 @@ struct NavBarRoot<PageContent: View>: View {
                 }
             case .left:
                 HStack(spacing: 0) {
-                    rail(width: 84, bottomAligned: false)
+                    rail(width: 84, gather: nil)
                         .background(Brand.surface.ignoresSafeArea())
                     divider
                     current
@@ -47,7 +54,7 @@ struct NavBarRoot<PageContent: View>: View {
             case .leftBelowCamera:
                 // Flush with the left edge, the buttons gathered at the bottom, clear of the camera.
                 HStack(spacing: 0) {
-                    rail(width: max(insets.leading, 76), bottomAligned: true)
+                    rail(width: max(insets.leading, 76), gather: .bottom)
                         .padding(.leading, -insets.leading)
                         .background(Brand.surface.ignoresSafeArea())
                     divider
@@ -58,7 +65,18 @@ struct NavBarRoot<PageContent: View>: View {
                 HStack(spacing: 0) {
                     current
                     divider
-                    rail(width: max(insets.trailing, 76), bottomAligned: true)
+                    rail(width: max(insets.trailing, 76), gather: .bottom)
+                        .padding(.trailing, -insets.trailing)
+                        .background(Brand.surface.ignoresSafeArea())
+                }
+            case .rightAboveCamera:
+                // In the status strip's column, the buttons gathered at the bottom and lifted just
+                // above the camera, the same small gap as below it on the other side (owner, 2026-10-29).
+                HStack(spacing: 0) {
+                    current
+                    divider
+                    rail(width: max(insets.trailing, 76), gather: .bottom)
+                        .padding(.bottom, Self.cameraClearance)
                         .padding(.trailing, -insets.trailing)
                         .background(Brand.surface.ignoresSafeArea())
                 }
@@ -86,14 +104,14 @@ struct NavBarRoot<PageContent: View>: View {
         .accessibilityIdentifier("navbar")
     }
 
-    /// Down a side: the six share the height, or sit together at the bottom where the top of
+    /// Down a side: the six share the height, or sit together at one end where the other end of
     /// that edge belongs to the clock or a camera.
-    private func rail(width: CGFloat, bottomAligned: Bool) -> some View {
+    private func rail(width: CGFloat, gather: VerticalEdge?) -> some View {
         VStack(spacing: 2) {
-            if bottomAligned { Spacer(minLength: 0) }
+            if gather == .bottom { Spacer(minLength: 0) }
             ForEach(AppTab.allCases) { t in
-                item(t, stretch: !bottomAligned)
-                    .frame(height: bottomAligned ? 56 : nil)
+                item(t, stretch: gather == nil)
+                    .frame(height: gather == nil ? nil : 56)
             }
         }
         .padding(.vertical, 6)
