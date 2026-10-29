@@ -28,8 +28,6 @@ enum hYYaLinks {
 }
 
 struct SettingsView: View {
-    /// Opened from the Score page's last row (iPhone, iPad), inside that page's navigation.
-    var embedded = false
     @Environment(HistoryStore.self) private var history
     @Environment(PrivacyCheck.self) private var check
     @Environment(\.openURL) private var openURL
@@ -40,7 +38,7 @@ struct SettingsView: View {
     static let shareMessage = "hYYa Footprint Inspector shows what any app can learn about your device, and how to fix it. Free, open source, nothing leaves your device."
 
     var body: some View {
-        MaybeNavigationStack(wrap: !embedded) {
+        NavigationStack {
             Page {
                 HeroCard(eyebrow: "Settings", title: "hYYa Footprint Inspector",
                          subtitle: "Everything here stays on this device.", mood: .idle, mascotSize: 96)
@@ -218,15 +216,5 @@ struct SupportRow: View {
         }
         .padding(.vertical, 4)
         .contentShape(Rectangle())
-    }
-}
-
-/// A navigation stack, unless the view already sits inside one.
-struct MaybeNavigationStack<Content: View>: View {
-    let wrap: Bool
-    @ViewBuilder var content: Content
-
-    var body: some View {
-        if wrap { NavigationStack { content } } else { content }
     }
 }

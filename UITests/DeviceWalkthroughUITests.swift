@@ -188,13 +188,9 @@ final class DeviceWalkthroughUITests: XCTestCase {
         app.launch()
         handleSystemAlert(context: "lab-launch")
         // The lab lives in Settings › Developer (Debug builds only) since 2026-10-17.
-        // Settings is the Score page's last row.
-        let scoreTab = app.buttons["Score"].firstMatch
-        XCTAssertTrue(scoreTab.waitForExistence(timeout: 10), "Score tab missing")
-        scoreTab.tap()
-        let settingsRow = app.buttons.containing(NSPredicate(format: "label BEGINSWITH 'Settings'")).firstMatch
-        for _ in 0..<14 where !(settingsRow.exists && settingsRow.isHittable) { app.swipeUp() }
-        settingsRow.tap()
+        let settingsTab = app.tabBars.buttons["Settings"]
+        XCTAssertTrue(settingsTab.waitForExistence(timeout: 10), "Settings tab missing")
+        settingsTab.tap()
         let lab = app.buttons["Settings link lab"]
         for _ in 0..<8 where !lab.isHittable { app.swipeUp() }
         lab.tap()

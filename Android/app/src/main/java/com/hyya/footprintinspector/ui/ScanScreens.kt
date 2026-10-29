@@ -485,13 +485,6 @@ fun HomeScreen(scanner: Scanner, nav: Nav) {
                 WeeklyReminderSwitch()
             }
         }
-        // Settings is the last row here: the navigation bar holds Score and the four checks.
-        Panel {
-            RowCard(Icons.Outlined.Tune, "Settings", "Reminders, history, sharing and more from hYYa", showDivider = false,
-                onClick = { nav.push(Route.SettingsRoute) }) {
-                Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = Brand.textSubtle)
-            }
-        }
     }
 }
 

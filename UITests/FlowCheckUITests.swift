@@ -19,17 +19,6 @@ final class FlowCheckUITests: XCTestCase {
         XCUIDevice.shared.orientation = .portrait
     }
 
-    /// Settings is the Score page's last row: the system tab bar holds Score and the four checks.
-    private func openSettings() {
-        app.buttons["Score"].firstMatch.tap()
-        sleep(1)
-        let row = app.buttons.containing(NSPredicate(format: "label BEGINSWITH 'Settings'")).firstMatch
-        var i = 0
-        while !(row.exists && row.isHittable) && i < 14 { app.swipeUp(velocity: .slow); i += 1 }
-        row.tap()
-        sleep(1)
-    }
-
     private func shot(_ name: String) {
         n += 1
         let a = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
@@ -42,8 +31,8 @@ final class FlowCheckUITests: XCTestCase {
     private func assertVisible(_ el: XCUIElement, _ what: String, timeout: TimeInterval = 8, file: StaticString = #filePath, line: UInt = #line) {
         guard el.waitForExistence(timeout: timeout) else { XCTFail("\(what): not found", file: file, line: line); return }
         let window = app.windows.firstMatch.frame
-        // Nothing may hide under the system tab bar when it runs along the bottom.
-        let bar = app.tabBars.firstMatch
+        // Upright, the app's own navbar runs along the bottom; nothing may hide under it.
+        let bar = app.otherElements["navbar"].firstMatch
         let tabBarTop = bar.exists && bar.frame.minY > window.midY ? bar.frame.minY : window.maxY
         let f = el.frame
         XCTAssertTrue(f.minY >= window.minY && f.minY < tabBarTop - 20,
@@ -77,23 +66,23 @@ final class FlowCheckUITests: XCTestCase {
         }
     }
 
-    /// The system tab bar holds Score and the four checks, all on screen; Settings is the Score
-    /// page's last row, never a button at the top of a page (owner, 2026-10-28).
-    func testTabsAndSettingsRow() {
+    /// Upright the navbar runs along the bottom with all six pages fully on screen, and the
+    /// Score page has no Settings button at its top (owner, 2026-10-28).
+    func testNavbarUpright() {
         app.launch()
+        let bar = app.otherElements["navbar"].firstMatch
         let w = app.windows.firstMatch.frame
-        for name in ["Score", "Footprint", "Sensitive", "Tracker", "Check-up"] {
+        XCTAssertTrue(bar.waitForExistence(timeout: 8), "no navbar")
+        // At the bottom, or on the folded iPhone Duo down the right in the status strip's column.
+        let atBottom = bar.frame.minY > w.midY, atRight = bar.frame.minX > w.midX
+        XCTAssertTrue(atBottom || atRight, "navbar is neither at the bottom nor on the right")
+        for name in ["Score", "Footprint", "Sensitive apps", "Tracker", "Check-up", "Settings"] {
             let b = app.buttons[name].firstMatch
-            XCTAssertTrue(b.waitForExistence(timeout: 8) && b.frame.minX >= w.minX && b.frame.maxX <= w.maxX && b.frame.minY >= w.minY && b.frame.maxY <= w.maxY,
-                          "\(name) tab missing or cut off")
+            XCTAssertTrue(b.exists && b.frame.minX >= w.minX && b.frame.maxX <= w.maxX && b.frame.minY >= w.minY && b.frame.maxY <= w.maxY,
+                          "\(name) missing or cut off in the navbar")
         }
-        let top = app.buttons.containing(NSPredicate(format: "label BEGINSWITH 'Settings'")).allElementsBoundByIndex
-            .filter { $0.isHittable && $0.frame.maxY < w.minY + w.height * 0.25 }
-        XCTAssertTrue(top.isEmpty, "a Settings button sits at the top of the page")
-        shot("tabs")
-        openSettings()
-        XCTAssertTrue(app.buttons["Rate the App"].firstMatch.waitForExistence(timeout: 5), "Settings didn't open from the Score page")
-        shot("settings-from-score")
+        XCTAssertEqual(app.buttons.matching(identifier: "Settings").count, 1, "a second Settings button is on the page")
+        shot("navbar-upright")
     }
 
     func testFootprintFlow() {
@@ -166,17 +155,17 @@ final class FlowCheckUITests: XCTestCase {
         XCUIDevice.shared.orientation = .landscapeLeft
         XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 25), "scan didn't finish")
         shot("sideways-footprint")
-        // Sideways every tab is still on screen, wherever the system puts the bar.
-        for name in ["Score", "Footprint", "Sensitive", "Tracker", "Check-up"] {
+        // Sideways the navbar runs down the left edge (owner, 2026-10-28), all six pages on screen.
+        let rail = app.otherElements["navbar"].firstMatch
+        XCTAssertTrue(rail.waitForExistence(timeout: 5) && rail.frame.maxX < app.windows.firstMatch.frame.midX, "navbar isn't on the left")
+        for name in ["Score", "Footprint", "Sensitive apps", "Tracker", "Check-up", "Settings"] {
             let b = app.buttons[name].firstMatch
-            XCTAssertTrue(b.exists && b.frame.minY >= 0 && b.frame.maxY <= app.windows.firstMatch.frame.maxY, "\(name) tab cut off")
+            XCTAssertTrue(b.exists && b.frame.minY >= 0 && b.frame.maxY <= app.windows.firstMatch.frame.maxY, "\(name) cut off in the navbar")
         }
-        for name in ["Score", "Sensitive", "Tracker", "Check-up"] {
+        for name in ["Score", "Sensitive apps", "Tracker", "Check-up", "Settings"] {
             tab(name)
             shot("sideways-\(name)")
         }
-        openSettings()
-        shot("sideways-Settings")
         XCUIDevice.shared.orientation = .portrait
     }
 
@@ -203,7 +192,7 @@ final class FlowCheckUITests: XCTestCase {
     func testSensitiveFlow() {
         app.launchArguments += ["-sensitiveCategories", "dating,health,circumvention"]
         app.launch()
-        tab("Sensitive")
+        tab("Sensitive apps")
         assertVisible(text("Which apps give you away"), "Sensitive title")
         shot("sensitive-start")
         let check = app.buttons.containing(NSPredicate(format: "label BEGINSWITH 'Check '")).firstMatch
@@ -259,7 +248,7 @@ final class FlowCheckUITests: XCTestCase {
 
     func testSettingsFlow() {
         app.launch()
-        openSettings()
+        tab("Settings")
         assertVisible(app.buttons["Rate the App"].firstMatch, "rating card")
         let reminder = text("Re-scan reminder")
         scrollUntil(reminder)

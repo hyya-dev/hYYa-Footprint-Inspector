@@ -22,17 +22,6 @@ final class StoreScreenshotsUITests: XCTestCase {
         app.launchArguments = ["-sampleData"]
     }
 
-    /// Settings is the Score page's last row: the system tab bar holds Score and the four checks.
-    private func openSettings() {
-        app.buttons["Score"].firstMatch.tap()
-        sleep(1)
-        let row = app.buttons.containing(NSPredicate(format: "label BEGINSWITH 'Settings'")).firstMatch
-        var i = 0
-        while !(row.exists && row.isHittable) && i < 14 { app.swipeUp(velocity: .slow); i += 1 }
-        row.tap()
-        sleep(1)
-    }
-
     private func shot(_ name: String) {
         sleep(1)
         let a = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
@@ -115,7 +104,7 @@ final class StoreScreenshotsUITests: XCTestCase {
             shot("review-\(group)")
             back(); sleep(1)
         }
-        tab("Sensitive"); sleep(1)
+        tab("Sensitive apps"); sleep(1)
         app.swipeUp(velocity: .fast); app.swipeUp(velocity: .fast); sleep(1)
         shot("review-sensitive-bottom")
         app.buttons.containing(NSPredicate(format: "label BEGINSWITH 'Check'")).firstMatch.tap()
@@ -127,7 +116,7 @@ final class StoreScreenshotsUITests: XCTestCase {
     func testCaptureSettings() {
         app.launch()
         sleep(2)
-        openSettings()
+        tab("Settings")
         shot("settings-1")
         for i in 2...4 { app.swipeUp(velocity: .slow); shot("settings-\(i)") }
     }
@@ -147,7 +136,7 @@ final class StoreScreenshotsUITests: XCTestCase {
         let clue = app.buttons.containing(NSPredicate(format: "label CONTAINS 'last restart'")).firstMatch
         scrollTo(clue, max: 8)
         if clue.exists { clue.tap(); sleep(3); back(); sleep(1) }  // one finding, in plain words
-        tab("Sensitive"); sleep(2)
+        tab("Sensitive apps"); sleep(2)
         let check = app.buttons.containing(NSPredicate(format: "label BEGINSWITH 'Check '")).firstMatch
         scrollTo(check, max: 6)
         if check.exists { check.tap() }
@@ -169,7 +158,7 @@ final class StoreScreenshotsUITests: XCTestCase {
         shot("store-01-home")
 
         // Checks 2 and 3 first, so the results show one privacy score built from three checks.
-        tab("Sensitive")
+        tab("Sensitive apps")
         sleep(1)
         for name in ["Dating and LGBTQ+", "Health and fertility", "VPN, Tor and censorship tools"] {
             let row = app.buttons.containing(NSPredicate(format: "label BEGINSWITH %@", name)).firstMatch

@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.layout.height
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.padding
@@ -67,7 +68,7 @@ enum class Tab(val label: String, val icon: ImageVector, val step: Int, val pitc
 
     companion object {
         /** The navigation bar's destinations; Settings opens from the Score page. */
-        val bar = listOf(HOME, SCAN, SENSITIVE, TRACKER, CHECKUP)
+        val bar = listOf(HOME, SCAN, SENSITIVE, TRACKER, CHECKUP, SETTINGS)
     }
 }
 
@@ -142,23 +143,25 @@ fun App(startTab: Tab = Tab.HOME, autoScan: Boolean = false, openFinding: String
     val view = androidx.compose.ui.platform.LocalView.current
     val goTo: (Tab) -> Unit = { t -> tab = t; nav.stack.clear() }
 
-    // The navbar (owner, 2026-10-28): along the bottom upright, down the left edge sideways, all
-    // six pages with one-word names, Settings included.
+    // The navbar: Google's standard bar along the bottom upright and rail down the left edge
+    // sideways, all six pages with one-word names, Settings included (owner, 2026-10-29).
     val config = androidx.compose.ui.platform.LocalConfiguration.current
     val rail = config.screenWidthDp > config.screenHeightDp
+    val shortRail = config.screenHeightDp < 480
     val select: (Tab) -> Unit = { t -> tab = t; nav.stack.clear(); view.performHapticFeedback(android.view.HapticFeedbackConstants.CONTEXT_CLICK) }
 
     Scaffold(
         containerColor = Color.Black,
         bottomBar = {
-            // Google's standard navigation bar: Score and the four checks (Material's limit is
-            // five). Settings is the Score page's last row (owner, 2026-10-28).
+            // Google's standard navigation bar: Score, the four checks and Settings (owner,
+            // 2026-10-29: Settings stays in the bar).
             if (!rail) NavigationBar(containerColor = Brand.surface) {
                 Tab.bar.forEach { t ->
                     NavigationBarItem(
                         selected = tab == t, onClick = { select(t) },
                         icon = { Icon(t.icon, contentDescription = null) },
-                        label = { Text(t.short, maxLines = 1, softWrap = false) },
+                        // Six names on a narrow phone: a size smaller so "Check-up" isn't clipped.
+                        label = { Text(t.short, maxLines = 1, softWrap = false, fontSize = if (config.screenWidthDp < 400) 11.sp else 12.sp) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = Brand.sand, selectedTextColor = Brand.sand,
                             indicatorColor = Brand.tile, unselectedIconColor = Brand.textMuted, unselectedTextColor = Brand.textMuted,
@@ -174,11 +177,12 @@ fun App(startTab: Tab = Tab.HOME, autoScan: Boolean = false, openFinding: String
             Tab.bar.forEach { t ->
                 androidx.compose.material3.NavigationRailItem(
                     selected = tab == t, onClick = { select(t) },
-                    // On a short screen five labelled items don't fit; Material's own option is to
-                    // label only the selected one, so they never overlap.
-                    alwaysShowLabel = config.screenHeightDp >= 480,
-                    icon = { Icon(t.icon, contentDescription = null) },
-                    label = { Text(t.short, maxLines = 1, softWrap = false) },
+                    // On a short screen six labelled items don't fit, so they show icons only (the
+                    // selected one keeps its highlight) and are a little shorter: all six, Settings
+                    // included, stay on screen. The names are still read out by TalkBack.
+                    modifier = if (shortRail) Modifier.height(44.dp) else Modifier,
+                    icon = { Icon(t.icon, contentDescription = if (shortRail) t.short else null) },
+                    label = if (shortRail) null else ({ Text(t.short, maxLines = 1, softWrap = false) }),
                     colors = androidx.compose.material3.NavigationRailItemDefaults.colors(
                         selectedIconColor = Brand.sand, selectedTextColor = Brand.sand,
                         indicatorColor = Brand.tile, unselectedIconColor = Brand.textMuted, unselectedTextColor = Brand.textMuted,

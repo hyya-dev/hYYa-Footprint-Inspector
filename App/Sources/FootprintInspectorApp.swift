@@ -85,7 +85,7 @@ struct RootView: View {
     /// Back where the person was, unless a screenshot run asked for a page.
     private func restore() {
         guard LaunchOptions.value(after: "-startTab") == nil, !LaunchOptions.autoScan,
-              let t = AppTab(rawValue: savedTab), t != .settings else { return }
+              let t = AppTab(rawValue: savedTab) else { return }
         tab = t
     }
 
@@ -132,15 +132,9 @@ struct RootView: View {
         .task { if LaunchOptions.has("-sampleData") { check.recordSensitive(found: 0) } }
         .task { if LaunchOptions.has("-openSettings") { openSettings() } }
         #else
-        // Apple's own tab bar (owner, 2026-10-28, after reading Apple's iPhone Duo guidance): the
-        // system places it in every pose, in the Duo's vertical strip or along the bottom, and
-        // keeps it clear of the clock and camera. Score and the four checks; Settings is the
-        // Score page's last row.
-        TabView(selection: Binding(get: { tab == .settings ? .home : tab }, set: { t in go(t); Haptics.selection() })) {
-            ForEach([AppTab.home] + AppTab.checks) { t in
-                Tab(t.shortTitle, systemImage: t.symbol, value: t) { page(t) }
-            }
-        }
+        // Our own navbar (owner, 2026-10-29: build 21's six-button bar, Settings included): it
+        // follows the Duo's own placement and sits along the bottom or left edge elsewhere.
+        NavBarRoot(tab: Binding(get: { tab }, set: { go($0) })) { page($0) }
         .environment(\.goToTab, go)
         .onAppear(perform: restore)
         .modifier(KeepScoreFresh())
@@ -154,7 +148,8 @@ struct RootView: View {
     #if os(iOS)
     @ViewBuilder private func page(_ t: AppTab) -> some View {
         switch t {
-        case .home, .settings: ScoreHomeView()
+        case .home: ScoreHomeView()
+        case .settings: SettingsView()
         case .footprint: ScanView()
         case .sensitive: SensitiveView()
         case .tracker: PrivacyReportView(onNext: { go(.checkup) })

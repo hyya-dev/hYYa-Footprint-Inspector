@@ -15,10 +15,6 @@ struct ScoreHomeView: View {
     @AppStorage("checkUpDone") private var checkUpStored = ""
     @AppStorage(TrackerPlaces.storageKey) private var trackerStored = ""
     @State private var showingFormula = false
-    /// Settings is the Score page's last row on iPhone and iPad (owner, 2026-10-28): the system
-    /// tab bar holds Score and the four checks. Saved, like every open screen, so it's still open
-    /// on return. Screenshot runs open it with `-startTab settings`.
-    @AppStorage("nav.settings") private var showingSettings = false
     #if os(iOS)
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     private var short: Bool { verticalSizeClass == .compact }
@@ -45,21 +41,9 @@ struct ScoreHomeView: View {
                         WeeklyReminderToggle()
                     }
                 }
-                #if os(iOS)
-                Panel {
-                    Button { showingSettings = true } label: {
-                        RowCard(symbol: "gearshape", title: "Settings", subtitle: "Reminders, history, sharing and more from hYYa")
-                    }
-                    .buttonStyle(PressableCardStyle())
-                }
-                #endif
             }
             .hiddenNavigationBar()
             .sheet(isPresented: $showingFormula) { FormulaSheet() }
-            #if os(iOS)
-            .navigationDestination(isPresented: $showingSettings) { SettingsView(embedded: true) }
-            .task { if LaunchOptions.value(after: "-startTab") == "settings" { showingSettings = true } }
-            #endif
         }
     }
 
