@@ -40,7 +40,11 @@ for (const platform of ["IOS", "MAC_OS"]) {
   const attached = versions.data.map((v) => ({ state: v.attributes.appStoreState, build: v.relationships.build.data?.id }))
     .filter((v) => v.build && v.state !== "PREPARE_FOR_SUBMISSION");
   const builds = (await api(`/v1/builds?filter[app]=${APP_ID}&filter[preReleaseVersion.platform]=${platform}&limit=200`)).data;
-  const keepIds = new Set(attached.map((v) => v.build));
+  // Replaced versions still read READY_FOR_SALE: only the newest of those is really on sale.
+  const number = (id) => Number(builds.find((b) => b.id === id)?.attributes.version ?? 0);
+  const onSale = attached.filter((v) => v.state === "READY_FOR_SALE").map((v) => v.build);
+  const live = onSale.sort((a, b) => number(b) - number(a))[0];
+  const keepIds = new Set(attached.map((v) => v.build).filter((id) => !onSale.includes(id) || id === live));
   const kept = builds.filter((b) => keepIds.has(b.id));
   if (!kept.length) { console.log(`${platform}: no build in review or on sale; nothing expired`); continue; }
   console.log(`${platform}: keeping build ${kept.map((b) => b.attributes.version).join(", ")} (${attached.map((v) => v.state).join(", ")}) and the newest build`);
