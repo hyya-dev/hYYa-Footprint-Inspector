@@ -10,5 +10,6 @@
   "primaryCategory": "UTILITIES",
   "secondaryCategory": "PRODUCTIVITY",
   "copyright": "2026 hYYa",
-  "whatsNew": "• Text now grows with your chosen text size, on every page.\nThis release contains general bug fixes and stability improvements."
+  "whatsNew": "• Text now grows with your chosen text size, on every page.\nThis release contains general bug fixes and stability improvements.",
+  "whatsNewMac": "• A new Score page brings your four checks together and keeps your score up to date.\nThis release contains general bug fixes and stability improvements."
 }

@@ -12,6 +12,8 @@
 //     What's New only; each language keeps its own subtitle and keywords, so search ranking holds)
 //   node scripts/gemini-localize-listing.mjs --whats-new   (redo What's New only; everything else
 //     in each language stays as it is)
+//   node scripts/gemini-localize-listing.mjs --whats-new-mac   (redo the Mac's own What's New,
+//     whatsNewMac, from the English whatsNewMac; everything else stays as it is)
 //   node scripts/gemini-localize-listing.mjs --search-only   (redo subtitle and keywords only, the
 //     fields App Store search reads; descriptions and promotional text stay as they are)
 //
@@ -26,8 +28,10 @@ const FORCE = argv.includes("--force");
 if (FORCE) argv.splice(argv.indexOf("--force"), 1);
 const TEXT_ONLY = argv.includes("--text-only");
 if (TEXT_ONLY) argv.splice(argv.indexOf("--text-only"), 1);
-const WHATS_NEW = argv.includes("--whats-new");
-if (WHATS_NEW) argv.splice(argv.indexOf("--whats-new"), 1);
+const WHATS_NEW_ONLY = argv.includes("--whats-new");
+if (WHATS_NEW_ONLY) argv.splice(argv.indexOf("--whats-new"), 1);
+const WHATS_NEW_MAC = argv.includes("--whats-new-mac");
+if (WHATS_NEW_MAC) argv.splice(argv.indexOf("--whats-new-mac"), 1);
 const SEARCH_ONLY = argv.includes("--search-only");
 if (SEARCH_ONLY) argv.splice(argv.indexOf("--search-only"), 1);
 const envFile = new URL("../.env", import.meta.url);
@@ -36,6 +40,9 @@ const KEY = process.env.GEMINI_API_KEY || (existsSync(envFile) ? (readFileSync(e
 if (!KEY || KEY.startsWith("PASTE_")) { console.error("Add GEMINI_API_KEY to .env first"); process.exit(1); }
 
 const en = JSON.parse(readFileSync(new URL("../store/listing-en-US.json", import.meta.url), "utf8"));
+// The Mac's note runs through the What's New path, then is saved as whatsNewMac.
+if (WHATS_NEW_MAC) en.whatsNew = en.whatsNewMac;
+const WHATS_NEW = WHATS_NEW_ONLY || WHATS_NEW_MAC;
 const OUT = new URL("../store/localized/", import.meta.url);
 mkdirSync(OUT, { recursive: true });
 
@@ -146,6 +153,7 @@ async function localise(locale) {
     }
   }
   if (issues.length) return `${locale}: ✗ ${issues.join("; ")}`;
+  if (WHATS_NEW_MAC) result = { ...result, whatsNewMac: result.whatsNew, whatsNew: kept?.whatsNew ?? JSON.parse(readFileSync(new URL("../store/listing-en-US.json", import.meta.url), "utf8")).whatsNew };
   writeFileSync(file, JSON.stringify({ locale, name: BRAND, ...result }, null, 2) + "\n");
   return `${locale}: ✓ ${result.subtitle}`;
 }

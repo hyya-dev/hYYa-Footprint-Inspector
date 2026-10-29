@@ -70,7 +70,7 @@ for (const locale of files) {
     if (!verLocs[locale]) Object.assign(verLocs, Object.fromEntries((await api(`/v1/appStoreVersions/${version.id}/appStoreVersionLocalizations?limit=200`)).data.map((v) => [v.attributes.locale, v.id])));
     const verAttrs = { description: l.description, keywords: l.keywords, promotionalText: l.promotionalText,
       supportUrl: en.supportUrl, marketingUrl: en.marketingUrl, // What's New is the iPhone Duo line, and a platform's first version can't have one: iOS only.
-      ...(l.whatsNew && PLATFORM === "IOS" ? { whatsNew: l.whatsNew } : {}) };
+      ...((PLATFORM === "MAC_OS" ? l.whatsNewMac : l.whatsNew) ? { whatsNew: PLATFORM === "MAC_OS" ? l.whatsNewMac : l.whatsNew } : {}) };
     if (verLocs[locale]) {
       await api(`/v1/appStoreVersionLocalizations/${verLocs[locale]}`, "PATCH", { data: { type: "appStoreVersionLocalizations", id: verLocs[locale], attributes: verAttrs } });
     } else {

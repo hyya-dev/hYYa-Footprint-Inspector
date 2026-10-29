@@ -51,10 +51,11 @@ let same = 0;
 for (const l of locs) {
   const r = repo[l.attributes.locale]; if (!r) continue;
   const a = l.attributes;
-  // What's New is iOS only (a platform's first version can't have one, and the Mac shares no line).
-  const fields = ["description", "keywords", "promotionalText", ...(PLATFORM === "IOS" ? ["whatsNew"] : [])].filter((k) => (a[k] ?? "") !== (r[k] ?? ""));
+  // The Mac has its own What's New (whatsNewMac in the repo).
+  const want = { ...r, whatsNew: PLATFORM === "MAC_OS" ? r.whatsNewMac : r.whatsNew };
+  const fields = ["description", "keywords", "promotionalText", "whatsNew"].filter((k) => (a[k] ?? "") !== (want[k] ?? ""));
   if (fields.length) ok(false, `${l.attributes.locale}: differs from repo in ${fields.join(", ")}`); else same++;
-  if (PLATFORM === "IOS" && !a.whatsNew?.trim()) ok(false, `${l.attributes.locale}: What's New missing`);
+  if (!a.whatsNew?.trim()) ok(false, `${l.attributes.locale}: What's New missing`);
 }
 ok(same === Object.keys(repo).length, `${same} of ${Object.keys(repo).length} languages match the repo exactly (description, keywords, promo, What's New)`);
 

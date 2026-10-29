@@ -26,6 +26,8 @@ for (const [k, v] of Object.entries({ ASC_ISSUER_ID, ASC_KEY_ID, ASC_PRIVATE_KEY
 
 const key = readFileSync(ASC_PRIVATE_KEY_PATH, "utf8");
 const listing = JSON.parse(readFileSync(new URL("../store/listing-en-US.json", import.meta.url), "utf8"));
+// The Mac has its own What's New (whatsNewMac); a platform's first version has none.
+const whatsNew = PLATFORM === "MAC_OS" ? listing.whatsNewMac : listing.whatsNew;
 const notes = readFileSync(new URL(PLATFORM === "MAC_OS" ? "../store/review-notes-mac.txt" : "../store/review-notes.txt", import.meta.url), "utf8").trim();
 
 function token() {
@@ -82,8 +84,8 @@ const verLocs = await api(`/v1/appStoreVersions/${version.id}/appStoreVersionLoc
 const verLoc = verLocs.data.find((l) => l.attributes.locale === "en-US");
 await api(`/v1/appStoreVersionLocalizations/${verLoc.id}`, "PATCH", { data: { type: "appStoreVersionLocalizations", id: verLoc.id, attributes: {
   description: listing.description, keywords: listing.keywords, promotionalText: listing.promotionalText,
-  supportUrl: listing.supportUrl, marketingUrl: listing.marketingUrl, ...(listing.whatsNew && PLATFORM === "IOS" ? { whatsNew: listing.whatsNew } : {}) } } });
-step(`description, keywords, promotional text, ${listing.whatsNew && PLATFORM === "IOS" ? "What's New, " : ""}support and marketing URLs`);
+  supportUrl: listing.supportUrl, marketingUrl: listing.marketingUrl, ...(whatsNew ? { whatsNew } : {}) } } });
+step(`description, keywords, promotional text, ${whatsNew ? "What's New, " : ""}support and marketing URLs`);
 
 // Copyright on the version
 await api(`/v1/appStoreVersions/${version.id}`, "PATCH", { data: { type: "appStoreVersions", id: version.id, attributes: { copyright: listing.copyright } } });
