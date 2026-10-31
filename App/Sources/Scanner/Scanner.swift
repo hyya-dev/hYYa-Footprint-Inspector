@@ -33,6 +33,8 @@ final class Scanner {
     private(set) var comparison: ScanComparison?
 
     let history: HistoryStore
+    /// Moves on with each `reset()`, so a scan still running then is dropped, not saved.
+    private var generation = 0
 
     init(history: HistoryStore) {
         self.history = history
@@ -51,7 +53,7 @@ final class Scanner {
 
     /// Forgets the last scan, for Clear history: nothing from it stays on screen or in memory.
     func reset() {
-        guard phase != .scanning else { return }
+        generation += 1
         phase = .idle
         readings = [:]
         comparison = nil
@@ -65,18 +67,21 @@ final class Scanner {
     /// quiet scan is saved to history only when something changed.
     func scan(quietly: Bool = false) async {
         guard phase != .scanning else { return }
+        let run = generation
         let before = history.latest
         if !quietly { phase = .scanning }
         progress = 0
         var fresh: [String: SignalReading] = [:]
         for (i, source) in passiveSources.enumerated() {
             for reading in await source.read() { fresh[reading.id] = reading }
+            guard run == generation else { return }
             progress = Double(i + 1) / Double(passiveSources.count)
         }
         readings.merge(fresh) { $1 }
         refreshPermissionStates()
         for kind in PermissionKind.onThisPlatform where isReadable(permissionStates[kind]) {
             await readPermission(kind)
+            guard run == generation else { readings = [:]; return }
         }
         lastScan = Date()
         let snapshot = history.makeSnapshot(findings: allFindings, score: score,

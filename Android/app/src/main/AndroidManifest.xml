@@ -23,6 +23,8 @@
     <!-- Package visibility: only the named sensitive apps (catalogue/Sensitive.kt) and the
          intents any app may ask about. No broad "all apps" visibility. -->
     <queries>
+        <!-- So the system's own Settings can be found and opened directly. -->
+        <intent><action android:name="android.settings.SETTINGS" /></intent>
         <package android:name="com.grindrapp.android" />
         <package android:name="com.tinder" />
         <package android:name="com.bumble.app" />

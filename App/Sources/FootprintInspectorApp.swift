@@ -184,11 +184,16 @@ private struct KeepScoreFresh: ViewModifier {
                 else if history.latest != nil { await scanner.scan(quietly: true) }
             }
             .task(id: widgetScore) {
-                guard !LaunchOptions.has("-sampleData"), widgetScore != WidgetScore.load() else { return }
+                guard !LaunchOptions.has("-sampleData"), check.readable, history.readable,
+                      widgetScore != WidgetScore.load() else { return }
                 WidgetScore.save(widgetScore)
                 WidgetCenter.shared.reloadAllTimelines()
             }
             .onChange(of: scenePhase) { old, phase in
+                if phase == .active {
+                    check.reloadIfNeeded()
+                    history.reloadIfNeeded()
+                }
                 // Not after Clear history: a re-read would save a new scan the person just wiped.
                 if phase == .active && old != .active && scanner.phase == .done && history.latest != nil { Task { await scanner.scan(quietly: true) } }
             }

@@ -23,7 +23,8 @@ final class PrivacyCheck {
     }
 
     private var saved = Saved()
-    private var readable = true
+    /// False while the file can't be read, such as a launch before the first unlock.
+    private(set) var readable = true
     /// Where it's all kept. `nil` keeps it in memory only (store screenshots, tests).
     private let fileURL: URL?
 
@@ -70,13 +71,25 @@ final class PrivacyCheck {
 
     func clearSaved() {
         saved = Saved()
+        readable = true
         if let fileURL { try? FileManager.default.removeItem(at: fileURL) }
+        // Old values can linger if the move below failed, and must not come back after a clear.
+        if fileURL != nil { Self.oldKeys.forEach(UserDefaults.standard.removeObject(forKey:)) }
     }
+
+    /// Picks the file up once it can be read: results then count, and saving resumes.
+    func reloadIfNeeded() {
+        guard !readable, let fileURL, let data = try? Data(contentsOf: fileURL) else { return }
+        saved = (try? JSONDecoder().decode(Saved.self, from: data)) ?? Saved()
+        readable = true
+    }
+
+    private static let oldKeys = ["result.sensitiveFound", "result.trackerSharing", "checkUpDone", "sensitiveCategories", TrackerPlaces.storageKey]
 
     /// Versions up to 1.0.2 kept these in UserDefaults, which goes into backups. Reads the app's
     /// own saved domain, not launch arguments, which UserDefaults would otherwise let override it.
     private func moveFromDefaults() {
-        let keys = ["result.sensitiveFound", "result.trackerSharing", "checkUpDone", "sensitiveCategories", TrackerPlaces.storageKey]
+        let keys = Self.oldKeys
         let defaults = UserDefaults.standard
         let old = Bundle.main.bundleIdentifier.flatMap(defaults.persistentDomain(forName:)) ?? [:]
         guard keys.contains(where: { old[$0] != nil }) else { return }

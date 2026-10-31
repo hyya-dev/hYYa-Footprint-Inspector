@@ -53,6 +53,8 @@ struct ScanComparison: Sendable, Equatable {
 @Observable
 final class HistoryStore {
     private(set) var snapshots: [ScanSnapshot] = []
+    /// False while the file can't be read, such as a launch before the first unlock.
+    private(set) var readable = true
     static let limit = 60
 
     private let fileURL: URL
@@ -90,6 +92,7 @@ final class HistoryStore {
 
     func clear() {
         snapshots = []
+        readable = true
         try? FileManager.default.removeItem(at: fileURL)
         try? FileManager.default.removeItem(at: saltURL)
     }
@@ -114,12 +117,18 @@ final class HistoryStore {
     }
 
     private func load() {
-        guard let data = try? Data(contentsOf: fileURL),
-              let decoded = try? JSONDecoder().decode([ScanSnapshot].self, from: data) else { return }
-        snapshots = decoded
+        guard FileManager.default.fileExists(atPath: fileURL.path) else { return }
+        // Unreadable while the device is locked: keep what's there rather than save over it.
+        guard let data = try? Data(contentsOf: fileURL) else { readable = false; return }
+        readable = true
+        snapshots = (try? JSONDecoder().decode([ScanSnapshot].self, from: data)) ?? []
     }
 
+    /// Picks the history up once the file can be read.
+    func reloadIfNeeded() { if !readable { load() } }
+
     private func save() {
+        guard readable else { return }
         do {
             try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
             let data = try JSONEncoder().encode(snapshots)

@@ -88,6 +88,61 @@ struct LiveScoreTests {
         #expect(PrivacyCheck(fileURL: url).trackerSharing == nil)
     }
 
+    /// A file that can't be read yet is never saved over, and is picked up once it can be.
+    @Test func unreadableResultsAreKeptAndPickedUpLater() throws {
+        let dir = FileManager.default.temporaryDirectory.appending(path: "locked-\(UUID().uuidString)")
+        let url = dir.appending(path: "check-results.json")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        // A folder at that path stands in for a locked file: it exists and can't be read.
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        let locked = PrivacyCheck(fileURL: url)
+        #expect(!locked.readable)
+        locked.recordSensitive(found: 3)
+        var isFolder: ObjCBool = false
+        #expect(FileManager.default.fileExists(atPath: url.path, isDirectory: &isFolder) && isFolder.boolValue)
+        try FileManager.default.removeItem(at: url)
+        PrivacyCheck(fileURL: url).recordSensitive(found: 1)
+        locked.reloadIfNeeded()
+        #expect(locked.readable)
+        #expect(locked.sensitiveFound == 1)
+        // Clearing makes it usable again even if it was never read.
+        try FileManager.default.removeItem(at: url)
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        let cleared = PrivacyCheck(fileURL: url)
+        try FileManager.default.removeItem(at: url)
+        cleared.clearSaved()
+        #expect(cleared.readable)
+    }
+
+    /// A history file that can't be read yet is never replaced by a new scan.
+    @Test func unreadableHistoryIsNeverSavedOver() async throws {
+        let dir = FileManager.default.temporaryDirectory.appending(path: "locked-history-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let file = dir.appending(path: "scan-history.json")
+        try FileManager.default.createDirectory(at: file, withIntermediateDirectories: true)
+        let history = HistoryStore(directory: dir)
+        #expect(!history.readable)
+        let scanner = Scanner(history: history)
+        await scanner.scan()
+        var isFolder: ObjCBool = false
+        #expect(FileManager.default.fileExists(atPath: file.path, isDirectory: &isFolder) && isFolder.boolValue)
+    }
+
+    /// Clear history must also beat a scan that's already running.
+    @Test func aRunningScanIsDroppedByReset() async throws {
+        let dir = FileManager.default.temporaryDirectory.appending(path: "reset-running-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let history = HistoryStore(directory: dir)
+        let scanner = Scanner(history: history)
+        let running = Task { await scanner.scan() }
+        await Task.yield()
+        scanner.reset()
+        await running.value
+        #expect(scanner.phase == .idle)
+        #expect(scanner.allFindings.isEmpty)
+        #expect(history.snapshots.isEmpty)
+    }
+
     /// A launch argument must not stand in for the saved value.
     @Test func launchArgumentsCantFakeTheInstallRecord() {
         let key = ReinstallSource.recordedKey

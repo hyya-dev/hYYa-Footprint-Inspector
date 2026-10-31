@@ -58,7 +58,7 @@ object WatchReaders {
             val info = runCatching { pm.getApplicationInfo(pkg, 0) }.getOrNull()
             val builtIn = info != null && (info.flags and ApplicationInfo.FLAG_SYSTEM) != 0
             // An outside app chooses its own name, so it can't borrow our built-in label.
-            val label = (a11yNames[pkg] ?: info?.loadLabel(pm)?.toString())?.takeUnless { !builtIn && BUILT_IN in it }
+            val label = (a11yNames[pkg] ?: info?.loadLabel(pm)?.toString())?.takeUnless { !builtIn && borrowsBuiltIn(it) }
             return Holder(pkg, label, builtIn)
         }
         val mine = c.packageName
@@ -74,7 +74,8 @@ object WatchReaders {
             if (listeners == null) Reading("watch-notifications", "Couldn't check this on your device", severityOverride = Severity.LOW)
             else list("watch-notifications", n, "can read every notification", "No app can read every notification"),
             list("watch-admin", a, "can lock or erase this device", "No app can lock or erase this device"),
-            if (several.isEmpty()) none("watch-several", "No app holds more than one of these")
+            if (listeners == null) Reading("watch-several", "Couldn't check this on your device", severityOverride = Severity.LOW)
+            else if (several.isEmpty()) none("watch-several", "No app holds more than one of these")
             else Reading("watch-several",
                 if (several.size == 1) "1 app holds more than one" else "${several.size} apps hold more than one",
                 several.map { it.shown },
@@ -95,3 +96,7 @@ object WatchReaders {
 }
 
 private const val BUILT_IN = "built into your device"
+
+/** Case, spacing and symbols aside, so look-alike names are caught too. */
+internal fun borrowsBuiltIn(label: String) =
+    BUILT_IN.filter(Char::isLetter) in label.lowercase().filter(Char::isLetter)
