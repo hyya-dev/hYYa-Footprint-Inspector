@@ -9,8 +9,7 @@ ARCHIVE=build/archive-mac/hYYaFootprintInspector.xcarchive
 AUTH=(-authenticationKeyPath "$ASC_PRIVATE_KEY_PATH" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID")
 xcodebuild -project hYYaFootprintInspector.xcodeproj -scheme "hYYa Footprint Inspector Mac" -configuration Release \
   -destination "generic/platform=macOS" -archivePath "$ARCHIVE" \
-  CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="Apple Distribution" \
-  PROVISIONING_PROFILE_SPECIFIER="hYYa Footprint Inspector Mac AppStore" archive -quiet
+  CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="Apple Distribution" archive -quiet
 xcodebuild -exportArchive -archivePath "$ARCHIVE" -exportOptionsPlist scripts/ExportOptions-upload-mac.plist \
   -exportPath build/export-mac "${AUTH[@]}"
 echo "Uploaded. Processing in App Store Connect takes a few minutes."

@@ -102,6 +102,8 @@ targets:
           CODE_SIGN_STYLE: Manual
           CODE_SIGN_IDENTITY: "Apple Development"
           PROVISIONING_PROFILE_SPECIFIER: "hYYa Footprint Inspector Mac Development"
+        Release:
+          PROVISIONING_PROFILE_SPECIFIER: "hYYa Footprint Inspector Mac AppStore"
 
   # The Home Screen and desktop widget: the mascot, the score and the last check.
   hYYaFootprintInspectorWidgetIOS:
@@ -141,6 +143,9 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Widget/WidgetMac.entitlements
         ENABLE_HARDENED_RUNTIME: YES
         SKIP_INSTALL: YES
+      configs:
+        Release:
+          PROVISIONING_PROFILE_SPECIFIER: "hYYa Footprint Inspector Widget Mac AppStore"
 
   hYYaFootprintInspectorMacTests:
     type: bundle.unit-test

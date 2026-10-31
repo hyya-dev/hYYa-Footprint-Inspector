@@ -19,6 +19,8 @@
 	<dict>
 		<key>com.hyya.footprintinspector</key>
 		<string>hYYa Footprint Inspector App Store</string>
+		<key>com.hyya.footprintinspector.widget</key>
+		<string>hYYa Footprint Inspector Widget App Store</string>
 	</dict>
 	<key>uploadSymbols</key>
 	<true/>
