@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">hYYa Footprint Inspector</string>
+    <string name="widget_description">Your privacy score and your last check</string>
+    <string name="widget_label">PRIVACY SCORE</string>
+    <string name="widget_out_of">out of 100</string>
+    <string name="widget_last_check">Last check</string>
+    <string name="widget_not_checked">Not checked yet</string>
+    <string name="widget_not_checked_lines">Not\nchecked\nyet</string>
+    <string name="widget_open">Open the app to run your first check</string>
 </resources>

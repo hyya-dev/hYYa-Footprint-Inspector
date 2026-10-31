@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- For home screens whose two cells are too narrow to hold the text and the mascot side by side. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:clipToOutline="true"
+    android:orientation="vertical"
+    android:padding="14dp">
+
+    <TextView style="@style/WidgetLabel" android:text="@string/widget_label" android:textColor="@color/widget_accent" />
+
+    <TextView
+        android:id="@+id/widget_empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="@string/widget_not_checked_lines"
+        android:textColor="@color/widget_ink"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:id="@+id/widget_checked"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/widget_score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/widget_ink"
+            android:textSize="42sp"
+            android:textStyle="bold" />
+
+        <TextView style="@style/WidgetNote" android:text="@string/widget_out_of" />
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginVertical="4dp"
+        android:layout_weight="1"
+        android:importantForAccessibility="no"
+        android:scaleType="fitCenter"
+        android:src="@drawable/mascot_cutout" />
+
+    <LinearLayout
+        android:id="@+id/widget_footer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView style="@style/WidgetNote" android:text="@string/widget_last_check" />
+
+        <TextView
+            android:id="@+id/widget_date"
+            style="@style/WidgetNote"
+            android:textColor="@color/widget_ink"
+            android:textStyle="bold" />
+    </LinearLayout>
+</LinearLayout>

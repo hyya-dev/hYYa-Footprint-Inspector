@@ -2,4 +2,11 @@
 <resources>
     <color name="icon_background">#FFFFFF</color>
     <color name="black">#000000</color>
+    <color name="widget_base">#FAF7F2</color>
+    <color name="widget_glow_top">#EEDECA</color>
+    <color name="widget_glow_bottom">#F3E9DD</color>
+    <color name="widget_ink">#1C1814</color>
+    <color name="widget_muted">#685E54</color>
+    <color name="widget_accent">#7A5C40</color>
+    <color name="widget_rule">#6E8F7560</color>
 </resources>

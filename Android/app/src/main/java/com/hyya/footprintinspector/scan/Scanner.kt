@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.hyya.footprintinspector.catalogue.Catalogue
+import com.hyya.footprintinspector.widget.ScoreWidget
 import com.hyya.footprintinspector.catalogue.CheckUp
 import com.hyya.footprintinspector.model.OverallScore
 import com.hyya.footprintinspector.model.Finding
@@ -70,13 +71,38 @@ class Scanner(app: Application) : AndroidViewModel(app) {
     fun recordSensitive(found: Int) {
         sensitiveFound = found
         if (keep) prefs.edit().putInt(SENSITIVE, found).apply()
+        publishWidget(checked = true)
+    }
+
+    /** Ticking the last Check-up step can change the score. Held here: Android keeps it weakly. */
+    private val checkUpListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (key == "checkUpDone" && prefs.contains(key)) publishWidget(checked = false)
+    }
+    init { prefs.registerOnSharedPreferenceChangeListener(checkUpListener) }
+
+    /** The widget's copy of the score. `checked`: a check really ran, so the time moves too. */
+    private fun publishWidget(checked: Boolean) {
+        if (!keep) return
+        val ctx = getApplication<Application>()
+        val value = overall(ctx).value
+        prefs.edit().apply {
+            if (value == null) remove(ScoreWidget.SCORE).remove(ScoreWidget.CHECKED_AT)
+            else {
+                putInt(ScoreWidget.SCORE, value)
+                if (checked) putLong(ScoreWidget.CHECKED_AT, System.currentTimeMillis())
+                else if (!prefs.contains(ScoreWidget.CHECKED_AT)) putLong(ScoreWidget.CHECKED_AT, history.latest?.date ?: System.currentTimeMillis())
+            }
+        }.apply()
+        ScoreWidget.update(ctx)
     }
 
     fun clearSaved() {
         sensitiveFound = null
         // The kinds of apps checked and the steps ticked say something too, so they go as well.
-        prefs.edit().remove(SENSITIVE).remove("sensitiveCategories").remove("checkUpDone").apply()
+        prefs.edit().remove(SENSITIVE).remove("sensitiveCategories").remove("checkUpDone")
+            .remove(ScoreWidget.SCORE).remove(ScoreWidget.CHECKED_AT).apply()
         history.clear()
+        ScoreWidget.update(getApplication())
     }
 
     /** The four checks as one score, for the first page. */
@@ -121,6 +147,7 @@ class Scanner(app: Application) : AndroidViewModel(app) {
                 history.append(snapshot)
             }
             phase = Phase.DONE
+            publishWidget(checked = !quietly)
         }
     }
 
