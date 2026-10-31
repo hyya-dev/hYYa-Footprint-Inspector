@@ -4,8 +4,8 @@
     {"screen": "mac-01-results", "headline": "See what any app can *learn about you*", "highlights": ["Your name, serial number, apps", "One privacy score, four checks", "Nothing leaves your device"]},
     {"screen": "mac-07-fix", "headline": "Fix it *step by step*", "highlights": ["One fix at a time", "Opens the right setting", "Watch your score go up"]},
     {"screen": "mac-02-finding", "headline": "Some clues *never change*", "highlights": ["Serial number", "Hardware ID", "Even after erasing"]},
-    {"screen": "mac-04-sensitive", "headline": "Which apps *give you away?*", "highlights": ["Dating, faith, health, VPN", "Banks can ask too", "Hidden, never saved"]},
-    {"screen": "mac-05-checkup", "headline": "Keep *spying apps* out", "highlights": ["Updates, passwords, Lockdown", "Screen, keyboard, files", "Opens each list"]},
+    {"screen": "mac-04-sensitive", "headline": "Which apps *give you away?*", "highlights": ["Dating, faith, health, VPN", "Banks can ask too", "Hidden, only you see it"]},
+    {"screen": "mac-05-checkup", "headline": "A guided *privacy check-up*", "highlights": ["Updates, passwords, Lockdown", "Screen, keyboard, files", "Opens each list"]},
     {"screen": "mac-06-home", "headline": "Private. Yours. *Open source.*", "highlights": ["No account, no ads", "No tracking, ever", "Made by hYYa"]}
   ]
 }

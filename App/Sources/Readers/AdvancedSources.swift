@@ -80,7 +80,10 @@ struct ReinstallSource: SignalSource {
 
     func read() async -> [SignalReading] {
         var log = Self.loadLog()
-        if !UserDefaults.standard.bool(forKey: Self.recordedKey) {
+        // The app's own saved value, so a launch argument can't stand in for it (on a Mac, any
+        // local program can pass one).
+        let saved = Bundle.main.bundleIdentifier.flatMap(UserDefaults.standard.persistentDomain(forName:))
+        if saved?[Self.recordedKey] as? Bool != true {
             log.append(Date())
             Self.saveLog(log)
             UserDefaults.standard.set(true, forKey: Self.recordedKey)

@@ -4,13 +4,13 @@ No login is required. To review:
 1. Click "Start with check 1". Results appear in a few seconds.
 2. Click any clue to see what it reveals, why the system allows it, and how to fix it. Where a fix exists, "Open in System Settings" opens the matching System Settings page.
 3. Each permission category ("Seen once you allow it") asks for that permission only when the user clicks "Show me", and shows counts and summaries only.
-4. "Sensitive apps": the user picks categories, then clicks Check. Results are hidden until clicked, cleared when the app goes to the background, and never stored.
+4. "Sensitive apps": the user picks categories, then clicks Check. Results are hidden until clicked, cleared when the app goes to the background, and never sent. Only the count found stays on the device, never which apps.
 5. "Check-up" walks through the Privacy & Security pages of System Settings.
 6. Settings opens in its own window (hYYa Footprint Inspector menu › Settings, or ⌘,).
 
 About device identifiers and personal information (5.1.1, 5.1.2): the app displays the Mac's serial number, hardware UUID, the user's full name, computer name, network hardware addresses, running apps and installed apps. It does this ONLY to show the user, on screen, that any app can read these without asking. None of these values are stored, logged, hashed for tracking or sent anywhere. Scan history keeps only salted one-way hashes, used to show "what changed since your last scan", and is excluded from backups.
 
-About the installed-app check: it reads the app names in /Applications and /System/Applications (readable by any sandboxed app) and, for a few apps, whether a URL scheme has a handler. It is user-initiated and results are never stored.
+About the installed-app check: it reads the app names in /Applications and /System/Applications (readable by any sandboxed app) and, for a few apps, whether a URL scheme has a handler. It is user-initiated, and only the count found stays on the device, never which apps.
 
 About entitlements: camera (to list camera names only; no capture), Bluetooth, location, contacts, calendars/reminders and photos are each requested only when the user clicks "Show me" for that category. The app uses only Apple frameworks.
 
@@ -22,3 +22,4 @@ Also in the app:
 - "Fix them with me": steps through fixable findings and opens System Settings; the app never changes a setting itself.
 
 New in 1.0.1: the first screen shows one privacy score for the checks done and links to each check; plainer wording for every finding; Check-up adds guidance steps (keep macOS updated, check the Passwords app for leaked passwords, Lockdown Mode for people at risk). These are instructions only: the app detects no malware and reads no passwords.
+About the widget: the desktop widget shows only the privacy score and the date and time of the last check, read from a device-only keychain item shared with the app. It makes no network connections and shows no finding or app name.

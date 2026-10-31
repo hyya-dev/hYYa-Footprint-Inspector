@@ -88,6 +88,21 @@ struct LiveScoreTests {
         #expect(PrivacyCheck(fileURL: url).trackerSharing == nil)
     }
 
+    /// Clear history must stick: nothing may bring a scan back when the app returns to the screen.
+    @Test func resetForgetsTheLastScan() async throws {
+        let dir = FileManager.default.temporaryDirectory.appending(path: "reset-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let history = HistoryStore(directory: dir)
+        let scanner = Scanner(history: history)
+        await scanner.scan()
+        #expect(scanner.phase == .done)
+        history.clear()
+        scanner.reset()
+        #expect(scanner.phase == .idle)
+        #expect(scanner.comparison == nil)
+        #expect(scanner.allFindings.isEmpty)
+    }
+
     @Test func aRestartWithinAWeekCountsAsDone() {
         let now = Date()
         #expect(RecentRestart.isRecent(boot: now.addingTimeInterval(-2 * 24 * 3600), now: now))

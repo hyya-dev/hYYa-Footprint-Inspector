@@ -189,7 +189,8 @@ private struct KeepScoreFresh: ViewModifier {
                 WidgetCenter.shared.reloadAllTimelines()
             }
             .onChange(of: scenePhase) { old, phase in
-                if phase == .active && old != .active && scanner.phase == .done { Task { await scanner.scan(quietly: true) } }
+                // Not after Clear history: a re-read would save a new scan the person just wiped.
+                if phase == .active && old != .active && scanner.phase == .done && history.latest != nil { Task { await scanner.scan(quietly: true) } }
             }
     }
 }

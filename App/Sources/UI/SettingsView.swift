@@ -4,6 +4,7 @@
 
 import StoreKit
 import SwiftUI
+import WidgetKit
 
 enum hYYaLinks {
     static let website = URL(string: "https://hyya.com")!
@@ -28,6 +29,7 @@ enum hYYaLinks {
 
 struct SettingsView: View {
     @Environment(HistoryStore.self) private var history
+    @Environment(Scanner.self) private var scanner
     @Environment(PrivacyCheck.self) private var check
     @Environment(\.openURL) private var openURL
     @State private var confirmingClear = false
@@ -151,7 +153,15 @@ struct SettingsView: View {
                 Text("To get a re-scan reminder, allow notifications for hYYa Footprint Inspector in Settings, then choose a reminder again.")
             }
             .confirmationDialog("Clear all saved scans?", isPresented: $confirmingClear, titleVisibility: .visible) {
-                Button("Clear history", role: .destructive) { history.clear(); check.clearSaved(); Haptics.success() }
+                Button("Clear history", role: .destructive) {
+                    history.clear()
+                    check.clearSaved()
+                    scanner.reset()
+                    // Directly as well: on a Mac this window can be open with the main one closed.
+                    WidgetScore.save(nil)
+                    WidgetCenter.shared.reloadAllTimelines()
+                    Haptics.success()
+                }
             } message: {
                 Text("Your score history, saved check results and before/after comparisons start over.")
             }

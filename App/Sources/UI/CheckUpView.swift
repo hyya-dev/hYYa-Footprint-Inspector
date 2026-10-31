@@ -8,7 +8,7 @@ struct CheckUpView: View {
     #if os(macOS)
     static let introLine = "macOS never tells one app which other apps can reach your location, contacts or screen. Only System Settings knows, so let's look together."
     #else
-    static let introLine = "Keep spying apps out, then see which apps can reach your Health, location or photos. Only Settings knows, so let's look together, one area at a time."
+    static let introLine = "Start with simple protection steps, then see which apps can reach your Health, location or photos. Only Settings knows, so let's look together, one area at a time."
     #endif
 
     /// Ticked steps, remembered on this phone only so the user can pick up where they left off.

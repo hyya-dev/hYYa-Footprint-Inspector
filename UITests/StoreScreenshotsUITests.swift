@@ -143,7 +143,7 @@ final class StoreScreenshotsUITests: XCTestCase {
         sleep(3)                                                    // which apps give you away
         tab("Tracker"); sleep(3)                                    // what apps really did
         app.swipeUp(velocity: .slow); sleep(2)
-        tab("Check-up"); sleep(3)                                   // keep spying apps out
+        tab("Check-up"); sleep(3)                                   // the guided check-up
         tab("Footprint"); sleep(3)                                  // back to the score
     }
 

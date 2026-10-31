@@ -49,6 +49,16 @@ final class Scanner {
     let passiveSources: [any SignalSource] = MacSources.all
     #endif
 
+    /// Forgets the last scan, for Clear history: nothing from it stays on screen or in memory.
+    func reset() {
+        guard phase != .scanning else { return }
+        phase = .idle
+        readings = [:]
+        comparison = nil
+        lastScan = nil
+        progress = 0
+    }
+
     /// Reads every passive and advanced signal, plus any permission category already granted.
     /// `quietly` re-reads in place, without the scanning screen: used when the app comes back to
     /// the screen and after the fix walk-through, so a fix shows in the score straight away. A

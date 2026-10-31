@@ -23,6 +23,7 @@ final class PrivacyCheck {
     }
 
     private var saved = Saved()
+    private var readable = true
     /// Where it's all kept. `nil` keeps it in memory only (store screenshots, tests).
     private let fileURL: URL?
 
@@ -55,8 +56,10 @@ final class PrivacyCheck {
     init(fileURL: URL? = PrivacyCheck.defaultURL) {
         self.fileURL = fileURL
         guard let fileURL else { return }
-        if let data = try? Data(contentsOf: fileURL), let decoded = try? JSONDecoder().decode(Saved.self, from: data) {
-            saved = decoded
+        if FileManager.default.fileExists(atPath: fileURL.path) {
+            // Unreadable while the device is locked: keep what's there rather than save over it.
+            guard let data = try? Data(contentsOf: fileURL) else { readable = false; return }
+            saved = (try? JSONDecoder().decode(Saved.self, from: data)) ?? Saved()
         } else {
             moveFromDefaults()
         }
@@ -82,18 +85,18 @@ final class PrivacyCheck {
         saved.checkUpDone = old[keys[2]] as? String ?? ""
         saved.sensitiveCategories = old[keys[3]] as? String ?? ""
         saved.trackerChecked = old[keys[4]] as? String ?? ""
-        saved.checkedAt = Date()
-        save()
-        keys.forEach(defaults.removeObject(forKey:))
+        // The old values go only once they're safely in the file.
+        if save() { keys.forEach(defaults.removeObject(forKey:)) }
     }
 
-    private func save() {
-        guard var url = fileURL, let data = try? JSONEncoder().encode(saved) else { return }
+    @discardableResult private func save() -> Bool {
+        guard readable, var url = fileURL, let data = try? JSONEncoder().encode(saved) else { return false }
         try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try? data.write(to: url, options: [.atomic, .completeFileProtection])
+        guard (try? data.write(to: url, options: [.atomic, .completeFileProtection])) != nil else { return false }
         var values = URLResourceValues()
         values.isExcludedFromBackup = true
         try? url.setResourceValues(values)
+        return true
     }
 }
 
