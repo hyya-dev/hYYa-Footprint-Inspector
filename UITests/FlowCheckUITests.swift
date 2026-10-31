@@ -155,9 +155,11 @@ final class FlowCheckUITests: XCTestCase {
         XCUIDevice.shared.orientation = .landscapeLeft
         XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 25), "scan didn't finish")
         shot("sideways-footprint")
-        // Sideways the navbar runs down the left edge (owner, 2026-10-28), all six pages on screen.
+        // Sideways the navbar runs down one edge, all six pages on screen: the left (owner,
+        // 2026-10-28), or the Duo's status strip, which can be on the right.
         let rail = app.otherElements["navbar"].firstMatch
-        XCTAssertTrue(rail.waitForExistence(timeout: 5) && rail.frame.maxX < app.windows.firstMatch.frame.midX, "navbar isn't on the left")
+        let width = app.windows.firstMatch.frame.width
+        XCTAssertTrue(rail.waitForExistence(timeout: 5) && (rail.frame.maxX < width / 2 || rail.frame.minX > width / 2), "navbar isn't on an edge sideways")
         for name in ["Score", "Footprint", "Sensitive apps", "Tracker", "Check-up", "Settings"] {
             let b = app.buttons[name].firstMatch
             XCTAssertTrue(b.exists && b.frame.minY >= 0 && b.frame.maxY <= app.windows.firstMatch.frame.maxY, "\(name) cut off in the navbar")
