@@ -196,9 +196,12 @@ struct PrivacyReportView: View {
         let scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
         do {
-            let size = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
-            guard size <= PrivacyReport.maxBytes else { throw PrivacyReport.ReadError.tooBig }
-            let r = try PrivacyReport.read(try Data(contentsOf: url))
+            // Reads one byte past the limit rather than trusting the size the file reports.
+            let handle = try FileHandle(forReadingFrom: url)
+            defer { try? handle.close() }
+            let data = try handle.read(upToCount: PrivacyReport.maxBytes + 1) ?? Data()
+            guard data.count <= PrivacyReport.maxBytes else { throw PrivacyReport.ReadError.tooBig }
+            let r = try PrivacyReport.read(data)
             withAnimation(reduceMotion ? nil : .spring(response: 0.45, dampingFraction: 0.85)) { report = r; showNormal = false }
             opened += 1
         } catch {

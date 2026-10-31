@@ -78,12 +78,16 @@ struct ReinstallSource: SignalSource {
     private static let service = "com.hyya.footprintinspector.install-log"
     static let recordedKey = "installRecorded"
 
+    /// The app's own saved value, so a launch argument can't stand in for it (on a Mac, any local
+    /// program can pass one).
+    static var alreadyRecorded: Bool {
+        let saved = Bundle.main.bundleIdentifier.flatMap(UserDefaults.standard.persistentDomain(forName:))
+        return saved?[recordedKey] as? Bool == true
+    }
+
     func read() async -> [SignalReading] {
         var log = Self.loadLog()
-        // The app's own saved value, so a launch argument can't stand in for it (on a Mac, any
-        // local program can pass one).
-        let saved = Bundle.main.bundleIdentifier.flatMap(UserDefaults.standard.persistentDomain(forName:))
-        if saved?[Self.recordedKey] as? Bool != true {
+        if !Self.alreadyRecorded {
             log.append(Date())
             Self.saveLog(log)
             UserDefaults.standard.set(true, forKey: Self.recordedKey)

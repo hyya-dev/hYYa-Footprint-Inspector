@@ -242,6 +242,9 @@ fun openSettings(context: Context, action: String?) {
     val intents = listOfNotNull(action?.let { Intent(it) }, Intent(Settings.ACTION_SETTINGS))
     for (i in intents) {
         try {
+            // Only the system's own Settings, never another app registered for the same action.
+            context.packageManager.resolveActivity(i, android.content.pm.PackageManager.MATCH_SYSTEM_ONLY)
+                ?.activityInfo?.packageName?.let(i::setPackage)
             context.startActivity(i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); return
         } catch (_: ActivityNotFoundException) { } catch (_: SecurityException) { }
     }

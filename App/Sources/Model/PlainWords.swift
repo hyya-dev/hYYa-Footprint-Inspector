@@ -80,7 +80,7 @@ enum PlainWords {
         "apple-pay": ("Apps can see if Apple Pay is set up", "Only which card networks, never your cards."),
         "mail-messages": ("Apps can see if Mail and Messages are set up", "Only whether they're set up, nothing inside them."),
         "tracking": ("Apps can see if they may ask to track you", "Turning tracking requests off tells every app no."),
-        "managed": ("Apps can see if an organisation manages this device", "Normal on a work device. On your own, check for profiles you don't recognise."),
+        "managed": ("Apps can see some signs that an organisation manages this device", "Normal on a work device. This check can't see every profile, so look in Settings for any you don't recognise."),
         "location-services": ("Apps can see if Location Services is on", "Only the switch, not where you are."),
 
         // Clever tricks

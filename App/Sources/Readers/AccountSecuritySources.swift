@@ -126,7 +126,8 @@ struct SecuritySource: SignalSource {
             .init(id: "mail-messages", value: "Mail \(MFMailComposeViewController.canSendMail() ? "set up" : "not set up") · Texts \(MFMessageComposeViewController.canSendText() ? "yes" : "no")"),
             .init(id: "tracking", value: tracking,
                   severityOverride: ATTrackingManager.trackingAuthorizationStatus == .denied ? .low : nil),
-            .init(id: "managed", value: managed ? "Yes" : "No", severityOverride: managed ? nil : .low),
+            // iOS can't tell an app about every profile, so "not detected" must never read as "no".
+            .init(id: "managed", value: managed ? "Yes" : "Not detected by this check", severityOverride: managed ? nil : .low),
             .init(id: "location-services", value: Format.onOff(locationOn)),
         ]
     }

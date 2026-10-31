@@ -48,7 +48,8 @@ object WatchReaders {
                 a11yNames[app.packageName] = app.loadLabel(pm).toString()
                 app.packageName
             }.distinct()
-        val notifications = (Settings.Secure.getString(c.contentResolver, "enabled_notification_listeners") ?: "")
+        val listeners = Settings.Secure.getString(c.contentResolver, "enabled_notification_listeners")
+        val notifications = listeners.orEmpty()
             .split(':').mapNotNull { ComponentName.unflattenFromString(it)?.packageName }.distinct()
         val admins = c.getSystemService(DevicePolicyManager::class.java).activeAdmins.orEmpty()
             .map { it.packageName }.distinct()
@@ -56,7 +57,9 @@ object WatchReaders {
         fun holder(pkg: String): Holder {
             val info = runCatching { pm.getApplicationInfo(pkg, 0) }.getOrNull()
             val builtIn = info != null && (info.flags and ApplicationInfo.FLAG_SYSTEM) != 0
-            return Holder(pkg, a11yNames[pkg] ?: info?.loadLabel(pm)?.toString(), builtIn)
+            // An outside app chooses its own name, so it can't borrow our built-in label.
+            val label = (a11yNames[pkg] ?: info?.loadLabel(pm)?.toString())?.takeUnless { !builtIn && BUILT_IN in it }
+            return Holder(pkg, label, builtIn)
         }
         val mine = c.packageName
         fun others(pkgs: List<String>) = pkgs.filter { it != mine }.map(::holder)
@@ -67,7 +70,9 @@ object WatchReaders {
 
         return listOf(
             list("watch-screen", s, "can read your screen", "No app can read your screen"),
-            list("watch-notifications", n, "can read every notification", "No app can read every notification"),
+            // An unreadable setting must not look like an all-clear.
+            if (listeners == null) Reading("watch-notifications", "Couldn't check this on your device", severityOverride = Severity.LOW)
+            else list("watch-notifications", n, "can read every notification", "No app can read every notification"),
             list("watch-admin", a, "can lock or erase this device", "No app can lock or erase this device"),
             if (several.isEmpty()) none("watch-several", "No app holds more than one of these")
             else Reading("watch-several",
@@ -83,8 +88,10 @@ object WatchReaders {
     private fun list(id: String, holders: List<Holder>, verb: String, empty: String): Reading {
         if (holders.isEmpty()) return none(id, empty)
         val outside = holders.filter { !it.builtIn }
-        val items = outside.map { it.shown } + holders.filter { it.builtIn }.map { "${it.shown} · built into your device" }
+        val items = outside.map { it.shown } + holders.filter { it.builtIn }.map { "${it.shown} · $BUILT_IN" }
         return if (outside.isEmpty()) Reading(id, "Only apps built into your device", items, severityOverride = Severity.LOW)
         else Reading(id, if (outside.size == 1) "1 app $verb" else "${outside.size} apps $verb", items)
     }
 }
+
+private const val BUILT_IN = "built into your device"

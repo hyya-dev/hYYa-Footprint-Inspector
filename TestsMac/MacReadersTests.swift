@@ -8,6 +8,22 @@ import XCTest
 /// Runs every Mac reader on this Mac and checks the catalogue covers what they return.
 @MainActor
 final class MacReadersTests: XCTestCase {
+    /// On a Mac any local program can pass launch arguments. They must not fake the install record.
+    func testLaunchArgumentsCantFakeTheInstallRecord() {
+        let key = ReinstallSource.recordedKey
+        let defaults = UserDefaults.standard
+        let args = defaults.volatileDomain(forName: UserDefaults.argumentDomain)
+        let before = defaults.object(forKey: key)
+        defer {
+            defaults.setVolatileDomain(args, forName: UserDefaults.argumentDomain)
+            defaults.set(before, forKey: key)
+        }
+        defaults.set(true, forKey: key)
+        defaults.setVolatileDomain([key: false], forName: UserDefaults.argumentDomain)
+        XCTAssertFalse(defaults.bool(forKey: key))
+        XCTAssertTrue(ReinstallSource.alreadyRecorded)
+    }
+
     override func setUp() {
         // Every test starts as a fresh install would: nothing recorded yet.
         UserDefaults.standard.removeObject(forKey: ReinstallSource.recordedKey)

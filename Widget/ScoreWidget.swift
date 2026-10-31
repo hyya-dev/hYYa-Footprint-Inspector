@@ -69,6 +69,8 @@ struct ScoreWidgetView: View {
         Group {
             if family == .systemMedium { medium } else { small }
         }
+        // Hidden while locked on surfaces such as StandBy.
+        .privacySensitive()
         .containerBackground(for: .widget) {
             ZStack {
                 palette.base

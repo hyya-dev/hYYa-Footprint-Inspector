@@ -88,6 +88,22 @@ struct LiveScoreTests {
         #expect(PrivacyCheck(fileURL: url).trackerSharing == nil)
     }
 
+    /// A launch argument must not stand in for the saved value.
+    @Test func launchArgumentsCantFakeTheInstallRecord() {
+        let key = ReinstallSource.recordedKey
+        let defaults = UserDefaults.standard
+        let args = defaults.volatileDomain(forName: UserDefaults.argumentDomain)
+        let before = defaults.object(forKey: key)
+        defer {
+            defaults.setVolatileDomain(args, forName: UserDefaults.argumentDomain)
+            defaults.set(before, forKey: key)
+        }
+        defaults.set(true, forKey: key)
+        defaults.setVolatileDomain([key: false], forName: UserDefaults.argumentDomain)
+        #expect(defaults.bool(forKey: key) == false)
+        #expect(ReinstallSource.alreadyRecorded)
+    }
+
     /// Clear history must stick: nothing may bring a scan back when the app returns to the screen.
     @Test func resetForgetsTheLastScan() async throws {
         let dir = FileManager.default.temporaryDirectory.appending(path: "reset-\(UUID().uuidString)")

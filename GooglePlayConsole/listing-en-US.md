@@ -21,7 +21,7 @@ FOUR SIMPLE STEPS
 4. Check-up: follow simple steps such as updates, weekly restarts and a leaked-password check, then go through your settings one area at a time and take back access you don't want to give.
 
 ONE SCORE FOR ALL FOUR
-Your privacy score, out of 100, brings the four checks together. Higher is better, and it grows as you finish each check.
+Your privacy score, out of 100, brings the four checks together. Higher is better, and it grows as you finish each check. Add the widget to see your score and your last check at a glance.
 
 FIX IT WITH ME
 Tap "Fix them with me" and the app walks you through each fix, one at a time, opening the exact setting for you. Then scan again and watch your score go up.
