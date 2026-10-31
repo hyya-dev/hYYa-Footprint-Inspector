@@ -95,7 +95,8 @@
         <service android:name="androidx.work.impl.foreground.SystemForegroundService" tools:node="remove" />
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:taskAffinity="">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

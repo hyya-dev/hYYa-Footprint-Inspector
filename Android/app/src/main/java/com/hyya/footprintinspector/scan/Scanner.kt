@@ -74,7 +74,8 @@ class Scanner(app: Application) : AndroidViewModel(app) {
 
     fun clearSaved() {
         sensitiveFound = null
-        prefs.edit().remove(SENSITIVE).apply()
+        // The kinds of apps checked and the steps ticked say something too, so they go as well.
+        prefs.edit().remove(SENSITIVE).remove("sensitiveCategories").remove("checkUpDone").apply()
         history.clear()
     }
 

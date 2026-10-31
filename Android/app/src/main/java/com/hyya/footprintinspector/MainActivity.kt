@@ -17,6 +17,8 @@ import com.hyya.footprintinspector.ui.Tab
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Revealed app names must not linger in the Recents thumbnail. Screenshots still work.
+        setRecentsScreenshotEnabled(false)
         enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT))
         // Screenshot switches (adb shell am start … --ez sampleData true --es startTab sensitive --ez autoScan true).
