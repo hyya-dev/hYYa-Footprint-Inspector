@@ -65,17 +65,27 @@ struct PrivacyCheckTests {
 @MainActor
 struct LiveScoreTests {
     @Test func checkResultsAreKeptAndCleared() throws {
-        let suite = "test-\(UUID().uuidString)"
-        let defaults = try #require(UserDefaults(suiteName: suite))
-        defer { defaults.removePersistentDomain(forName: suite) }
-        PrivacyCheck(defaults: defaults).recordSensitive(found: 2)
-        let reopened = PrivacyCheck(defaults: defaults)
+        let url = FileManager.default.temporaryDirectory.appending(path: "check-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let first = PrivacyCheck(fileURL: url)
+        first.recordSensitive(found: 2)
+        first.checkUpDone = "updates"
+        first.sensitiveCategories = "dating"
+        let reopened = PrivacyCheck(fileURL: url)
         #expect(reopened.sensitiveFound == 2)
+        #expect(reopened.checkUpDone == "updates")
+        #expect(reopened.sensitiveCategories == "dating")
+        #expect(reopened.checkedAt != nil)
+        // Not in iCloud or computer backups.
+        #expect(try url.resourceValues(forKeys: [.isExcludedFromBackupKey]).isExcludedFromBackup == true)
         reopened.clearSaved()
-        #expect(PrivacyCheck(defaults: defaults).sensitiveFound == nil)
+        let cleared = PrivacyCheck(fileURL: url)
+        #expect(cleared.sensitiveFound == nil)
+        #expect(cleared.checkUpDone.isEmpty)
+        #expect(cleared.sensitiveCategories.isEmpty)
         // In-memory (store screenshots) never writes anything.
-        PrivacyCheck(defaults: nil).recordTracker(sharing: 3)
-        #expect(PrivacyCheck(defaults: defaults).trackerSharing == nil)
+        PrivacyCheck(fileURL: nil).recordTracker(sharing: 3)
+        #expect(PrivacyCheck(fileURL: url).trackerSharing == nil)
     }
 
     @Test func aRestartWithinAWeekCountsAsDone() {

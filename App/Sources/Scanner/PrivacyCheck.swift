@@ -4,38 +4,111 @@
 
 import Foundation
 import Observation
+import SwiftUI
 
 /// The four checks as one journey, so the Score page can show one overall score and where to go
-/// next. Only counts are kept, never which apps were found or what they shared, and they're saved
-/// on this device so the score is still there after a restart (owner, 2026-10-28). Settings ›
-/// Clear history removes them.
+/// next. Only counts and choices are kept, never which apps were found or what they shared. They
+/// live in a file of their own, outside iCloud and computer backups, so the score is still there
+/// after a restart (owner, 2026-10-28). Settings › Clear history removes them.
 @MainActor
 @Observable
 final class PrivacyCheck {
-    /// Sensitive apps: how many answered, out of how many were checked.
-    private(set) var sensitiveFound: Int?
-    /// Tracker: how many apps shared data with outside advertising or analytics companies.
-    private(set) var trackerSharing: Int?
-
-    /// Where the counts are kept. `nil` keeps them in memory only (store screenshots, tests).
-    private let defaults: UserDefaults?
-    static let sensitiveKey = "result.sensitiveFound"
-    static let trackerKey = "result.trackerSharing"
-
-    init(defaults: UserDefaults? = .standard) {
-        self.defaults = defaults
-        sensitiveFound = defaults?.object(forKey: Self.sensitiveKey) as? Int
-        trackerSharing = defaults?.object(forKey: Self.trackerKey) as? Int
+    private struct Saved: Codable {
+        var sensitiveFound: Int?
+        var trackerSharing: Int?
+        var checkedAt: Date?
+        var checkUpDone = ""
+        var sensitiveCategories = ""
+        var trackerChecked = ""
     }
 
-    func recordSensitive(found: Int) { sensitiveFound = found; defaults?.set(found, forKey: Self.sensitiveKey) }
-    func recordTracker(sharing: Int) { trackerSharing = sharing; defaults?.set(sharing, forKey: Self.trackerKey) }
+    private var saved = Saved()
+    /// Where it's all kept. `nil` keeps it in memory only (store screenshots, tests).
+    private let fileURL: URL?
+
+    static var defaultURL: URL {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appending(path: "check-results.json")
+    }
+
+    /// Sensitive apps: how many answered, out of how many were checked.
+    var sensitiveFound: Int? { saved.sensitiveFound }
+    /// Tracker: how many apps shared data with outside advertising or analytics companies.
+    var trackerSharing: Int? { saved.trackerSharing }
+    /// When a Sensitive, Tracker or Check-up check last ran. Footprint scans have their own dates.
+    var checkedAt: Date? { saved.checkedAt }
+    /// The Check-up areas ticked, comma-separated.
+    var checkUpDone: String {
+        get { saved.checkUpDone }
+        set { saved.checkUpDone = newValue; saved.checkedAt = Date(); save() }
+    }
+    /// The kinds of apps chosen, comma-separated.
+    var sensitiveCategories: String {
+        get { saved.sensitiveCategories }
+        set { saved.sensitiveCategories = newValue; save() }
+    }
+    /// The Mac's Tracker places looked through, comma-separated.
+    var trackerChecked: String {
+        get { saved.trackerChecked }
+        set { saved.trackerChecked = newValue; saved.checkedAt = Date(); save() }
+    }
+
+    init(fileURL: URL? = PrivacyCheck.defaultURL) {
+        self.fileURL = fileURL
+        guard let fileURL else { return }
+        if let data = try? Data(contentsOf: fileURL), let decoded = try? JSONDecoder().decode(Saved.self, from: data) {
+            saved = decoded
+        } else {
+            moveFromDefaults()
+        }
+    }
+
+    func recordSensitive(found: Int) { saved.sensitiveFound = found; saved.checkedAt = Date(); save() }
+    func recordTracker(sharing: Int) { saved.trackerSharing = sharing; saved.checkedAt = Date(); save() }
 
     func clearSaved() {
-        sensitiveFound = nil
-        trackerSharing = nil
-        defaults?.removeObject(forKey: Self.sensitiveKey)
-        defaults?.removeObject(forKey: Self.trackerKey)
+        saved = Saved()
+        if let fileURL { try? FileManager.default.removeItem(at: fileURL) }
+    }
+
+    /// Versions up to 1.0.2 kept these in UserDefaults, which goes into backups. Reads the app's
+    /// own saved domain, not launch arguments, which UserDefaults would otherwise let override it.
+    private func moveFromDefaults() {
+        let keys = ["result.sensitiveFound", "result.trackerSharing", "checkUpDone", "sensitiveCategories", TrackerPlaces.storageKey]
+        let defaults = UserDefaults.standard
+        let old = Bundle.main.bundleIdentifier.flatMap(defaults.persistentDomain(forName:)) ?? [:]
+        guard keys.contains(where: { old[$0] != nil }) else { return }
+        saved.sensitiveFound = old[keys[0]] as? Int
+        saved.trackerSharing = old[keys[1]] as? Int
+        saved.checkUpDone = old[keys[2]] as? String ?? ""
+        saved.sensitiveCategories = old[keys[3]] as? String ?? ""
+        saved.trackerChecked = old[keys[4]] as? String ?? ""
+        saved.checkedAt = Date()
+        save()
+        keys.forEach(defaults.removeObject(forKey:))
+    }
+
+    private func save() {
+        guard var url = fileURL, let data = try? JSONEncoder().encode(saved) else { return }
+        try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try? data.write(to: url, options: [.atomic, .completeFileProtection])
+        var values = URLResourceValues()
+        values.isExcludedFromBackup = true
+        try? url.setResourceValues(values)
+    }
+}
+
+/// Reads and writes one saved value on `PrivacyCheck`, the way `@AppStorage` would in a view.
+@MainActor
+@propertyWrapper
+struct CheckStored: DynamicProperty {
+    @Environment(PrivacyCheck.self) private var check
+    private let key: ReferenceWritableKeyPath<PrivacyCheck, String>
+
+    init(_ key: ReferenceWritableKeyPath<PrivacyCheck, String>) { self.key = key }
+
+    var wrappedValue: String {
+        get { check[keyPath: key] }
+        nonmutating set { check[keyPath: key] = newValue }
     }
 }
 

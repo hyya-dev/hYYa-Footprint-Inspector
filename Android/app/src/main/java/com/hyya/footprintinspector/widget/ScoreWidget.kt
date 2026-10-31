@@ -44,15 +44,14 @@ class ScoreWidget : AppWidgetProvider() {
             return RemoteViews(mapOf(
                 SizeF(110f, 140f) to layout(context, R.layout.widget_narrow, score, checkedAt, year = false),
                 SizeF(165f, 140f) to layout(context, R.layout.widget_small, score, checkedAt, year = false),
-                SizeF(240f, 140f) to layout(context, R.layout.widget_medium, score, checkedAt, year = true),
+                SizeF(290f, 140f) to layout(context, R.layout.widget_medium, score, checkedAt, year = true),
             ))
         }
 
         private fun layout(context: Context, id: Int, score: Int?, checkedAt: Long, year: Boolean): RemoteViews {
             val date = DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_ABBREV_MONTH
-            // Two lines on the small widget, so a long date and time stays clear of the mascot.
-            val whenChecked = if (year) DateUtils.formatDateTime(context, checkedAt, date or DateUtils.FORMAT_SHOW_YEAR or DateUtils.FORMAT_SHOW_TIME)
-            else DateUtils.formatDateTime(context, checkedAt, date or DateUtils.FORMAT_NO_YEAR) + "\n" +
+            // Two lines, so a long date and time stays clear of the mascot.
+            val whenChecked = DateUtils.formatDateTime(context, checkedAt, date or (if (year) DateUtils.FORMAT_SHOW_YEAR else DateUtils.FORMAT_NO_YEAR)) + "\n" +
                 DateUtils.formatDateTime(context, checkedAt, DateUtils.FORMAT_SHOW_TIME)
             val checked = score != null
             return RemoteViews(context.packageName, id).apply {

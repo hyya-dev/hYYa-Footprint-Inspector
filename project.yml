@@ -18,8 +18,8 @@ settings:
     SWIFT_VERSION: "5.0"
     # Apple silicon only: same convention as the sibling hYYa apps.
     ARCHS: arm64
-    MARKETING_VERSION: "1.0.2"
-    CURRENT_PROJECT_VERSION: "24"
+    MARKETING_VERSION: "1.0.3"
+    CURRENT_PROJECT_VERSION: "25"
     CODE_SIGN_STYLE: Automatic
     DEVELOPMENT_TEAM: "8PYFWUL3ND"
     SWIFT_STRICT_CONCURRENCY: complete
@@ -32,11 +32,15 @@ targets:
     sources:
       - path: App/Sources
       - path: App/Resources
+      - path: Widget/Shared
+    dependencies:
+      - target: hYYaFootprintInspectorWidgetIOS
     settings:
       base:
         PRODUCT_NAME: "hYYa Footprint Inspector"
         PRODUCT_MODULE_NAME: "FootprintInspector"
         PRODUCT_BUNDLE_IDENTIFIER: com.hyya.footprintinspector
+        CODE_SIGN_ENTITLEMENTS: App/iOS/FootprintInspector.entitlements
         # The generated Info.plist is merged with App/Info.plist, which holds the permission
         # wording, the Bonjour service list and LSApplicationQueriesSchemes.
         GENERATE_INFOPLIST_FILE: YES
@@ -62,6 +66,9 @@ targets:
     sources:
       - path: App/Sources
       - path: App/Resources
+      - path: Widget/Shared
+    dependencies:
+      - target: hYYaFootprintInspectorWidgetMac
     settings:
       base:
         PRODUCT_NAME: "hYYa Footprint Inspector"
@@ -95,6 +102,45 @@ targets:
           CODE_SIGN_STYLE: Manual
           CODE_SIGN_IDENTITY: "Apple Development"
           PROVISIONING_PROFILE_SPECIFIER: "hYYa Footprint Inspector Mac Development"
+
+  # The Home Screen and desktop widget: the mascot, the score and the last check.
+  hYYaFootprintInspectorWidgetIOS:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Widget
+        excludes:
+          - "*.entitlements"
+          - Info.plist
+    settings:
+      base:
+        PRODUCT_NAME: "hYYa Footprint Inspector Widget"
+        PRODUCT_BUNDLE_IDENTIFIER: com.hyya.footprintinspector.widget
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: Widget/Info.plist
+        INFOPLIST_KEY_CFBundleDisplayName: "hYYa Footprint Inspector"
+        CODE_SIGN_ENTITLEMENTS: Widget/WidgetIOS.entitlements
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SKIP_INSTALL: YES
+
+  hYYaFootprintInspectorWidgetMac:
+    type: app-extension
+    platform: macOS
+    sources:
+      - path: Widget
+        excludes:
+          - "*.entitlements"
+          - Info.plist
+    settings:
+      base:
+        PRODUCT_NAME: "hYYa Footprint Inspector Widget"
+        PRODUCT_BUNDLE_IDENTIFIER: com.hyya.footprintinspector.widget
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: Widget/Info.plist
+        INFOPLIST_KEY_CFBundleDisplayName: "hYYa Footprint Inspector"
+        CODE_SIGN_ENTITLEMENTS: Widget/WidgetMac.entitlements
+        ENABLE_HARDENED_RUNTIME: YES
+        SKIP_INSTALL: YES
 
   hYYaFootprintInspectorMacTests:
     type: bundle.unit-test

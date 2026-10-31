@@ -23,6 +23,11 @@
 	<!-- Lets the reinstall demonstration use the device-only (data protection) keychain, where
 	     ThisDeviceOnly applies, as on iPhone. Without a group the Mac falls back to the login
 	     keychain, which backups and Migration Assistant carry to other Macs. -->
+	<!-- Shared with the widget, holding only the score and the time of the last check. -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>8PYFWUL3ND.com.hyya.footprintinspector</string>
+	</array>
 	<key>keychain-access-groups</key>
 	<array>
 		<string>$(AppIdentifierPrefix)com.hyya.footprintinspector</string>

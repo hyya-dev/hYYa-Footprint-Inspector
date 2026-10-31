@@ -12,7 +12,7 @@ struct CheckUpView: View {
     #endif
 
     /// Ticked steps, remembered on this phone only so the user can pick up where they left off.
-    @AppStorage("checkUpDone") private var stored = ""
+    @CheckStored(\.checkUpDone) private var stored
     /// The open area, saved on this device so it's still open after the person goes to Settings,
     /// even if iOS quit the app meanwhile (owner, 2026-10-28).
     @AppStorage("nav.checkup") private var openStep = ""

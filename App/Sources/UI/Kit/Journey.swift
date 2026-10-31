@@ -192,8 +192,8 @@ struct ChecksPanel: View {
     @Environment(\.goToTab) private var goToTab
     @Environment(Scanner.self) private var scanner
     @Environment(PrivacyCheck.self) private var check
-    @AppStorage("checkUpDone") private var checkUpStored = ""
-    @AppStorage(TrackerPlaces.storageKey) private var trackerStored = ""
+    @CheckStored(\.checkUpDone) private var checkUpStored
+    @CheckStored(\.trackerChecked) private var trackerStored
 
     var body: some View {
         Panel {

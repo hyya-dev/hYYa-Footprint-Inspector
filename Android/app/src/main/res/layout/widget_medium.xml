@@ -86,18 +86,13 @@
 
             <FrameLayout android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+            <TextView style="@style/WidgetNote" android:text="@string/widget_last_check" />
 
-                <TextView style="@style/WidgetNote" android:text="@string/widget_last_check" />
-
-                <TextView
-                    android:id="@+id/widget_date"
-                    style="@style/WidgetNote"
-                    android:layout_marginStart="6dp" />
-            </LinearLayout>
+            <TextView
+                android:id="@+id/widget_date"
+                style="@style/WidgetNote"
+                android:textColor="@color/widget_ink"
+                android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>

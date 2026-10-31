@@ -7,10 +7,10 @@ import SwiftUI
 /// The installed-app check. Safety rules (docs/SENSITIVE-APP-CATALOGUE.md §5):
 /// - every category starts off and is checked only when the user taps Check
 /// - results sit behind a tap and a blur, and vanish when the app leaves the screen
-/// - results stay on the device; history keeps only how many were found, never which
+/// - results stay on the device; only how many were found is kept, never which
 struct SensitiveView: View {
     @Environment(\.scenePhase) private var scenePhase
-    @AppStorage("sensitiveCategories") private var storedChoice = ""
+    @CheckStored(\.sensitiveCategories) private var storedChoice
     @State private var results: [String: [SensitiveApp]]? = nil
     @State private var revealed = false
     @State private var checks = 0

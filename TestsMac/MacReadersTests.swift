@@ -83,7 +83,7 @@ final class MacLiveScoreTests: XCTestCase {
     func testTrackerCountsOnceEveryPlaceIsChecked() {
         let partway = OverallScore.current(scanner: Scanner(history: HistoryStore(directory: FileManager.default.temporaryDirectory.appending(path: UUID().uuidString))),
                                            history: HistoryStore(directory: FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)),
-                                           check: PrivacyCheck(defaults: nil), checkUpStored: "", trackerStored: "screen,files")
+                                           check: PrivacyCheck(fileURL: nil), checkUpStored: "", trackerStored: "screen,files")
         XCTAssertNil(partway.parts[.tracker])
         let all = OverallScore(footprint: 44, sensitiveFound: nil, trackerSharing: nil, trackerReviewed: true, checkUpDone: 0, checkUpTotal: 17)
         XCTAssertEqual(all.parts[.tracker], 100)

@@ -11,7 +11,7 @@ struct MacTrackerView: View {
     @Environment(\.goToTab) private var goToTab
     /// Places looked through, kept on this Mac like the Check-up's areas. Once all are ticked,
     /// Tracker counts as 100 in the privacy score.
-    @AppStorage(TrackerPlaces.storageKey) private var stored = ""
+    @CheckStored(\.trackerChecked) private var stored
     private var checked: Set<String> { Set(stored.split(separator: ",").map(String.init)).intersection(TrackerPlaces.ids) }
 
     private struct Place: Identifiable {

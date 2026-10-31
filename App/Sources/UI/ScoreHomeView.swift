@@ -12,8 +12,8 @@ struct ScoreHomeView: View {
     @Environment(HistoryStore.self) private var history
     @Environment(PrivacyCheck.self) private var check
     @Environment(\.goToTab) private var goToTab
-    @AppStorage("checkUpDone") private var checkUpStored = ""
-    @AppStorage(TrackerPlaces.storageKey) private var trackerStored = ""
+    @CheckStored(\.checkUpDone) private var checkUpStored
+    @CheckStored(\.trackerChecked) private var trackerStored
     @State private var showingFormula = false
     #if os(iOS)
     @Environment(\.verticalSizeClass) private var verticalSizeClass

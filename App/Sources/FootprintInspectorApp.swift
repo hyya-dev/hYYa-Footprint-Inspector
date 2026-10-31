@@ -3,12 +3,13 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import SwiftUI
+import WidgetKit
 
 @main
 struct FootprintInspectorApp: App {
     @State private var history: HistoryStore
     @State private var scanner: Scanner
-    @State private var check = PrivacyCheck(defaults: LaunchOptions.has("-sampleData") ? nil : .standard)
+    @State private var check = PrivacyCheck(fileURL: LaunchOptions.has("-sampleData") ? nil : PrivacyCheck.defaultURL)
 
     init() {
         // Sample-data runs (store screenshots, UI tests) start on the Score page every time, not
@@ -164,7 +165,16 @@ struct RootView: View {
 private struct KeepScoreFresh: ViewModifier {
     @Environment(Scanner.self) private var scanner
     @Environment(HistoryStore.self) private var history
+    @Environment(PrivacyCheck.self) private var check
     @Environment(\.scenePhase) private var scenePhase
+
+    /// The widget's copy: the same score as the Score page, dated by the latest check of any kind.
+    private var widgetScore: WidgetScore? {
+        let overall = OverallScore.current(scanner: scanner, history: history, check: check,
+                                           checkUpStored: check.checkUpDone, trackerStored: check.trackerChecked)
+        guard let value = overall.value, let date = [history.latest?.date, check.checkedAt].compactMap({ $0 }).max() else { return nil }
+        return WidgetScore(score: value, checkedAt: date)
+    }
 
     func body(content: Content) -> some View {
         content
@@ -172,6 +182,11 @@ private struct KeepScoreFresh: ViewModifier {
                 // Screenshot runs: scan from launch, whichever page opens first.
                 if LaunchOptions.autoScan && scanner.allFindings.isEmpty { await scanner.scan() }
                 else if history.latest != nil { await scanner.scan(quietly: true) }
+            }
+            .task(id: widgetScore) {
+                guard !LaunchOptions.has("-sampleData"), widgetScore != WidgetScore.load() else { return }
+                WidgetScore.save(widgetScore)
+                WidgetCenter.shared.reloadAllTimelines()
             }
             .onChange(of: scenePhase) { old, phase in
                 if phase == .active && old != .active && scanner.phase == .done { Task { await scanner.scan(quietly: true) } }
