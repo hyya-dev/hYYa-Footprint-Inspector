@@ -18,7 +18,7 @@ FOUR SIMPLE STEPS
 1. Footprint: one tap checks what any app can read about your device.
 2. Sensitive apps: see which of your apps others can spot, like dating, faith, health or VPN apps, and what that could say about you.
 3. Tracker: see which apps can read your screen, read every notification, or lock your device. Apps holding more than one of these are flagged, because that's how monitoring apps work. Then open Android's own record of which apps used your location, camera and microphone.
-4. Check-up: keep spying apps out with updates, weekly restarts and a leaked-password check, then go through your settings one area at a time and take back access you don't want to give.
+4. Check-up: follow simple steps such as updates, weekly restarts and a leaked-password check, then go through your settings one area at a time and take back access you don't want to give.
 
 ONE SCORE FOR ALL FOUR
 Your privacy score, out of 100, brings the four checks together. Higher is better, and it grows as you finish each check.

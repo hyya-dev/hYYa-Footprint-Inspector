@@ -206,7 +206,7 @@ Rules for picking: (a) the highest-harm signals come first (sexual orientation, 
 - A list of detected circumvention, LGBTQ+ or religious apps is itself sensitive. Someone holding the phone, at a border check or a police stop, or an abusive partner, could read it. So:
   - Every category is **off by default** and is scanned only when the user turns it on and taps Scan. Nothing scans automatically.
   - Results appear **behind a tap with a privacy blur**. They are hidden again when the app goes to the background and are never shown in notifications, widgets, Spotlight or the app-switcher snapshot.
-  - Results are **never stored, logged, sent, shared or included in any export or crash report**. They are recomputed every time.
+  - Results stay on the device, and hYYa has no access to them. Which apps were found is **never logged, sent, shared or included in any export or crash report**; history keeps only how many. Results are recomputed every time.
   - The circumvention and LGBTQ+ categories show a short, calm notice before the scan, for example: "In some countries, having these apps can be risky. This check runs only on your phone and shows results only to you."
 - Wording stays factual ("an app that opens `psiphon://` is installed") and avoids judgement.
 - Even when the user never runs the scan, our declared list shows which apps we *could* check. Anyone inspecting the phone learns nothing personal from that, because the list is identical on every install.
@@ -216,6 +216,6 @@ Rules for picking: (a) the highest-harm signals come first (sexual orientation, 
 - App Review may ask why an app declares Tor, VPN or dating schemes. Answer in the review notes up front, keep the privacy policy consistent with them, and make the "Data Not Collected" privacy label true.
 - Suggested reviewer note (adapt as needed):
 
-  > hYYa Footprint Inspector is a privacy-education app. One screen shows users which sensitive kinds of apps (for example dating, health, VPN) any other app could detect on their phone using canOpenURL. The schemes in LSApplicationQueriesSchemes are used only for this on-device demonstration. Every category is off until the user turns it on, results are shown only on screen and are never stored, logged or transmitted, and the app collects no data. The code is open source at [repo URL]. To test: open Installed Apps, turn on a category and tap Scan.
+  > hYYa Footprint Inspector is a privacy-education app. One screen shows users which sensitive kinds of apps (for example dating, health, VPN) any other app could detect on their phone using canOpenURL. The schemes in LSApplicationQueriesSchemes are used only for this on-device demonstration. Every category is off until the user turns it on, results are shown only on screen, stay on the device and are never logged or transmitted, and the app collects no data. The code is open source at [repo URL]. To test: open Installed Apps, turn on a category and tap Scan.
 
 - If App Review objects, offer to cut the list down (for example, to the 25-scheme list) rather than drop the feature.

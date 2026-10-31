@@ -280,7 +280,7 @@ fun CheckUpScreen(nav: Nav) {
     val done = prefs(context).getStringSet("checkUpDone", emptySet())!!
     Page {
         HeroCard("Check-up", if (done.size == CheckUp.steps.size) "All checked!" else "${done.size} of ${CheckUp.steps.size} checked",
-            "Keep spying apps out, then see which apps can reach your location, contacts or notifications. Only Settings knows, so let's look together, one area at a time.")
+            "Start with simple protection steps, then see which apps can reach your location, contacts or notifications. Only Settings knows, so let's look together, one area at a time.")
         LinearProgressIndicator(progress = { done.size.toFloat() / CheckUp.steps.size }, color = Tone.FIX.tint, trackColor = Brand.tile,
             modifier = Modifier.fillMaxWidth())
         Panel {

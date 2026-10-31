@@ -8,7 +8,7 @@ import Observation
 
 /// A saved scan. It deliberately holds **no readings**: only the score, which signals were worth
 /// a look, and a salted fingerprint of each value so the next scan can tell what changed without
-/// the file ever containing the values themselves. Sensitive-app results are never saved.
+/// the file ever containing the values themselves. Only the count of sensitive apps is kept, never which ones.
 struct ScanSnapshot: Codable, Identifiable, Sendable, Equatable {
     let id: UUID
     let date: Date
