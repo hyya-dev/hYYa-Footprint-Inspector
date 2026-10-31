@@ -7,9 +7,9 @@ No login is required. To review:
 4. "Sensitive apps" tab: the user picks categories, then taps Check.
 5. "Tracker" tab: the user opens the App Privacy Report file they saved from Settings with the system file picker. It is read on the device only; never stored or sent.
 
-About CallKit (guideline 5, China): from build 5 the app no longer includes or links CallKit in any territory. The only use was a read-only "call in progress" display, which has been removed.
+About CallKit (guideline 5, China): the app no longer includes or links CallKit in any territory.
 
-About VPN (automated question, 2026-10-19): the app has NO VPN functionality. It has no Network Extension entitlement, creates no VPN configuration or tunnel, routes no traffic and makes no network connections of its own. It collects no user information (Data Not Collected), so nothing is shared or stored off the device. Two read-only checks mention VPNs: (1) one finding shows the user whether a VPN is currently on, read from the system proxy settings (CFNetworkCopySystemProxySettings), because any app can see this; (2) the user-initiated "Sensitive apps" check can test whether four VPN and censorship-circumvention apps are installed (URL schemes psiphon, onionhttp, protonvpn, nordvpn, declared in LSApplicationQueriesSchemes). Both are only shown to the device owner and never sent; only a count of the sensitive apps found stays on the device, never which ones.
+About VPN (automated question, 2026-10-19): the app has NO VPN functionality. It has no Network Extension entitlement, creates no VPN configuration or tunnel, routes no traffic and makes no network connections of its own. Two read-only checks mention VPNs: (1) one finding shows the user whether a VPN is currently on, read from the system proxy settings (CFNetworkCopySystemProxySettings), because any app can see this; (2) the user-initiated "Sensitive apps" check can test whether four VPN and censorship-circumvention apps are installed (URL schemes psiphon, onionhttp, protonvpn, nordvpn, declared in LSApplicationQueriesSchemes). Both are only shown to the device owner and never sent; only a count of the sensitive apps found stays on the device, never which ones.
 
 About fingerprinting (5.1.2): the app does not fingerprint anyone. Every value is displayed to the device owner on screen and never leaves the device. Scan history keeps only salted one-way hashes, the score and the ids of notable findings, never the values, and is excluded from backups.
 
@@ -17,16 +17,12 @@ About LSApplicationQueriesSchemes (25 schemes): these are used only for the user
 
 About Required Reason APIs: system boot time, disk space, active keyboards, file timestamps and user defaults are read solely to display them to the user as part of the privacy report. The privacy manifest declares them.
 
-The keychain item the app writes holds only this app's own install dates, as an on-device demonstration that apps can recognise a reinstall. It is ThisDeviceOnly and never synced.
+The app's keychain items hold only its own install dates, as an on-device demonstration that apps can recognise a reinstall, and the widget's copy of the score and last-check date. Both are ThisDeviceOnly and never synced.
 
 Motion sensors are also used for a subtle tilt effect on the mascot. Nothing is recorded.
 
 The app uses only Apple frameworks. StoreKit and MusicKit are used to show the App Store country, the original download date and Apple Music subscription status to the user.
 
-New in 1.0.1:
-- The first screen shows one privacy score for the four checks and links to each check.
-- Plainer wording for every finding.
-- Check-up adds guidance steps (keep the system updated, restart weekly, check the Passwords app for leaked passwords, Lockdown Mode for people at risk). These are instructions only: the app detects no malware and reads no passwords.
-- Layout for iPhone Duo (folded and open) and landscape on iPhone.
+Check-up's guidance steps (updates, weekly restart, leaked passwords, Lockdown Mode) are instructions only: the app detects no malware and reads no passwords.
 Optional local re-scan reminder: asked for only when chosen. No server, no push.
-About the widget: the Home Screen widget shows only the privacy score and the date and time of the last check, read from a device-only keychain item shared with the app. It makes no network connections and shows no finding or app name.
+New in 1.0.3: a Home Screen widget showing only the privacy score and the date and time of the last check. It makes no network connections and shows no finding or app name.
