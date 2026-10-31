@@ -59,7 +59,9 @@ export const LOCALES = {
   "ur-PK": "Urdu", vi: "Vietnamese", "zh-Hans": "Chinese (Simplified)", "zh-Hant": "Chinese (Traditional)",
 };
 const ENGLISH = new Set(["en-AU", "en-CA", "en-GB"]);
-const BANNED = /spyware|malware|anti-?virus|\bvirus\b|#\s*1|\bbest\b/i;
+// Extra private terms can be added with BANNED_TERMS=a|b in the gitignored .env file.
+const extraBanned = (existsSync(envFile) ? readFileSync(envFile, "utf8").split("\n").find((l) => l.startsWith("BANNED_TERMS=")) ?? "" : "").slice(13).trim();
+const BANNED = new RegExp(`${extraBanned ? `${extraBanned}|` : ""}spyware|spying apps?|malware|anti-?virus|\\bvirus\\b|#\\s*1|\\bbest\\b`, "i");
 const BRAND = "hYYa Footprint Inspector";
 
 function check(l) {

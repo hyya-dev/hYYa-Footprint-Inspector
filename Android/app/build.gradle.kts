@@ -6,12 +6,14 @@ plugins {
 }
 
 /**
- * Play upload-signing credentials live OUTSIDE the repo, in a private folder, as for the
- * sibling hYYa apps. Nothing secret is committed. Without them the release builds unsigned.
+ * Play upload-signing credentials live OUTSIDE the repo, in the folder named by `hyya.signingDir`
+ * in the gitignored local.properties. Nothing secret is committed. Without them the release
+ * builds unsigned.
  */
-val keystoreFile: File = File(
-    "/path/to/signing/folder",
-)
+val signingDir: String = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.isFile }?.inputStream()?.use { load(it) }
+}.getProperty("hyya.signingDir").orEmpty()
+val keystoreFile: File = File(signingDir, "keystore.properties")
 val keystoreProps = Properties().apply {
     if (keystoreFile.isFile) keystoreFile.inputStream().use { load(it) }
 }

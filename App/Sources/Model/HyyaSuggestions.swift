@@ -13,7 +13,7 @@ struct HyyaSuggestion: Sendable {
 }
 
 /// Which hYYa app goes with which finding. **Deliberately empty**: the owner decides each pairing
-/// case by case, when the time comes (CLAUDE.md). Add an entry here and the suggestion appears on
+/// case by case, when the time comes. Add an entry here and the suggestion appears on
 /// that finding's detail page, below the free fix. Bring back the Settings switch
 /// ("Suggest hYYa apps in fixes", key `settingKey`) with the first entry; it was removed while the
 /// list is empty because it did nothing.

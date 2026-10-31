@@ -7,7 +7,7 @@ import Foundation
 /// The Mac's findings. Same wording rules as the iOS catalogue: plain words, "could" rather than
 /// "will", and every entry says what an app learns, why the system allows it, how long it lasts
 /// and what to do. Where a System Settings page opens directly, the fix carries its pane id
-/// (tested on macOS 27, docs/MACOS-PLAN.md).
+/// (tested on macOS 27).
 enum MacSignalCatalogue {
     enum Pane {
         static let privacy = "com.apple.settings.PrivacySecurity.extension"

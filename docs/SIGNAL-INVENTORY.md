@@ -21,7 +21,7 @@ Phase 2.
 | **RRA** | Apple "Required Reason API" category: `BOOT` system boot time · `DISK` disk space · `KBD` active keyboards · `FTS` file timestamp · `UD` user defaults · `—` none. If we use one, we must declare it with an approved reason in `PrivacyInfo.xcprivacy`. |
 | **Persist** | `R` until restart · `I` until reinstall · `E` until erase · `HW` fixed for the hardware/model · `S` until you change the setting · `C` changes often · `A` follows the Apple Account |
 | **Sev** | How much it helps identify or profile you: **L** low · **M** medium · **H** high |
-| **Fix** | **Yes** / **Partly** / **Only Apple**, plus our fix level from CLAUDE.md: L1 one tap in our app · L2 one tap to Settings · L3 guided steps · L4 only Apple |
+| **Fix** | **Yes** / **Partly** / **Only Apple**, plus our fix level: L1 one tap in our app · L2 one tap to Settings · L3 guided steps · L4 only Apple |
 | **iOS 27** | `Changed` / `Still open` where a source confirms it; otherwise `unverified` |
 
 **Why iOS allows passive signals.** Apps need them to work properly: lay out the screen, pick

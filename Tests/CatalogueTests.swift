@@ -105,7 +105,7 @@ struct CatalogueTests {
     }
 
     @Test func noCustomURLSchemeOfOurOwn() {
-        // docs/HYYA-APPS-DETECTABILITY.md: other apps must not be able to detect this one.
+        // Other apps must not be able to detect this one.
         #expect(Bundle.main.object(forInfoDictionaryKey: "CFBundleURLTypes") == nil)
     }
 

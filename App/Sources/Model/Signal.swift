@@ -49,7 +49,7 @@ enum Persistence: Sendable {
     }
 }
 
-/// The four fix levels agreed for the product (see CLAUDE.md).
+/// The four fix levels agreed for the product.
 enum FixLevel: Int, Sendable {
     /// One tap, done inside our app.
     case inApp = 1
@@ -77,7 +77,7 @@ struct Fix: Sendable {
     /// Ordered steps for guided fixes. Empty when there's nothing to do.
     var steps: [String] = []
     /// Mac only: the System Settings page that "Open in System Settings" goes to, as an
-    /// `x-apple.systempreferences:` id (docs/MACOS-PLAN.md lists the ones that work).
+    /// `x-apple.systempreferences:` id.
     var settingsPane: String? = nil
 
     static func onlyApple(_ summary: String = "No setting changes this. Only a system update from Apple can.") -> Fix {

@@ -9,7 +9,6 @@ enum hYYaLinks {
     static let website = URL(string: "https://hyya.com")!
     static let hyyaAIAppStore = URL(string: "https://apps.apple.com/app/id6767114813")!
     static let contact = URL(string: "https://hyya.com/#contact")!
-    /// ⚠️ Page owed by hyya.com before launch (HANDOFF.md).
     static let privacy = URL(string: "https://hyya.com/privacypolicy/hyya-footprint-inspector.html")!
     static let security = URL(string: "mailto:security@hyya.com?subject=Security%20report%20%E2%80%94%20hYYa%20Footprint%20Inspector")!
     static let source = URL(string: "https://github.com/hyya-dev/hYYa-Footprint-Inspector")!

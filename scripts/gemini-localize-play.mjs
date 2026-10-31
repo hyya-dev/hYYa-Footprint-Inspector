@@ -65,7 +65,9 @@ export const COPIES = {
 // "Phone" in the languages where Gemini reached for it: the listing serves tablets too.
 const PHONE = /phone|mobile|smartphone|móvil|mòbil|móbil|celular|telemóvel|telefon|телефон|смартфон|फ़ोन|फोन|ফোন|ફોન|ਫ਼ੋਨ|ਫੋਨ|ఫోన్|ಫೋನ್|ഫോൺ|فون|موبایل|گوشی|هاتف|جوال|טלפון|ስልክ|手机|手機|携帯|スマホ|휴대폰|스마트폰|điện thoại|โทรศัพท์|ဖုန်း|foon|cellulare/i;
 const MICROPHONE = /(?:micro|mikro|mic|ميكرو|میکرو|माइक्रो|मायक्रो|मैक्रो|ಮೈಕ್ರೊ|ಮೈಕ್ರೋ|മൈക്രോ|మైక్రో|மைக்ரோ|মাইক্রো|ਮਾਈਕ੍ਰੋ|માઇક્રો|מיקרו|ማይክሮ|მიკრო|микро|μικρό|麦克|麥克|マイク|마이크|ไมโคร|မိုက်ခရို)\S*/giu;
-const BANNED = /spyware|malware|anti-?virus|\bvirus\b|#\s*1|\bbest\b/i;
+// Extra private terms can be added with BANNED_TERMS=a|b in the gitignored .env file.
+const extraBanned = (existsSync(envFile) ? readFileSync(envFile, "utf8").split("\n").find((l) => l.startsWith("BANNED_TERMS=")) ?? "" : "").slice(13).trim();
+const BANNED = new RegExp(`${extraBanned ? `${extraBanned}|` : ""}spyware|spying apps?|malware|anti-?virus|\\bvirus\\b|#\\s*1|\\bbest\\b`, "i");
 
 function check(l) {
   const issues = [];

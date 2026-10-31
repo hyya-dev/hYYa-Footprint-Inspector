@@ -6,7 +6,7 @@ import Foundation
 
 /// Every signal we know how to describe, keyed by id.
 ///
-/// Wording rules (CLAUDE.md): calm, plain English, "could" rather than "will". Every entry says
+/// Wording rules: calm, plain English, "could" rather than "will". Every entry says
 /// what an app learns, why iOS allows it, how long it lasts and what the user can do.
 enum SignalCatalogue {
     /// This platform's definitions, in display order.

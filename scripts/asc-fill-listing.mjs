@@ -5,7 +5,7 @@
 //
 // Pushes store/listing-en-US.json and store/review-notes.txt to App Store Connect for the
 // editable iOS version. 🚨 It never submits anything for review: submitting needs the owner's
-// explicit consent (CLAUDE.md).
+// explicit consent.
 //
 //   ASC_ISSUER_ID=… ASC_KEY_ID=… ASC_PRIVATE_KEY_PATH=… node scripts/asc-fill-listing.mjs [--dry-run]
 //
