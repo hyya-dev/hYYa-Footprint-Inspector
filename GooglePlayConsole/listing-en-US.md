@@ -47,7 +47,7 @@ Meet the detective: he's on every page and has a tip if you tap him.
 hYYa Footprint Inspector is part of the hYYa family of privacy-first apps.
 
 ## Release notes (500)
-• Clearer wording in the Check-up.
+• See your privacy score at a glance with the new widget.
 This release contains general bug fixes and stability improvements.
 
 ## Category
