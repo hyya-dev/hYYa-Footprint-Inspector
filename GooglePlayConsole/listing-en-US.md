@@ -9,7 +9,7 @@ appear naturally a few times.
 hYYa Footprint Inspector
 
 ## Short description (80)
-See what your apps know and did, then fix it in a few taps. Free and private.
+See what apps know, check permissions and fix it step by step. Free and private.
 
 ## Full description (4000)
 Your apps can learn more about you than you think. hYYa Footprint Inspector shows you what they can see, who can watch you, and how to fix it, in plain words.
