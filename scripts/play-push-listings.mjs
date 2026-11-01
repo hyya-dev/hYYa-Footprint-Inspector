@@ -25,6 +25,11 @@ const LIMITS = { title: 30, shortDescription: 80, fullDescription: 4000 };
 
 const local = Object.fromEntries(readdirSync(DIR).filter((f) => f.endsWith(".json"))
   .map((f) => JSON.parse(readFileSync(DIR + f, "utf8"))).map((l) => [l.language, l]));
+// English (United States) comes from the approved source file, not the translations.
+const md = readFileSync(`${ROOT}GooglePlayConsole/listing-en-US.md`, "utf8");
+const section = (name) => md.split(`## ${name}\n`)[1].split("\n## ")[0].trim();
+local["en-US"] = { language: "en-US", title: section("App name (30)"), shortDescription: section("Short description (80)"),
+  fullDescription: section("Full description (4000)") };
 for (const [lang, l] of Object.entries(local))
   for (const [f, max] of Object.entries(LIMITS))
     if (!l[f] || [...l[f]].length > max) throw new Error(`${lang} ${f} is empty or over ${max}`);
