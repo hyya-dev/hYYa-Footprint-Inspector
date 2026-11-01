@@ -200,7 +200,7 @@ struct OverallScore: Equatable, Sendable {
     • Footprint: how much any app can read about this device. Everyone starts at 100; each thing worth a look that you can fix costs 10 points, each smaller one 2, and every 40 points lost halve it, so it never hits zero.
     • Sensitive apps: 100 if none of the apps you checked can be spotted, then 25 less for each one that can.
     • Tracker: \(trackerLine)
-    • Check-up: counts as 100 once you've been through every Settings area. Until then it isn't in the score, so ticking areas off never lowers it.
+    • Check-up: counts as 100 once you've been through the main Settings areas. Until then it isn't in the score, so ticking areas off never lowers it.
 
     Sensitive apps and Tracker never go below 20. Only these numbers are saved on this device, never which apps you have. Things only Apple can fix don't count, because nothing you do changes them. The score isn't a measure of how unique your device is: that would need data from other devices, and this app never sends or receives any.
     """

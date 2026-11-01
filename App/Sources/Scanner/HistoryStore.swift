@@ -17,7 +17,7 @@ struct ScanSnapshot: Codable, Identifiable, Sendable, Equatable {
     let findingCount: Int
     let concerningIDs: [String]
     /// Signal id → salted SHA-256 of its value, shortened.
-    let valueHashes: [String: String]
+    var valueHashes: [String: String]
 }
 
 /// What changed between two scans.
@@ -74,7 +74,8 @@ final class HistoryStore {
     func makeSnapshot(findings: [Finding], score: FootprintScore, osVersion: String, date: Date = Date()) -> ScanSnapshot {
         let salt = self.salt()
         var hashes: [String: String] = [:]
-        for finding in findings {
+        // Not permission findings: a value such as a rough location is few enough to guess from its marker.
+        for finding in findings where finding.definition.section.group != .permission {
             let material = salt + finding.id + "\u{1F}" + finding.reading.value + finding.reading.items.joined(separator: "\u{1F}")
             hashes[finding.id] = SHA256.hash(data: Data(material.utf8)).prefix(8).map { String(format: "%02x", $0) }.joined()
         }
@@ -121,7 +122,15 @@ final class HistoryStore {
         // Unreadable while the device is locked: keep what's there rather than save over it.
         guard let data = try? Data(contentsOf: fileURL) else { readable = false; return }
         readable = true
-        snapshots = (try? JSONDecoder().decode([ScanSnapshot].self, from: data)) ?? []
+        let permissionIDs = Set(SignalCatalogue.permission.map(\.id))
+        let decoded = (try? JSONDecoder().decode([ScanSnapshot].self, from: data)) ?? []
+        snapshots = decoded.map {
+            var snapshot = $0
+            snapshot.valueHashes = snapshot.valueHashes.filter { !permissionIDs.contains($0.key) }
+            return snapshot
+        }
+        // Older versions saved these markers: remove them from the file too.
+        if zip(decoded, snapshots).contains(where: { $0.valueHashes.count != $1.valueHashes.count }) { save() }
     }
 
     /// Picks the history up once the file can be read.

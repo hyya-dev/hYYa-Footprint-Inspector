@@ -49,7 +49,7 @@ struct ComparisonCard: View {
                     .foregroundStyle(Brand.textMuted)
             }
             if comparison.resolved.isEmpty && comparison.newConcerns.isEmpty && others.isEmpty {
-                Text("Nothing changed.")
+                Text("No other changes found.")
                     .font(.subheadline)
                     .foregroundStyle(Brand.textMuted)
             }

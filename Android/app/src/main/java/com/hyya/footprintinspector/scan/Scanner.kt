@@ -189,8 +189,14 @@ class HistoryStore(context: Context) {
     private val dir = context.noBackupFilesDir
     private val file = File(dir, "scan-history.json")
     private val saltFile = File(dir, "scan-history.salt")
+    private var strippedOldMarkers = false
     var snapshots: List<Snapshot> = load(); private set
     val latest: Snapshot? get() = snapshots.lastOrNull()
+
+    init {
+        // Older versions saved markers for permission data: remove them from the file too.
+        if (strippedOldMarkers) write()
+    }
 
     private val salt: String
         get() = if (saltFile.isFile) saltFile.readText() else (UUID.randomUUID().toString() + UUID.randomUUID()).also { saltFile.writeText(it) }
@@ -207,6 +213,10 @@ class HistoryStore(context: Context) {
 
     fun append(s: Snapshot) {
         snapshots = (snapshots + s).takeLast(60)
+        write()
+    }
+
+    private fun write() {
         val arr = JSONArray()
         snapshots.forEach { sn ->
             arr.put(JSONObject().put("date", sn.date).put("score", sn.score).put("count", sn.findingCount)
@@ -228,7 +238,7 @@ class HistoryStore(context: Context) {
             val h = o.getJSONObject("hashes")
             Snapshot(o.getLong("date"), o.getInt("score"), o.getInt("count"),
                 o.getJSONArray("concerning").let { a -> (0 until a.length()).map(a::getString) },
-                h.keys().asSequence().filter { it !in permissionIds }.associateWith { h.getString(it) })
+                h.keys().asSequence().filter { key -> (key !in permissionIds).also { if (!it) strippedOldMarkers = true } }.associateWith { h.getString(it) })
         }
     }.getOrDefault(emptyList())
 }

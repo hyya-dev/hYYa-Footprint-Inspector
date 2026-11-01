@@ -285,7 +285,7 @@ fun CheckUpScreen(nav: Nav) {
             modifier = Modifier.fillMaxWidth())
         Panel {
             CheckUp.steps.forEachIndexed { i, s ->
-                RowCard(if (s.id in done) Icons.Outlined.CheckCircle else Icons.Outlined.Security, s.title, s.path.substringBefore(" (on Samsung").let { if (it.length > 60 && "Permission manager" in it) "Permission manager › " + s.path.substringAfterLast("› ") else it.substringBefore(", then") },
+                RowCard(if (s.id in done) Icons.Outlined.CheckCircle else Icons.Outlined.Security, s.title, s.hint ?: s.path.substringBefore(" (on Samsung").let { if (it.length > 60 && "Permission manager" in it) "Permission manager › " + s.path.substringAfterLast("› ") else it.substringBefore(", then") },
                     tint = if (s.id in done) Brand.green else Brand.sand, showDivider = i < CheckUp.steps.lastIndex,
                     onClick = { nav.push(Route.CheckUpRoute(i)) }) {
                     Icon(if (s.id in done) Icons.Outlined.CheckCircle else Icons.AutoMirrored.Outlined.KeyboardArrowRight, null,

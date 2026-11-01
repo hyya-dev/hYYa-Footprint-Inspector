@@ -164,7 +164,7 @@ extension OverallScore {
     /// places looked through.
     @MainActor static func current(scanner: Scanner, history: HistoryStore, check: PrivacyCheck, checkUpStored: String, trackerStored: String = "") -> OverallScore {
         let ticked = Set(checkUpStored.split(separator: ",").map(String.init))
-        let ids = Set(CheckUpGuide.steps.map(\.id))
+        let ids = Set(CheckUpGuide.steps.filter(\.counts).map(\.id))
         let reviewed = Set(trackerStored.split(separator: ",").map(String.init)).intersection(TrackerPlaces.ids).count
         return OverallScore(footprint: scanner.phase == .done ? scanner.score.value : history.latest?.score,
                             sensitiveFound: check.sensitiveFound,

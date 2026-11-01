@@ -80,8 +80,8 @@ final class Scanner {
         readings.merge(fresh) { $1 }
         refreshPermissionStates()
         for kind in PermissionKind.onThisPlatform where isReadable(permissionStates[kind]) {
-            await readPermission(kind)
-            guard run == generation else { readings = [:]; return }
+            await readPermission(kind, run: run)
+            guard run == generation else { return }
         }
         lastScan = Date()
         let snapshot = history.makeSnapshot(findings: allFindings, score: score,
@@ -104,17 +104,20 @@ final class Scanner {
 
     /// "Show me": asks for the permission if needed, then reads that category.
     func reveal(_ kind: PermissionKind) async {
+        let run = generation
         let source = PermissionSources.source(for: kind)
         loadingPermissions.insert(kind)
         defer { loadingPermissions.remove(kind) }
         var state = source.permissionState()
         if state == .notAsked { state = await source.requestPermission() }
         permissionStates[kind] = state
-        if isReadable(state) { await readPermission(kind) }
+        if isReadable(state) { await readPermission(kind, run: run) }
     }
 
-    private func readPermission(_ kind: PermissionKind) async {
+    /// Drops the result if Clear history ran while it was being read.
+    private func readPermission(_ kind: PermissionKind, run: Int) async {
         let readings = await PermissionSources.source(for: kind).read()
+        guard run == generation else { return }
         for reading in readings { self.readings[reading.id] = reading }
     }
 

@@ -20,7 +20,9 @@ final class LocalNetworkPermissionSource: SignalSource {
     private static let storageKey = "permission.localNetwork"
 
     func permissionState() -> PermissionState {
-        switch UserDefaults.standard.string(forKey: Self.storageKey) {
+        // The app's own saved value, never a launch argument.
+        let saved = Bundle.main.bundleIdentifier.flatMap(UserDefaults.standard.persistentDomain(forName:))
+        return switch saved?[Self.storageKey] as? String {
         case "granted": .granted
         case "denied": .denied
         default: .notAsked

@@ -23,6 +23,6 @@ Motion sensors are also used for a subtle tilt effect on the mascot. Nothing is 
 
 The app uses only Apple frameworks. StoreKit and MusicKit are used to show the App Store country, the original download date and Apple Music subscription status to the user.
 
-Check-up's guidance steps (updates, weekly restart, leaked passwords, Lockdown Mode) are instructions only: the app detects no malware and reads no passwords.
+Check-up's guidance steps (updates, restart, passwords, Lockdown Mode, screen lock, Apple Account, Find My, Stolen Device Protection, locked apps, social media apps) are instructions only: the app reads none of these settings, detects no malware and reads no passwords.
 Optional local re-scan reminder: asked for only when chosen. No server, no push.
-New in 1.0.3: a Home Screen widget showing only the privacy score and the date and time of the last check. It makes no network connections and shows no finding or app name.
+New: a Home Screen widget showing only the privacy score and the date and time of the last check. It makes no network connections and shows no finding or app name.

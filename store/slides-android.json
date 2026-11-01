@@ -1,12 +1,68 @@
 {
   "_note": "Google Play phone slides (English only). Same rules as the iOS slides; raw screens come from the Android app launched with sampleData (made-up values).",
   "slides": [
-    {"screen": "store-02-results", "headline": "See what *every app* can learn about you", "highlights": ["One privacy score, four checks", "Plain words, no jargon", "Nothing leaves your device"]},
-    {"screen": "store-03-watch", "headline": "See *who can watch you*", "highlights": ["Screen, notifications, device lock", "Several at once? Flagged", "One tap to take it back"]},
-    {"screen": "store-07-fix", "headline": "Fix it *step by step*", "highlights": ["One fix at a time", "Opens the exact setting", "Watch your score go up"]},
-    {"screen": "store-04-finding", "headline": "Recognised *even after you delete it*", "highlights": ["Same code after reinstalling", "Only a reset changes it", "Explained in plain words"]},
-    {"screen": "store-05-sensitive", "headline": "Which apps *give you away?*", "highlights": ["Dating, faith, health, VPN", "Banks can ask too", "Hidden, only you see it"]},
-    {"screen": "store-06-checkup", "headline": "A guided *privacy check-up*", "highlights": ["Updates, restarts, passwords", "Location, notifications, photos", "Opens each setting"]},
-    {"screen": "store-01-home", "headline": "Private. Yours. *Open source.*", "highlights": ["No internet permission", "No account, no ads", "Made by hYYa"]}
+    {
+      "screen": "store-02-results",
+      "headline": "See what *every app* can learn about you",
+      "highlights": [
+        "One privacy score, four checks",
+        "On your Home Screen as a widget",
+        "Nothing leaves your device"
+      ]
+    },
+    {
+      "screen": "store-03-watch",
+      "headline": "See *who can watch you*",
+      "highlights": [
+        "Screen, notifications, device lock",
+        "Several at once? Flagged",
+        "One tap to take it back"
+      ]
+    },
+    {
+      "screen": "store-07-fix",
+      "headline": "Fix it *step by step*",
+      "highlights": [
+        "One fix at a time",
+        "Opens the exact setting",
+        "Watch your score go up"
+      ]
+    },
+    {
+      "screen": "store-04-finding",
+      "headline": "Recognised *even after you delete it*",
+      "highlights": [
+        "Apps can still spot you",
+        "Only a reset stops it",
+        "Explained in plain words"
+      ]
+    },
+    {
+      "screen": "store-05-sensitive",
+      "headline": "Which apps *give you away?*",
+      "highlights": [
+        "Dating, faith, health, VPN",
+        "Banks can ask too",
+        "Hidden, only you see it"
+      ]
+    },
+    {
+      "screen": "store-06-checkup",
+      "headline": "Take back *your privacy*",
+      "highlights": [
+        "Lock and find your device",
+        "Protect your accounts",
+        "Tame your social apps"
+      ]
+    },
+    {
+      "screen": "store-01-home",
+      "headline": "Private. Yours. *Open source.*",
+      "highlights": [
+        "Works without internet",
+        "No account, no ads",
+        "Made by hYYa"
+      ]
+    }
   ]
 }

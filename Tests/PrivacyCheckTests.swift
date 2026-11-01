@@ -143,6 +143,29 @@ struct LiveScoreTests {
         #expect(history.snapshots.isEmpty)
     }
 
+    /// People who finished Check-up keep their credit: newer steps never count.
+    @Test func onlyTheOriginalStepsCountTowardTheScore() {
+        let counted = CheckUpGuide.iosSteps.filter(\.counts)
+        #expect(counted.count == 17)
+        #expect(!counted.contains { ["lock-device", "apple-account", "find-device", "stolen-device", "lock-apps", "social-apps"].contains($0.id) })
+    }
+
+    /// Markers for permission data can be guessed, so old ones leave the file too.
+    @Test func permissionMarkersAreRemovedFromSavedHistory() throws {
+        let dir = FileManager.default.temporaryDirectory.appending(path: "markers-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let file = dir.appending(path: "scan-history.json")
+        let permissionID = try #require(SignalCatalogue.permission.first?.id)
+        let old = ScanSnapshot(id: UUID(), date: Date(), osVersion: "26", score: 80, findingCount: 2, concerningIDs: [],
+                               valueHashes: [permissionID: "aa", "boot-time": "bb"])
+        try JSONEncoder().encode([old]).write(to: file)
+        let history = HistoryStore(directory: dir)
+        #expect(history.latest?.valueHashes == ["boot-time": "bb"])
+        let saved = try JSONDecoder().decode([ScanSnapshot].self, from: Data(contentsOf: file))
+        #expect(saved.first?.valueHashes == ["boot-time": "bb"])
+    }
+
     /// A launch argument must not stand in for the saved value.
     @Test func launchArgumentsCantFakeTheInstallRecord() {
         let key = ReinstallSource.recordedKey

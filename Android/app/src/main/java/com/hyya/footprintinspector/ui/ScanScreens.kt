@@ -169,7 +169,7 @@ private fun Results(scanner: Scanner, nav: Nav) {
             InfoCard("Since your last scan", Tone.CONTEXT, Icons.Outlined.History) {
                 Text("${cmp.previous.score} → ${cmp.current.score}", color = Brand.ink, fontSize = 18.sp)
                 val changed = cmp.changedIds.mapNotNull { Catalogue.byId[it]?.title }
-                Text(if (changed.isEmpty()) "Nothing changed." else "${changed.size} changed, such as ${changed.take(3).joinToString(", ")}.",
+                Text(if (changed.isEmpty()) "No other changes found." else "${changed.size} changed, such as ${changed.take(3).joinToString(", ")}.",
                     color = Brand.textMuted, fontSize = 13.sp)
             }
         }

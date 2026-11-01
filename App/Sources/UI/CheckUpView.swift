@@ -39,7 +39,7 @@ struct CheckUpView: View {
                         Button { openStep = step.id } label: {
                             RowCard(symbol: done.contains(step.id) ? "checkmark" : step.symbol,
                                     title: step.title,
-                                    subtitle: step.path,
+                                    subtitle: step.hint ?? step.path,
                                     tileFG: done.contains(step.id) ? .white : Brand.accent,
                                     tileBG: done.contains(step.id) ? Brand.mint : Brand.lilacSoft) {
                                 Image(systemName: done.contains(step.id) ? "checkmark.circle.fill" : "chevron.right")
@@ -94,9 +94,10 @@ struct CheckUpStepView: View {
     /// "Settings › Privacy & Security › Location Services" → "Location Services".
     static func searchTerm(_ path: String) -> String? {
         guard path.hasPrefix("Settings ›") else { return nil }
-        let last = path.components(separatedBy: "›").last?.trimmingCharacters(in: .whitespaces) ?? ""
+        let plain = path.components(separatedBy: " (").first ?? path
+        let last = plain.components(separatedBy: "›").last?.trimmingCharacters(in: .whitespaces) ?? ""
         let term = last.components(separatedBy: ", then").first?.trimmingCharacters(in: .whitespaces) ?? last
-        return term.isEmpty || term.hasPrefix("[") ? nil : term
+        return term.isEmpty || term.contains("[") ? nil : term
     }
 
     let step: CheckUpStep
