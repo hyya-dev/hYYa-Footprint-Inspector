@@ -25,6 +25,22 @@
     <queries>
         <!-- So the system's own Settings can be found and opened directly. -->
         <intent><action android:name="android.settings.SETTINGS" /></intent>
+        <intent><action android:name="android.settings.ACCESSIBILITY_SETTINGS" /></intent>
+        <intent><action android:name="android.settings.APPLICATION_DEVELOPMENT_SETTINGS" /></intent>
+        <intent><action android:name="android.settings.APPLICATION_SETTINGS" /></intent>
+        <intent><action android:name="android.settings.BLUETOOTH_SETTINGS" /></intent>
+        <intent><action android:name="android.settings.DEVICE_INFO_SETTINGS" /></intent>
+        <intent><action android:name="android.settings.INPUT_METHOD_SETTINGS" /></intent>
+        <intent><action android:name="android.settings.LOCALE_SETTINGS" /></intent>
+        <intent><action android:name="android.settings.MANAGE_APPLICATIONS_SETTINGS" /></intent>
+        <intent><action android:name="android.settings.action.MANAGE_OVERLAY_PERMISSION" /></intent>
+        <intent><action android:name="android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS" /></intent>
+        <intent><action android:name="android.settings.PRIVACY_SETTINGS" /></intent>
+        <intent><action android:name="android.settings.SECURITY_SETTINGS" /></intent>
+        <intent><action android:name="android.settings.SYSTEM_UPDATE_SETTINGS" /></intent>
+        <intent><action android:name="android.settings.USAGE_ACCESS_SETTINGS" /></intent>
+        <intent><action android:name="android.intent.action.SAFETY_CENTER" /></intent>
+        <intent><action android:name="android.intent.action.REVIEW_PERMISSION_USAGE" /></intent>
         <package android:name="com.grindrapp.android" />
         <package android:name="com.tinder" />
         <package android:name="com.bumble.app" />

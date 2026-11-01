@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.hyya.footprintinspector.catalogue.Catalogue
+import com.hyya.footprintinspector.model.Group
 import com.hyya.footprintinspector.widget.ScoreWidget
 import com.hyya.footprintinspector.catalogue.CheckUp
 import com.hyya.footprintinspector.model.OverallScore
@@ -102,8 +103,15 @@ class Scanner(app: Application) : AndroidViewModel(app) {
         prefs.edit().remove(SENSITIVE).remove("sensitiveCategories").remove("checkUpDone")
             .remove(ScoreWidget.SCORE).remove(ScoreWidget.CHECKED_AT).apply()
         history.clear()
+        generation++
+        readings = emptyMap()
+        comparison = null
+        phase = Phase.IDLE
         ScoreWidget.update(getApplication())
     }
+
+    /** Moves on with each Clear history, so a scan still running then is dropped, not saved. */
+    private var generation = 0
 
     /** The four checks as one score, for the first page. */
     fun overall(context: Context): OverallScore {
@@ -113,7 +121,8 @@ class Scanner(app: Application) : AndroidViewModel(app) {
         return OverallScore.of(
             footprint = if (done) score.value else history.latest?.score,
             sensitiveFound = sensitiveFound,
-            watchers = if (done) findings(Section.WATCH).count { it.isConcerning } else null,
+            // A failed read must not score as an all-clear.
+            watchers = if (done && findings(Section.WATCH).isNotEmpty()) findings(Section.WATCH).count { it.isConcerning } else null,
             checkUpDone = ticked.intersect(ids).size,
             checkUpTotal = ids.size,
         )
@@ -126,6 +135,7 @@ class Scanner(app: Application) : AndroidViewModel(app) {
      */
     fun scan(quietly: Boolean = false) {
         if (phase == Phase.SCANNING) return
+        val run = generation
         val before = history.latest
         if (!quietly) phase = Phase.SCANNING
         progress = 0f
@@ -135,6 +145,7 @@ class Scanner(app: Application) : AndroidViewModel(app) {
             val out = mutableMapOf<String, Reading>()
             readers.forEachIndexed { i, r ->
                 val got = withContext(Dispatchers.Default) { runCatching { r.read(ctx) }.getOrDefault(emptyList()) }
+                if (run != generation) return@launch
                 got.forEach { out[it.id] = it }
                 progress = (i + 1f) / readers.size
                 if (!quietly) delay(60)
@@ -186,7 +197,8 @@ class HistoryStore(context: Context) {
 
     fun snapshot(findings: List<Finding>, score: FootprintScore): Snapshot {
         val s = salt
-        val hashes = findings.associate { f ->
+        // Not permission findings: a value such as a rough location is few enough to guess from its marker.
+        val hashes = findings.filter { it.definition.section.group != Group.PERMISSION }.associate { f ->
             val material = s + f.id + "\u001F" + f.reading.value + f.reading.items.joinToString("\u001F")
             f.id to MessageDigest.getInstance("SHA-256").digest(material.toByteArray()).take(8).joinToString("") { "%02x".format(it) }
         }
@@ -207,6 +219,8 @@ class HistoryStore(context: Context) {
         snapshots = emptyList(); file.delete(); saltFile.delete()
     }
 
+    private val permissionIds get() = Catalogue.list.filter { it.section.group == Group.PERMISSION }.map { it.id }.toSet()
+
     private fun load(): List<Snapshot> = runCatching {
         val arr = JSONArray(file.readText())
         (0 until arr.length()).map { i ->
@@ -214,7 +228,7 @@ class HistoryStore(context: Context) {
             val h = o.getJSONObject("hashes")
             Snapshot(o.getLong("date"), o.getInt("score"), o.getInt("count"),
                 o.getJSONArray("concerning").let { a -> (0 until a.length()).map(a::getString) },
-                h.keys().asSequence().associateWith { h.getString(it) })
+                h.keys().asSequence().filter { it !in permissionIds }.associateWith { h.getString(it) })
         }
     }.getOrDefault(emptyList())
 }
