@@ -108,7 +108,7 @@ class Scanner(app: Application) : AndroidViewModel(app) {
     /** The four checks as one score, for the first page. */
     fun overall(context: Context): OverallScore {
         val ticked = context.getSharedPreferences("app", Context.MODE_PRIVATE).getStringSet("checkUpDone", emptySet())!!
-        val ids = CheckUp.steps.map { it.id }.toSet()
+        val ids = CheckUp.steps.filter { it.counts }.map { it.id }.toSet()
         val done = phase == Phase.DONE
         return OverallScore.of(
             footprint = if (done) score.value else history.latest?.score,

@@ -12,7 +12,11 @@ import android.provider.Settings
  * check-up walks through Settings one area at a time. [action] opens the closest page; every
  * opener falls back to the Settings home if the device doesn't have that page.
  */
-data class CheckUpStep(val id: String, val title: String, val why: String, val path: String, val actions: List<String>, val action: String)
+data class CheckUpStep(
+    val id: String, val title: String, val why: String, val path: String, val actions: List<String>, val action: String,
+    /** False for steps added after 1.0.3: finishing Check-up must never lower a score, so people who finished keep their credit. */
+    val counts: Boolean = true,
+)
 
 object CheckUp {
     private const val PM = "Settings › Security & privacy › Privacy controls › Permission manager (on Samsung: Security and privacy › Permission manager)"
@@ -21,6 +25,24 @@ object CheckUp {
         CheckUpStep("safety", "Start with the privacy check", "Android's own overview of your privacy and security settings, in one place.",
             "Settings › Security & privacy", listOf("Follow any suggestions it shows.", "Open Privacy dashboard to see which apps used your location, camera and microphone recently."),
             Intent.ACTION_SAFETY_CENTER),
+        CheckUpStep("screen-lock", "Lock your device", "Your screen lock protects everything else on this device. A short screen timeout locks it soon after you put it down.",
+            "Android 14 or later: Settings › Security & privacy › Device unlock › Screen lock. Android 13: Settings › Security › Screen lock. Samsung: Settings › Security and privacy › Screen lock and biometrics",
+            listOf("Use a PIN of at least six digits, or a password.", "Set the screen to turn off after 30 seconds or 1 minute: Settings › Display › Screen timeout. On Android 15 and 16, Display is called Display & touch.",
+                "Menu names vary by maker. If you can't see it, search for Screen lock in Settings."),
+            Settings.ACTION_SECURITY_SETTINGS, counts = false),
+        CheckUpStep("google-account", "Protect your Google Account", "Your Google Account can hold your passwords, photos and backups. 2-Step Verification protects it even if your password leaks.",
+            "Settings › Google › Manage your Google Account › Security › 2-Step Verification",
+            listOf("Turn on 2-Step Verification.", "Check that your recovery phone and email are up to date.", "This works the same on every Android version this app supports."),
+            Settings.ACTION_SETTINGS, counts = false),
+        CheckUpStep("find-device", "Be able to find your device", "If you lose your device, you can see where it is, lock it or erase it from another device.",
+            "Android 14 or later: Settings › Security & privacy › Device finders › Find Hub. Android 13: Settings › Security › Find My Device. Samsung: Settings › Security and privacy › Lost device protection › Find My Mobile",
+            listOf("Check that finding this device is turned on.", "Find Hub used to be called Find My Device, so your version may still use that name. It's the same service."),
+            Settings.ACTION_SECURITY_SETTINGS, counts = false),
+        CheckUpStep("theft-protection", "Theft protection", "If someone takes your device, these features can lock the screen quickly and keep your information out of reach.",
+            "Android: Settings › Google › All services › Theft protection. Samsung with One UI 7 or later: Settings › Security and privacy › Lost device protection › Theft protection",
+            listOf("Turn on Theft Detection Lock, Offline Device Lock and Remote Lock.", "If you see Identity Check, turn it on too. Only some devices have it.",
+                "Samsung with One UI 6.1 or earlier: use the Android path. If an option is greyed out, your device doesn't support it. Tablets don't have these features."),
+            Settings.ACTION_SETTINGS, counts = false),
         CheckUpStep("updates", "Keep the system updated", "Updates close the holes that spyware uses to get in. It's the single best protection there is.",
             "Settings › System › Software updates (on Samsung: Settings › Software update)",
             listOf("Install any update that's waiting.", "Also update apps in the Play Store, and turn on automatic updates."),
