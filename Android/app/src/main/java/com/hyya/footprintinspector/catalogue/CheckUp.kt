@@ -34,7 +34,7 @@ object CheckUp {
                 "Menu names vary by maker. If you can't see it, search for Screen lock in Settings."),
             Settings.ACTION_SECURITY_SETTINGS, counts = false, hint = "PIN, password and screen timeout"),
         CheckUpStep("google-account", "Protect your Google Account", "Your Google Account can hold your passwords, photos and backups. 2-Step Verification protects it even if your password leaks.",
-            "Settings › Google › Manage your Google Account › Security › 2-Step Verification",
+            "${here.google} › Manage your Google Account › Security › 2-Step Verification",
             listOf("Turn on 2-Step Verification.", "Check that your recovery phone and email are up to date."),
             Settings.ACTION_SETTINGS, counts = false, hint = "2-Step Verification and recovery"),
         CheckUpStep("find-device", "Be able to find your device", "If you lose your device, you can see where it is, lock it or erase it from another device.",

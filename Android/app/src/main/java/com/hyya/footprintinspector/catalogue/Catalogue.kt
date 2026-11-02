@@ -60,7 +60,7 @@ object Catalogue {
                 Settings.ACTION_APPLICATION_SETTINGS,
                 "If it's a device admin app, turn that off first (${Directions.here.deviceAdmin}).",
                 "Open Settings › Apps, find the app and tap Uninstall.",
-                "If someone else set up this device and you don't feel safe, Safety Check in Settings › Safety & emergency can help you review who has access.")),
+                "If someone else set up this device and you don't feel safe, Safety Check in ${Directions.here.safety} can help you review who has access.")),
 
         // This device
         Definition("device-name", Section.IDENTITY, "Device name",

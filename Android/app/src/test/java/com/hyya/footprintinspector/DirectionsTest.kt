@@ -18,8 +18,10 @@ class DirectionsTest {
     @Test fun samsungPathsMatchItsOwnSettingsApp() {
         assertEquals("Settings › Security and privacy › More privacy settings › Permission manager", galaxyOneUi9.permissionManager)
         assertEquals("Settings › Security and privacy › Screen lock and biometrics", galaxyOneUi9.screenLock)
-        assertEquals("Settings › General management › Keyboard list and default", galaxyOneUi9.keyboards)
+        assertEquals("Settings › General management › Keyboard", galaxyOneUi9.keyboards)
         assertEquals("Settings › Security and privacy › Lost device protection › Theft protection", galaxyOneUi9.theftProtection)
+        assertEquals("Settings › Apps › More options › Special access › Usage data access", galaxyOneUi9.usageAccess)
+        assertEquals("Settings › Google services › All services › Advanced Protection", galaxyOneUi9.advancedProtection)
     }
 
     @Test fun android13UsesItsOlderMenus() {
