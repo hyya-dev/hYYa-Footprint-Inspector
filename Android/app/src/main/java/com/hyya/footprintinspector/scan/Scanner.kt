@@ -71,7 +71,8 @@ class Scanner(app: Application) : AndroidViewModel(app) {
 
     fun recordSensitive(found: Int) {
         sensitiveFound = found
-        if (keep) prefs.edit().putInt(SENSITIVE, found).apply()
+        // A kept choice beside a found count could name the app.
+        if (keep) prefs.edit().putInt(SENSITIVE, found).apply { if (found > 0) remove("sensitiveCategories") }.apply()
         publishWidget(checked = true)
     }
 

@@ -67,7 +67,7 @@ struct PrivacyReportView: View {
             // Footprint and Settings.
             .hiddenNavigationBar()
             .fileImporter(isPresented: $importing, allowedContentTypes: Self.types) { result in load(result) }
-            .onChange(of: scenePhase) { _, phase in if phase == .background { report = nil } }
+            .onChange(of: scenePhase) { _, phase in if phase != .active { report = nil } }
             .onChange(of: report?.sharing.count) { _, n in if let n { check.recordTracker(sharing: n) } }
             .task { if LaunchOptions.has("-sampleData") && report == nil { report = .sample } }
             .sensoryFeedback(trigger: opened) { _, _ in (report?.sharing.isEmpty ?? true) ? .success : .warning }
@@ -193,21 +193,28 @@ struct PrivacyReportView: View {
     private func load(_ result: Result<URL, Error>) {
         problem = nil
         guard case .success(let url) = result else { return }
+        Task {
+            do {
+                // Off the main thread: a very large file must not freeze the app.
+                let r = try await Task.detached(priority: .userInitiated) { try Self.readReport(at: url) }.value
+                withAnimation(reduceMotion ? nil : .spring(response: 0.45, dampingFraction: 0.85)) { report = r; showNormal = false }
+                opened += 1
+            } catch {
+                problem = (error as? LocalizedError)?.errorDescription ?? PrivacyReport.ReadError.notAReport.errorDescription
+                Haptics.warning()
+            }
+        }
+    }
+
+    private nonisolated static func readReport(at url: URL) throws -> PrivacyReport {
         let scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-        do {
-            // Reads one byte past the limit rather than trusting the size the file reports.
-            let handle = try FileHandle(forReadingFrom: url)
-            defer { try? handle.close() }
-            let data = try handle.read(upToCount: PrivacyReport.maxBytes + 1) ?? Data()
-            guard data.count <= PrivacyReport.maxBytes else { throw PrivacyReport.ReadError.tooBig }
-            let r = try PrivacyReport.read(data)
-            withAnimation(reduceMotion ? nil : .spring(response: 0.45, dampingFraction: 0.85)) { report = r; showNormal = false }
-            opened += 1
-        } catch {
-            problem = (error as? LocalizedError)?.errorDescription ?? PrivacyReport.ReadError.notAReport.errorDescription
-            Haptics.warning()
-        }
+        // Reads one byte past the limit rather than trusting the size the file reports.
+        let handle = try FileHandle(forReadingFrom: url)
+        defer { try? handle.close() }
+        let data = try handle.read(upToCount: PrivacyReport.maxBytes + 1) ?? Data()
+        guard data.count <= PrivacyReport.maxBytes else { throw PrivacyReport.ReadError.tooBig }
+        return try PrivacyReport.read(data)
     }
 }
 

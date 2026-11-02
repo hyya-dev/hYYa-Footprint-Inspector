@@ -44,7 +44,7 @@ struct SensitiveView: View {
         NavigationStack {
             Page(resetOn: AnyHashable("\(checks)-\(results == nil)-\(revealed)")) {
                 HeroCard(eyebrow: "Sensitive apps",
-                         title: "Which apps give you away?",
+                         title: "Which apps could reveal you?",
                          subtitle: Self.heroLine,
                          mood: heroMood,
                          mascotSize: 104)
@@ -119,7 +119,7 @@ struct SensitiveView: View {
             if found.isEmpty {
                 MascotSays(line: "None of these apps answered. Any app asking the same would find nothing.", mood: .happy, size: 76, tone: .fix)
             } else {
-                Text(found.count == 1 ? "1 app gives you away" : "\(found.count) apps give you away")
+                Text(found.count == 1 ? "1 app could reveal you" : "\(found.count) apps could reveal you")
                     .scaledFont(24, weight: .semibold, relativeTo: .title2)
                     .foregroundStyle(Brand.textPrimary)
                 // The names stay hidden until asked for, but the way to see them is always in view.

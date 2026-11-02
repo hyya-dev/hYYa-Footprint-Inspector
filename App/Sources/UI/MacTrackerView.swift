@@ -48,7 +48,7 @@ struct MacTrackerView: View {
         NavigationStack {
             Page {
                 let done = checked.count, total = places.count
-                HeroCard(eyebrow: "Tracker", title: done == total ? "All checked!" : "Who can watch you?",
+                HeroCard(eyebrow: "Tracker", title: done == total ? "All checked!" : "See what has special access",
                          subtitle: "A Mac doesn't keep a record of what apps did, and it doesn't tell one app which others hold powerful access. These are the places that show it. Open each, remove anything you don't recognise, then tick it.",
                          mood: done == total ? .happy : .thinking, mascotSize: 96) {
                     VStack(alignment: .leading, spacing: 6) {

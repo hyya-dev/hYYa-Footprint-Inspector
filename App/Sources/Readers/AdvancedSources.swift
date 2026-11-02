@@ -85,6 +85,12 @@ struct ReinstallSource: SignalSource {
         return saved?[recordedKey] as? Bool == true
     }
 
+    /// For Clear history: the list outlives deleting the app, so this is the only way to remove it.
+    static func forget() {
+        SecItemDelete(query as CFDictionary)
+        UserDefaults.standard.removeObject(forKey: recordedKey)
+    }
+
     func read() async -> [SignalReading] {
         var log = Self.loadLog()
         if !Self.alreadyRecorded {

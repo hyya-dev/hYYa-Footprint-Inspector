@@ -15,9 +15,7 @@ struct FootprintInspectorApp: App {
         // Sample-data runs (store screenshots, UI tests) start on the Score page every time, not
         // where an earlier run left off, unless a test of returning asks to keep the place.
         if LaunchOptions.has("-sampleData") && !LaunchOptions.has("-keepPlace") {
-            for key in ["nav.tab", "nav.finding", "nav.section", "nav.fixing", "nav.checkup", "nav.settings", "fix.ids", "fix.index"] {
-                UserDefaults.standard.removeObject(forKey: key)
-            }
+            SavedPlace.forget()
         }
         // Store screenshots and UI tests start clean every time, with nothing from earlier runs.
         let history = LaunchOptions.has("-sampleData")
@@ -60,6 +58,16 @@ struct FootprintInspectorApp: App {
                 #if os(macOS)
                 .frame(minWidth: 820, minHeight: 600)
                 #endif
+        }
+    }
+}
+
+/// Where the person was, kept so coming back lands on the same page. The fix keys name unfixed
+/// findings, so Clear history removes all of it.
+enum SavedPlace {
+    static func forget() {
+        for key in ["nav.tab", "nav.finding", "nav.section", "nav.fixing", "nav.checkup", "nav.settings", "fix.ids", "fix.index"] {
+            UserDefaults.standard.removeObject(forKey: key)
         }
     }
 }

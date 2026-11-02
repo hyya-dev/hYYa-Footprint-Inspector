@@ -3,6 +3,36 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import Foundation
+import LocalAuthentication
+#if os(iOS)
+import UIKit
+#endif
+
+/// What this device has, read from the device itself, so a direction names what's really on it.
+/// Apple's guides for iOS 26 and 27 use the same paths, so what differs is the hardware.
+enum ThisDevice {
+    /// "Face ID" or "Touch ID"; nil when the device has neither.
+    static let biometry: String? = {
+        let context = LAContext()
+        _ = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil)
+        return switch context.biometryType {
+        case .faceID: "Face ID"
+        case .touchID: "Touch ID"
+        default: nil
+        }
+    }()
+
+    /// The Settings row that holds the passcode. It's named after how the device unlocks.
+    static var passcodeRow: String { biometry.map { "\($0) & Passcode" } ?? "Passcode" }
+
+    static var isTablet: Bool {
+        #if os(iOS)
+        UIDevice.current.userInterfaceIdiom == .pad
+        #else
+        false
+        #endif
+    }
+}
 
 /// iOS never tells one app which other apps hold a permission. Only Settings knows, so the
 /// check-up walks the user through Settings, one area at a time.
@@ -34,7 +64,8 @@ enum CheckUpGuide {
         #if os(macOS)
         macSteps
         #else
-        iosSteps
+        // Stolen Device Protection is iPhone only.
+        iosSteps.filter { !(ThisDevice.isTablet && $0.id == "stolen-device") }
         #endif
     }
 
@@ -45,7 +76,7 @@ enum CheckUpGuide {
               actions: ["Tap Manage Sharing & Access.", "Go through each screen and remove anything you don't recognise or no longer need."]),
         .init(id: "lock-device", title: "Lock your device", symbol: "lock",
               why: "Your passcode protects everything else on this device. A short Auto-Lock locks it soon after you put it down.",
-              path: "Settings › Face ID & Passcode (Touch ID & Passcode on devices with a Home button)",
+              path: "Settings › \(ThisDevice.passcodeRow)",
               actions: ["Use a passcode of at least six digits. Passcode Options offers longer ones.",
                         "Set Auto-Lock to 30 seconds or 1 minute: Settings › Display & Brightness › Auto-Lock.",
                         "Under Allow Access When Locked, turn off what you don't need on the Lock Screen, such as Control Center."],
@@ -62,14 +93,14 @@ enum CheckUpGuide {
               counts: false, hint: "Find it even when it's offline"),
         .init(id: "stolen-device", title: "Stolen Device Protection", symbol: "lock.iphone",
               why: "If someone takes your device and knows your passcode, this adds extra checks before they can change sensitive settings away from familiar places.",
-              path: "Settings › Face ID & Passcode › Stolen Device Protection",
-              actions: ["Turn it on. It may already be on.", "You'll need two-factor authentication, Find My and Significant Locations on.", "Tablets don't have this feature."],
+              path: "Settings › \(ThisDevice.passcodeRow) › Stolen Device Protection",
+              actions: ["Turn it on. It may already be on.", "You'll need two-factor authentication, \(ThisDevice.biometry ?? "Face ID or Touch ID") and Significant Locations on."],
               counts: false, hint: "Extra checks if someone takes it"),
         .init(id: "lock-apps", title: "Lock sensitive apps", symbol: "app.badge.checkmark",
-              why: "Locking an app asks for Face ID, Touch ID or your passcode before it opens, even when your device is unlocked.",
+              why: "Locking an app asks for \(ThisDevice.biometry.map { "\($0) or " } ?? "")your passcode before it opens, even when your device is unlocked.",
               path: "Home Screen: touch and hold an app",
-              actions: ["Choose Require Face ID, Require Touch ID or Require Passcode.", "Some built-in apps, such as Settings and Camera, can't be locked."],
-              counts: false, hint: "Face ID on the apps that matter"),
+              actions: ["Choose Require \(ThisDevice.biometry ?? "Passcode").", "Some built-in apps can't be locked."],
+              counts: false, hint: "\(ThisDevice.biometry ?? "A passcode") on the apps that matter"),
         .init(id: "social-apps", title: "Social media apps", symbol: "person.2.wave.2",
               why: "Social apps can learn a lot from what they're allowed to reach, and from what other apps and websites share with them.",
               path: "Settings › Apps, then a social app",
@@ -78,14 +109,14 @@ enum CheckUpGuide {
                         "On Facebook and Instagram, look in Accounts Center or Meta Account settings for Your activity off Meta technologies and Ad preferences. Names can change, and some options aren't offered everywhere."],
               counts: false, hint: "What they can reach and share"),
         .init(id: "device-management", title: "VPN & Device Management", symbol: "gearshape.2",
-              why: "A profile here can let someone manage this device, send your internet traffic through their servers, or read connections that are meant to be private. An unknown profile is a common way spying apps get in.",
+              why: "A profile here can let someone manage this device, send your internet traffic through their servers, or read connections that are meant to be private.",
               path: "Settings › General › VPN & Device Management",
               actions: ["Tap each profile or management entry you don't recognise, then choose Remove.",
                         "Keep ones your work or school set up with you, and VPNs you installed yourself."]),
         .init(id: "updates", title: "Keep the system updated", symbol: "arrow.down.circle",
               why: "Updates close the holes that spyware uses to get in. It's the single best protection there is.",
               path: "Settings › General › Software Update › Automatic Updates",
-              actions: ["Turn on both Download and Install.", "If an update is waiting, install it now."]),
+              actions: ["Turn on Automatically Install.", "If an update is waiting, install it now."]),
         .init(id: "restart", title: "Restart once a week", symbol: "arrow.clockwise",
               why: "Some spyware lives only in memory and is cleared by a restart. It also gives apps a new restart time, so they can't use it to recognise you.",
               path: "Hold the side or top button and either volume button",
@@ -102,8 +133,8 @@ enum CheckUpGuide {
                         "Otherwise, leave it off and keep your system updated."]),
         .init(id: "health", title: "Health", symbol: "heart.text.square",
               why: "Health data is the most personal information on your device: sleep, heart, cycles, medicines.",
-              path: "Settings › Health › Data Access & Devices",
-              actions: ["Open each app in the list.", "Turn off any data type the app doesn't truly need.", "Remove apps you no longer use."]),
+              path: "Health app › your picture or initials › Privacy › Apps",
+              actions: ["Open each app in the list.", "Turn off any data type the app doesn't truly need.", "Check Devices in the same place, and remove any you no longer use."]),
         .init(id: "location", title: "Location", symbol: "location",
               why: "Your location shows where you live, work and spend time.",
               path: "Settings › Privacy & Security › Location Services",

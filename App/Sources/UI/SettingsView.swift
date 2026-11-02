@@ -85,7 +85,7 @@ struct SettingsView: View {
                         RowCard(symbol: "trash", title: "Clear history", tileFG: Brand.concern) { EmptyView() }
                     }
                     .buttonStyle(PressableCardStyle())
-                    .disabled(history.snapshots.isEmpty && check.sensitiveFound == nil && check.trackerSharing == nil)
+                    .disabled(history.snapshots.isEmpty && check.isEmpty)
                 }
                 Text("Only scores and counts are kept, never which apps you have. Clear history removes them too.")
                     .font(.footnote).foregroundStyle(Brand.textSubtle).padding(.horizontal, 4).padding(.top, -14)
@@ -157,6 +157,8 @@ struct SettingsView: View {
                     history.clear()
                     check.clearSaved()
                     scanner.reset()
+                    ReinstallSource.forget()
+                    SavedPlace.forget()
                     // Directly as well: on a Mac this window can be open with the main one closed.
                     WidgetScore.save(nil)
                     WidgetCenter.shared.reloadAllTimelines()

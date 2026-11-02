@@ -33,7 +33,10 @@ struct ScanView: View {
                 if let finding = scanner.allFindings.first(where: { $0.id == id }) {
                     FindingDetailView(finding: finding)
                 } else {
+                    // Waiting for the first scan after a relaunch. Once it's in and this clue
+                    // isn't there, say, because a fix cleared it, go back instead of waiting on.
                     ProgressView().tint(Brand.ink)
+                        .task(id: scanner.lastScan) { if scanner.lastScan != nil { openedFinding = "" } }
                 }
             }
             .navigationDestination(item: stored($openedSection)) { id in

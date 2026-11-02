@@ -53,7 +53,7 @@ enum SensitiveCatalogue {
     /// The best first step: a hidden app behaves as if it isn't installed, so no other app's check
     /// finds it, and its owner can still open it from the Hidden folder behind Face ID. A locked app
     /// that isn't hidden can still be found, so the step says Hide.
-    static let hideStep = "Best: hide it. Touch and hold its icon, tap Require Face ID, then Hide and Require Face ID. Other apps can no longer spot it, and you still open it from the Hidden folder at the bottom of the App Library. Check again here to see it gone."
+    static let hideStep = "Best: hide it. Touch and hold its icon, tap Require \(ThisDevice.biometry ?? "Passcode"), then Hide and Require \(ThisDevice.biometry ?? "Passcode"). Other apps can no longer spot it, and you still open it from the Hidden folder at the bottom of the App Library. Check again here to see it gone."
     #endif
 
     /// Mac only: more apps per category, matched by name against the installed-app list any Mac

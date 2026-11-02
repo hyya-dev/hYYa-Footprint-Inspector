@@ -54,6 +54,12 @@ final class PrivacyCheck {
         set { saved.trackerChecked = newValue; saved.checkedAt = Date(); save() }
     }
 
+    /// Nothing is saved, so Clear history has nothing to remove.
+    var isEmpty: Bool {
+        saved.sensitiveFound == nil && saved.trackerSharing == nil && saved.checkUpDone.isEmpty
+            && saved.sensitiveCategories.isEmpty && saved.trackerChecked.isEmpty
+    }
+
     init(fileURL: URL? = PrivacyCheck.defaultURL) {
         self.fileURL = fileURL
         guard let fileURL else { return }
@@ -103,7 +109,10 @@ final class PrivacyCheck {
     }
 
     @discardableResult private func save() -> Bool {
-        guard readable, var url = fileURL, let data = try? JSONEncoder().encode(saved) else { return false }
+        // Some kinds hold one app, so a kept choice beside a found count could name it.
+        var stored = saved
+        if (saved.sensitiveFound ?? 0) > 0 { stored.sensitiveCategories = "" }
+        guard readable, var url = fileURL, let data = try? JSONEncoder().encode(stored) else { return false }
         try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         guard (try? data.write(to: url, options: [.atomic, .completeFileProtection])) != nil else { return false }
         var values = URLResourceValues()
@@ -190,7 +199,7 @@ struct OverallScore: Equatable, Sendable {
     /// Every app that shares with outside ad or analytics companies costs 20 points, down to 20.
     static func trackerPart(_ sharing: Int) -> Int { max(20, 100 - 20 * sharing) }
     #if os(macOS)
-    static let trackerLine = "counts as 100 once you've looked through every place that shows which apps can watch you. Until then it isn't in the score."
+    static let trackerLine = "counts as 100 once you've looked through every place that shows which apps have special access. Until then it isn't in the score."
     #else
     static let trackerLine = "100 if no app shared your data with outside advertising or analytics companies, then 20 less for each app that did."
     #endif

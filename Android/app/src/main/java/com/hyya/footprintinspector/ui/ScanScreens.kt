@@ -229,7 +229,7 @@ fun SectionScreen(scanner: Scanner, section: Section, nav: Nav) {
     val findings = scanner.findings(section)
     Page {
         BackBar(section.title, nav)
-        HeroCard(when (section.group) { Group.PERMISSION -> "Needs your permission"; Group.ADVANCED -> "Clever trick"; Group.WATCH -> "Who can watch you"; else -> "Seen without asking" },
+        HeroCard(when (section.group) { Group.PERMISSION -> "Needs your permission"; Group.ADVANCED -> "Clever trick"; Group.WATCH -> "What has special access"; else -> "Seen without asking" },
             section.title,
             when {
                 kind != null && !kind.granted(context) -> "Here's what any app you allow gets to see."

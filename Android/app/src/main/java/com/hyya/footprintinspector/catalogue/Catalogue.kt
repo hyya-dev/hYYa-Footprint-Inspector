@@ -36,21 +36,21 @@ object Catalogue {
             UNTIL_YOU_CHANGE_IT, MEDIUM,
             Fix.settings("Turn off any service you don't know or no longer use. Screen readers and tools you rely on are fine to keep.",
                 Settings.ACTION_ACCESSIBILITY_SETTINGS,
-                "Open Settings › Accessibility.", "Look under Downloaded apps (or Installed apps).", "Tap any service you don't recognise and turn it off.")),
+                "Open Settings › Accessibility.", "Look under ${Directions.here.accessibilityGroup}.", "Tap any service you don't recognise and turn it off.")),
         Definition("watch-notifications", Section.WATCH, "Apps that can read every notification",
             "Apps with notification access can read every notification as it arrives: messages, codes, emails and who they're from.",
             "So watches, car systems and similar apps can show your notifications.",
             UNTIL_YOU_CHANGE_IT, MEDIUM,
             Fix.settings("Remove notification access from any app you don't recognise. A watch or car app you set up yourself needs it.",
                 Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS,
-                "Open Settings › Apps › Special app access › Notification read, reply & control.", "Turn off any app you don't recognise.")),
+                "Open ${Directions.here.notificationAccess}.", "Turn off any app you don't recognise.")),
         Definition("watch-admin", Section.WATCH, "Apps that can lock or erase this device",
             "A device admin app can lock your device, change your screen-lock rules or erase everything, and can't be uninstalled until you turn it off.",
             "For work and school devices, and for finding a lost device.",
             UNTIL_YOU_CHANGE_IT, MEDIUM,
             Fix.settings("Turn off device admin for any app you don't recognise. Work and school apps may need it.",
                 Settings.ACTION_SECURITY_SETTINGS,
-                "Open Settings › Security & privacy › More security settings › Device admin apps.",
+                "Open ${Directions.here.deviceAdmin}.",
                 "Turn off any app you don't recognise. After that you can uninstall it.")),
         Definition("watch-several", Section.WATCH, "Apps with more than one of these",
             "One app holding two or more of these can see what's on your screen, read your messages or lock you out. That combination is how monitoring apps work. Parental-control and work apps hold it too, so check you know each one.",
@@ -58,9 +58,9 @@ object Catalogue {
             UNTIL_YOU_CHANGE_IT, HIGH,
             Fix.settings("If you don't know the app, remove it.",
                 Settings.ACTION_APPLICATION_SETTINGS,
-                "If it's a device admin app, turn that off first (Settings › Security & privacy › More security settings › Device admin apps).",
+                "If it's a device admin app, turn that off first (${Directions.here.deviceAdmin}).",
                 "Open Settings › Apps, find the app and tap Uninstall.",
-                "If someone else set up this device and you don't feel safe, Safety Check in Settings › Security & privacy can help you review who has access.")),
+                "If someone else set up this device and you don't feel safe, Safety Check in Settings › Safety & emergency can help you review who has access.")),
 
         // This device
         Definition("device-name", Section.IDENTITY, "Device name",
@@ -77,7 +77,7 @@ object Catalogue {
             "Exactly which Android version and security update you have.",
             "So apps can turn features on or off.", UNTIL_UPDATE, LOW,
             Fix.settings("Keeping up to date puts you in the biggest crowd and gets you the latest privacy fixes.", Settings.ACTION_DEVICE_INFO_SETTINGS,
-                "Open Settings › System › Software updates (on Samsung: Software update).", "Install any update waiting.")),
+                "Open ${Directions.here.softwareUpdate}.", "Install any update waiting.")),
         Definition("build-fingerprint", Section.IDENTITY, "Build fingerprint",
             "A long label naming your device's maker, model and exact software build. Few devices share it on any given day.",
             "So developers can match problem reports to the right software.", UNTIL_UPDATE, MEDIUM,
@@ -99,7 +99,7 @@ object Catalogue {
             "Whether developer options and USB debugging are on. It marks you as technical, and some apps treat it as a risk signal.",
             "So apps can warn about debugging tools.", UNTIL_YOU_CHANGE_IT, MEDIUM,
             Fix.settings("Turn developer options off if you don't use them.", Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS,
-                "Open Settings › System › Developer options.", "Turn off Use developer options at the top.")),
+                "Open ${Directions.here.developerOptions}.", "Turn off Use developer options at the top.")),
 
         // Storage and memory
         Definition("disk-total", Section.STORAGE, "Total storage", "Your storage size (128 GB, 256 GB…).",
@@ -126,7 +126,7 @@ object Catalogue {
             "What's playing your audio, by name. Earbuds are often named after their owner, such as \"Sam's Buds\", which hands over a first name.",
             "So apps can play sound on the right device.", CHANGES_OFTEN, MEDIUM,
             Fix.settings("Rename your headphones so the name doesn't include yours.", Settings.ACTION_BLUETOOTH_SETTINGS,
-                "Open Settings › Connected devices (on Samsung: Connections › Bluetooth).",
+                "Open ${Directions.here.bluetooth}.",
                 "Tap the settings icon next to your headphones, then Rename.")),
 
         // Language, region and time
@@ -134,12 +134,12 @@ object Catalogue {
             "Your languages, in order. An unusual mix is rare and can hint at where you're from.",
             "So apps can show the right language.", UNTIL_YOU_CHANGE_IT, MEDIUM,
             Fix.settings("Remove languages you don't use.", Settings.ACTION_LOCALE_SETTINGS,
-                "Open Settings › System › Languages.", "Remove any language you don't use.")),
+                "Open ${Directions.here.languages}.", "Remove any language you don't use.")),
         Definition("keyboards", Section.LANGUAGE, "Keyboards",
             "Every keyboard app and language you've turned on. Extra keyboards can see everything you type in them, and their languages show which languages you write in.",
             "So apps can adapt text input.", UNTIL_YOU_CHANGE_IT, MEDIUM,
             Fix.settings("Turn off keyboards you don't use, especially ones you don't fully trust.", Settings.ACTION_INPUT_METHOD_SETTINGS,
-                "Open Settings › System › Keyboard (on Samsung: General management › Keyboard list).",
+                "Open ${Directions.here.keyboards}.",
                 "Turn off keyboards you don't use.")),
         Definition("timezone", Section.LANGUAGE, "Time zone and clock",
             "Your time zone, close to your city, and whether you use a 24-hour clock. A VPN doesn't hide it.",
@@ -151,7 +151,7 @@ object Catalogue {
             "Which accessibility services are on. They're the most powerful thing you can allow: they can read your screen and act for you. Some can also hint at a disability.",
             "So apps can adapt to what you need.", UNTIL_YOU_CHANGE_IT, HIGH,
             Fix.settings("Keep only services you need and trust. Turn off any you don't recognise.", Settings.ACTION_ACCESSIBILITY_SETTINGS,
-                "Open Settings › Accessibility.", "Under Downloaded apps (or Installed apps), turn off what you don't use.")),
+                "Open Settings › Accessibility.", "Under ${Directions.here.accessibilityGroup}, turn off what you don't use.")),
         Definition("appearance", Section.ACCESSIBILITY, "Light or dark theme",
             "Whether you use the light or dark theme.", "So apps match your look.", UNTIL_YOU_CHANGE_IT, LOW,
             Fix.leaveIt("Not worth changing. It's a small detail.")),
@@ -184,7 +184,7 @@ object Catalogue {
             "Whether a screen lock is set, and whether you use fingerprint or face unlock.",
             "So apps can offer biometric sign-in.", UNTIL_YOU_CHANGE_IT, LOW,
             Fix.settings("A screen lock protects everything else here. If yours isn't set, set one.", Settings.ACTION_SECURITY_SETTINGS,
-                "Open Settings › Security & privacy (on Samsung: Lock screen).", "Set a screen lock.")),
+                "Open ${Directions.here.screenLock}.", "Set a screen lock.")),
 
         // Apps
         Definition("default-browser", Section.APPS, "Default browser", "Which browser opens your links.",
@@ -228,7 +228,7 @@ object Catalogue {
     )
 
     private val permissionManagerSteps get() = arrayOf(
-        "Open Settings › Security & privacy › Privacy controls › Permission manager (on Samsung: Security and privacy › Permission manager).",
+        "Open ${Directions.here.permissionManager}.",
     )
     private val locationFix get() = Fix.settings("Give each app the least it needs, and turn off precise location for apps that only need your area.",
         Settings.ACTION_PRIVACY_SETTINGS, *permissionManagerSteps, "Tap Location, then each app: choose Don't allow, or Allow only while using the app with Use precise location off.")

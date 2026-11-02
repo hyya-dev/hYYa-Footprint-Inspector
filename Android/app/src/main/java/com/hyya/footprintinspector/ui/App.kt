@@ -58,7 +58,7 @@ enum class Tab(val label: String, val icon: ImageVector, val step: Int, val pitc
     HOME("Score", Icons.Outlined.Speed, 0, ""),
     SCAN("Footprint", Icons.Outlined.Pets, 1, "See what any app can read about this device."),
     SENSITIVE("Sensitive apps", Icons.Outlined.VisibilityOff, 2, "See which of your apps any app can spot, and what that says about you."),
-    TRACKER("Tracker", Icons.Outlined.Sensors, 3, "See which apps can watch you, and what apps actually used."),
+    TRACKER("Tracker", Icons.Outlined.Sensors, 3, "See which apps have special access, and what apps actually used."),
     CHECKUP("Check-up", Icons.Outlined.Checklist, 4, "Go through Settings one area at a time and take access back."),
     SETTINGS("Settings", Icons.Outlined.Settings, 0, ""),
     ;

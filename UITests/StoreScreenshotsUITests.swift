@@ -30,6 +30,14 @@ final class StoreScreenshotsUITests: XCTestCase {
         add(a)
     }
 
+    /// A store shot of a screen that has finished: it fails the run rather than photograph a
+    /// loading screen or the wrong page, which is how 1.0.4's blank slides got through.
+    private func shot(_ name: String, showing element: XCUIElement) {
+        XCTAssertTrue(element.waitForExistence(timeout: 30), "\(name): the screen never finished")
+        XCTAssertFalse(app.activityIndicators.firstMatch.exists, "\(name): still loading")
+        shot(name)
+    }
+
     private func tap(_ label: String, timeout: TimeInterval = 8) {
         let el = app.buttons[label].firstMatch
         if el.waitForExistence(timeout: timeout) {
@@ -167,34 +175,36 @@ final class StoreScreenshotsUITests: XCTestCase {
         }
         app.swipeDown(velocity: .fast)
         sleep(1)
-        shot("store-05-sensitive")
+        shot("store-05-sensitive", showing: app.staticTexts["Which apps could reveal you?"])
         let check = app.buttons.containing(NSPredicate(format: "label BEGINSWITH 'Check '")).firstMatch
         scrollTo(check, max: 6)
         if check.exists { check.tap(); sleep(1) }
 
         tab("Tracker")
         sleep(2)
-        shot("store-08-tracker")
+        shot("store-08-tracker", showing: app.staticTexts["Here's what they did"])
 
         tab("Check-up")
         sleep(1)
-        shot("store-06-checkup")
+        shot("store-06-checkup", showing: app.staticTexts["Start with Safety Check"])
 
         tab("Footprint")
         tab("Footprint"); tap("Start with check 1")
         XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 20))
         sleep(2)
-        shot("store-03-footprint")
+        shot("store-03-footprint", showing: app.buttons["Scan again"])
         // The Score page with all the checks done so far, the app's first page.
         tab("Score")
         sleep(2)
-        shot("store-02-results")
+        shot("store-02-results", showing: app.buttons["Share my result"])
         tab("Footprint")
-        sleep(1)
+        XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 20))
 
         let clue = app.buttons.containing(NSPredicate(format: "label CONTAINS 'last restart'")).firstMatch
         scrollTo(clue, max: 14)
-        if clue.exists { clue.tap(); sleep(2); shot("store-04-finding") }
+        XCTAssertTrue(clue.exists, "The restart clue isn't on the page")
+        clue.tap()
+        shot("store-04-finding", showing: app.staticTexts["Your last restart time gives you away"])
         back()
         sleep(1)
         app.swipeDown(velocity: .fast); app.swipeDown(velocity: .fast)
@@ -202,14 +212,14 @@ final class StoreScreenshotsUITests: XCTestCase {
         // The score explained, with "Fix them with me", then the first fix step.
         let fix = app.buttons["Fix them with me"]
         scrollTo(fix, max: 6)
+        XCTAssertTrue(fix.exists, "Fix them with me isn't on the page")
         if fix.exists {
             app.swipeUp(velocity: .slow)
             sleep(1)
             shot("store-10-score")
             fix.tap()
-            _ = app.buttons["Done, next"].waitForExistence(timeout: 5)
             sleep(3) // let the sheet finish rising before the shot
-            shot("store-09-fix")
+            shot("store-09-fix", showing: app.buttons["Done, next"])
             app.buttons["Close"].firstMatch.tap()
         }
 

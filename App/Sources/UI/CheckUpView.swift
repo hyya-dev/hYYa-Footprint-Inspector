@@ -160,8 +160,8 @@ struct CheckUpStepView: View {
                 .frame(maxWidth: .infinity)
             }
             #else
-            // Restarting and the Passwords app aren't in Settings, so there's no Settings button.
-            if step.id != "restart" && step.id != "passwords" {
+            // Restarting and the Health and Passwords apps aren't in Settings, so there's no Settings button.
+            if !["restart", "passwords", "health"].contains(step.id) {
                 Button("Open Settings") { SettingsLink.openSettingsHome() }
                     .buttonStyle(GhostButtonStyle())
                     .frame(maxWidth: .infinity)

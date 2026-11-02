@@ -98,7 +98,7 @@ fun SensitiveScreen(scanner: com.hyya.footprintinspector.scan.Scanner) {
     }
 
     Page(resetOn = "${results != null}-$revealed") {
-        HeroCard("Sensitive apps", "Which apps give you away?",
+        HeroCard("Sensitive apps", "Which apps could reveal you?",
             "Any app can ask whether certain apps are installed, one by one, without asking you. Pick the kinds to check.", 104)
         results?.let { r ->
             val found = Sensitive.categories.flatMap { c -> (r[c.id] ?: emptyList()).map { c to it } }
@@ -108,7 +108,7 @@ fun SensitiveScreen(scanner: com.hyya.footprintinspector.scan.Scanner) {
             if (found.isEmpty()) {
                 MascotSays("None of these apps answered. Any app asking the same would find nothing.", tone = Tone.FIX)
             } else {
-                Text(if (found.size == 1) "1 app gives you away" else "${found.size} apps give you away",
+                Text(if (found.size == 1) "1 app could reveal you" else "${found.size} apps could reveal you",
                     color = Brand.ink, fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 // The names stay hidden until asked for, but the way to see them is always in view.
                 if (revealed) Column(verticalArrangement = Arrangement.spacedBy(12.dp)) { found.forEach { (c, app) -> FoundAppCard(c, app) } }
@@ -227,7 +227,7 @@ fun TrackerScreen(scanner: com.hyya.footprintinspector.scan.Scanner, nav: Nav) {
     val context = LocalContext.current
     val watch = scanner.findings(com.hyya.footprintinspector.model.Section.WATCH)
     Page {
-        HeroCard("Tracker", "Who can watch you?",
+        HeroCard("Tracker", "See what has special access",
             "Some apps hold access that lets them read your screen, every notification, or lock your device. Here's who, and Android's own record of what apps used.", 96)
         if (watch.isEmpty()) {
             InfoCard("Run a scan first", Tone.EXPLAIN, Icons.Outlined.Search) {
@@ -240,7 +240,7 @@ fun TrackerScreen(scanner: com.hyya.footprintinspector.scan.Scanner, nav: Nav) {
                 Slice("worth knowing", watch.count { it.severity == com.hyya.footprintinspector.model.Severity.MEDIUM }, Amber),
                 Slice("all clear", watch.count { it.severity == com.hyya.footprintinspector.model.Severity.LOW }, Tone.FIX.tint),
             ), "checks")
-            SectionTitle("Who can watch you", watch.count { it.isConcerning }.takeIf { it > 0 }?.toString())
+            SectionTitle("What has special access", watch.count { it.isConcerning }.takeIf { it > 0 }?.toString())
             Panel { watch.forEachIndexed { i, f -> TrackerRow(f, nav, i < watch.lastIndex) } }
             Text("Apps built into your device, like Google's and the home screen, are listed but not counted. Parental-control and work apps hold this access too.",
                 color = Brand.textSubtle, fontSize = 12.sp, lineHeight = 16.sp)

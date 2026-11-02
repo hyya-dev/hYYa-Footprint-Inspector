@@ -74,7 +74,8 @@ struct LiveScoreTests {
         let reopened = PrivacyCheck(fileURL: url)
         #expect(reopened.sensitiveFound == 2)
         #expect(reopened.checkUpDone == "updates")
-        #expect(reopened.sensitiveCategories == "dating")
+        // Some kinds hold one app, so the choice isn't kept beside a found count.
+        #expect(reopened.sensitiveCategories.isEmpty)
         #expect(reopened.checkedAt != nil)
         // Not in iCloud or computer backups.
         #expect(try url.resourceValues(forKeys: [.isExcludedFromBackupKey]).isExcludedFromBackup == true)
@@ -227,6 +228,28 @@ struct ReportHardeningTests {
         let report = try PrivacyReport.read(data)
         let hits = report.ranked.first?.sites.values.first?.hits ?? 0
         #expect(hits > 0 && hits <= 50 * 1_000_000)
+    }
+
+    @Test func appsAndSitesAreCapped() throws {
+        var lines = (0...PrivacyReport.maxApps + 5).map { #"{"type":"networkActivity","bundleID":"com.example.a\#($0)","domain":"a.example.com"}"# }
+        lines += (0...PrivacyReport.maxSitesPerApp + 5).map { #"{"type":"networkActivity","bundleID":"com.example.a0","domain":"s\#($0).example.com"}"# }
+        let report = try PrivacyReport.read(Data(lines.joined(separator: "\n").utf8))
+        #expect(report.apps.count == PrivacyReport.maxApps)
+        #expect((report.apps.map(\.sites.count).max() ?? 0) == PrivacyReport.maxSitesPerApp)
+        #expect(report.ranked.count == report.apps.count)
+    }
+
+    @MainActor @Test func aChoiceIsNotKeptBesideAFoundCount() throws {
+        let url = FileManager.default.temporaryDirectory.appending(path: "check-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let check = PrivacyCheck(fileURL: url)
+        check.sensitiveCategories = "recovery"
+        check.recordSensitive(found: 0)
+        #expect(PrivacyCheck(fileURL: url).sensitiveCategories == "recovery")
+        check.recordSensitive(found: 1)
+        #expect(check.sensitiveCategories == "recovery")
+        #expect(PrivacyCheck(fileURL: url).sensitiveCategories.isEmpty)
+        #expect(PrivacyCheck(fileURL: url).sensitiveFound == 1)
     }
 
     @Test func oversizedFilesAreRefused() {

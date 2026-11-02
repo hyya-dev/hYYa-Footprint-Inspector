@@ -195,7 +195,7 @@ final class FlowCheckUITests: XCTestCase {
         app.launchArguments += ["-sensitiveCategories", "dating,health,circumvention"]
         app.launch()
         tab("Sensitive apps")
-        assertVisible(text("Which apps give you away"), "Sensitive title")
+        assertVisible(text("Which apps could reveal you"), "Sensitive title")
         shot("sensitive-start")
         let check = app.buttons.containing(NSPredicate(format: "label BEGINSWITH 'Check '")).firstMatch
         scrollUntil(check)

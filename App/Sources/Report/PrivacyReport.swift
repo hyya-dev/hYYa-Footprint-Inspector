@@ -140,13 +140,23 @@ struct PrivacyReport: Sendable {
         }
     }
 
-    var apps: [AppActivity]
-    var from: Date?
-    var to: Date?
+    let apps: [AppActivity]
+    let from: Date?
+    let to: Date?
+    /// Most worth a look first, then by name. Worked out once: each verdict reads every site.
+    let ranked: [AppActivity]
+    let sharing: [AppActivity]
 
-    /// Most worth a look first, then by name.
-    var ranked: [AppActivity] { apps.sorted { ($0.verdict, $0.name) < ($1.verdict, $1.name) } }
-    var sharing: [AppActivity] { ranked.filter { $0.verdict == .sharesOutside } }
+    init(apps: [AppActivity], from: Date? = nil, to: Date? = nil) {
+        self.apps = apps
+        self.from = from
+        self.to = to
+        let sorted = apps.map { (app: $0, verdict: $0.verdict, name: $0.name) }
+            .sorted { ($0.verdict, $0.name) < ($1.verdict, $1.name) }
+        ranked = sorted.map(\.app)
+        sharing = sorted.filter { $0.verdict == .sharesOutside }.map(\.app)
+    }
+
     var appsUsingData: Int { apps.filter { !$0.uses.isEmpty && !$0.isThisApp }.count }
     var days: Int {
         guard let from, let to else { return 7 }
@@ -166,6 +176,9 @@ struct PrivacyReport: Sendable {
     /// A week's report is a few megabytes at most. Anything far bigger isn't one, and reading it
     /// whole could run the device out of memory.
     static let maxBytes = 64 * 1024 * 1024
+    /// Far more than a real week holds. A crafted file can't build a page too long to draw.
+    static let maxApps = 2_000
+    static let maxSitesPerApp = 2_000
 
     static func read(_ data: Data) throws -> PrivacyReport {
         guard data.count <= maxBytes else { throw ReadError.tooBig }
@@ -190,7 +203,9 @@ struct PrivacyReport: Sendable {
             let stream = obj["stream"] as? String
             if type == "networkActivity", let bundle = obj["bundleID"] as? String, let domain = obj["domain"] as? String, !domain.isEmpty {
                 recognised += 1
+                guard byApp[bundle] != nil || byApp.count < maxApps else { continue }
                 var app = byApp[bundle] ?? AppActivity(bundleID: bundle)
+                guard app.sites[domain] != nil || app.sites.count < maxSitesPerApp else { continue }
                 // Clamped and added without overflow: a crafted file can't crash the app.
                 let hits = min(max((obj["hits"] as? Int) ?? 1, 0), 1_000_000)
                 let old = app.sites[domain]
@@ -204,7 +219,7 @@ struct PrivacyReport: Sendable {
                 recognised += 1
                 let kind = obj["kind"] as? String
                 // An access is logged as a begin/end pair; count each use once.
-                guard kind != "intervalEnd" else { continue }
+                guard kind != "intervalEnd", byApp[bundle] != nil || byApp.count < maxApps else { continue }
                 let raw = (obj["category"] as? String) ?? (obj["tccService"] as? String) ?? (stream?.contains("location") == true ? "location" : "other")
                 var app = byApp[bundle] ?? AppActivity(bundleID: bundle)
                 app.uses[DataKind(raw: raw), default: 0] += 1

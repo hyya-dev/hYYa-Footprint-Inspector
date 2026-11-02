@@ -54,7 +54,7 @@ data class Fix(
 }
 
 enum class Section(val title: String, val group: Group) {
-    WATCH("Who can watch you", Group.WATCH),
+    WATCH("What has special access", Group.WATCH),
     IDENTITY("This device", Group.PASSIVE),
     SYSTEM("System", Group.PASSIVE),
     STORAGE("Storage and memory", Group.PASSIVE),

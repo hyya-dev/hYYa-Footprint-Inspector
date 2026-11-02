@@ -301,7 +301,7 @@ extension SignalCatalogue {
               why: "So apps can offer biometric sign-in.",
               persistence: .untilYouChangeIt, severity: .low,
               fix: .guided("A passcode protects everything else here. If yours isn't set, set one.", [
-                  "Open Settings › Face ID & Passcode.",
+                  "Open Settings › \(ThisDevice.passcodeRow).",
                   "Tap Turn Passcode On.",
               ])),
         .init(id: "apple-pay", section: .security, title: "Apple Pay",
