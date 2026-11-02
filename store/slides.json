@@ -3,7 +3,7 @@
   "slides": [
     {
       "screen": "store-02-results",
-      "headline": "See what *every app* can learn about you",
+      "headline": "See what *any app* can learn about you",
       "highlights": [
         "One privacy score, four checks",
         "On your Home Screen as a widget",
@@ -16,7 +16,7 @@
       "headline": "See what your apps *really did*",
       "highlights": [
         "Who used your location or photos",
-        "Who shared with ad companies",
+        "Who contacted ad companies",
         "Normal things stay calm"
       ],
       "mascot": "left"
@@ -26,7 +26,7 @@
       "headline": "Fix it *step by step*",
       "highlights": [
         "One fix at a time",
-        "Straight to the right setting",
+        "Find the right setting fast",
         "Watch your score go up"
       ],
       "mascot": "right"
@@ -43,11 +43,11 @@
     },
     {
       "screen": "store-05-sensitive",
-      "headline": "Which apps *give you away?*",
+      "headline": "Which apps *could reveal you?*",
       "highlights": [
         "Dating, faith, health, VPN",
         "Banks can ask too",
-        "Hidden, only you see it"
+        "Results stay on your device"
       ],
       "mascot": "right"
     },

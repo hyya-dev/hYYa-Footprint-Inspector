@@ -3,7 +3,7 @@
   "slides": [
     {
       "screen": "store-02-results",
-      "headline": "See what *every app* can learn about you",
+      "headline": "See what *any app* can learn about you",
       "highlights": [
         "One privacy score, four checks",
         "On your Home Screen as a widget",
@@ -12,11 +12,11 @@
     },
     {
       "screen": "store-03-watch",
-      "headline": "See *who can watch you*",
+      "headline": "See *what has special access*",
       "highlights": [
         "Screen, notifications, device lock",
         "Several at once? Flagged",
-        "One tap to take it back"
+        "One tap to the setting"
       ]
     },
     {
@@ -24,7 +24,7 @@
       "headline": "Fix it *step by step*",
       "highlights": [
         "One fix at a time",
-        "Opens the exact setting",
+        "Find the right setting fast",
         "Watch your score go up"
       ]
     },
@@ -33,17 +33,17 @@
       "headline": "Recognised *even after you delete it*",
       "highlights": [
         "Apps can still spot you",
-        "Only a reset stops it",
+        "Only a factory reset stops it",
         "Explained in plain words"
       ]
     },
     {
       "screen": "store-05-sensitive",
-      "headline": "Which apps *give you away?*",
+      "headline": "Which apps *could reveal you?*",
       "highlights": [
         "Dating, faith, health, VPN",
         "Banks can ask too",
-        "Hidden, only you see it"
+        "Results stay on your device"
       ]
     },
     {

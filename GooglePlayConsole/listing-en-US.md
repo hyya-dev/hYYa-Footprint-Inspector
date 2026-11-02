@@ -12,7 +12,7 @@ hYYa Footprint Inspector
 See what apps know, check permissions and fix it step by step. Free and private.
 
 ## Full description (4000)
-Your apps can learn more about you than you think. hYYa Footprint Inspector shows you what they can see, who can watch you, and how to fix it, in plain words.
+Your apps can learn more about you than you think. hYYa Footprint Inspector shows you what they can see, what has special access, and how to fix it, in plain words.
 
 FOUR SIMPLE STEPS
 1. Footprint: one tap checks what any app can read about your device.
@@ -24,7 +24,7 @@ ONE SCORE FOR ALL FOUR
 Your privacy score, out of 100, brings the four checks together. Higher is better, and it grows as you finish each check. Add the widget to see your score and your last check at a glance.
 
 FIX IT WITH ME
-Tap "Fix them with me" and the app walks you through each fix, one at a time, opening the exact setting for you. Then scan again and watch your score go up.
+Tap "Fix them with me" and the app walks you through each fix, one at a time, helping you find the right setting fast. Then scan again and watch your score go up.
 
 CLEAR, CALM AND HONEST
 • A colour chart on every page: red is worth a look, amber is worth knowing, green is fine.
@@ -47,7 +47,7 @@ Meet the detective: he's on every page and has a tip if you tap him.
 hYYa Footprint Inspector is part of the hYYa family of privacy-first apps.
 
 ## Release notes (500)
-• New Check-up steps help protect your device, accounts and social apps.
+• New Check-up steps help you protect your device, accounts and social apps.
 This release contains general bug fixes and stability improvements.
 
 ## Category
