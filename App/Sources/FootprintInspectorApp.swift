@@ -16,6 +16,8 @@ struct FootprintInspectorApp: App {
         // where an earlier run left off, unless a test of returning asks to keep the place.
         if LaunchOptions.has("-sampleData") && !LaunchOptions.has("-keepPlace") {
             SavedPlace.forget()
+        } else if !LaunchOptions.has("-keepPlace") {
+            SavedPlace.forgetUnlessComingBack()
         }
         // Store screenshots and UI tests start clean every time, with nothing from earlier runs.
         let history = LaunchOptions.has("-sampleData")
@@ -63,11 +65,39 @@ struct FootprintInspectorApp: App {
 }
 
 /// Where the person was, kept so coming back lands on the same page. The fix keys name unfixed
-/// findings, so Clear history removes all of it.
+/// findings, so Clear history removes all of it. Only a short trip away counts as coming back
+/// (owner, 2026-11-04): after a hard close the app opens on Score. iOS gives no signal for a
+/// hard close, so the place is kept for ten minutes after the app left the screen, and never
+/// across a new build.
 enum SavedPlace {
+    static let keepFor: TimeInterval = 10 * 60
+    private static let leftKey = "nav.leftAt", buildKey = "nav.build"
+    private static var currentBuild: String { Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "" }
+
     static func forget() {
-        for key in ["nav.tab", "nav.finding", "nav.section", "nav.fixing", "nav.checkup", "nav.settings", "fix.ids", "fix.index"] {
+        for key in ["nav.tab", "nav.finding", "nav.section", "nav.fixing", "nav.checkup", "nav.settings", "fix.ids", "fix.index", leftKey, buildKey] {
             UserDefaults.standard.removeObject(forKey: key)
+        }
+    }
+
+    /// The app left the screen: the place stays good for a short while.
+    static func markLeft(at now: Date = .now) {
+        UserDefaults.standard.set(now.timeIntervalSince1970, forKey: leftKey)
+        UserDefaults.standard.set(currentBuild, forKey: buildKey)
+    }
+
+    /// Whether a launch is the person coming back, rather than opening the app afresh.
+    static func isComingBack(leftAt: Double?, build: String?, now: Date, currentBuild: String) -> Bool {
+        guard let leftAt, build == currentBuild else { return false }
+        let away = now.timeIntervalSince1970 - leftAt
+        return away >= 0 && away <= keepFor
+    }
+
+    /// At launch: a fresh start forgets the old place, so the app opens on Score.
+    static func forgetUnlessComingBack(now: Date = .now) {
+        let d = UserDefaults.standard
+        if !isComingBack(leftAt: d.object(forKey: leftKey) as? Double, build: d.string(forKey: buildKey), now: now, currentBuild: currentBuild) {
+            forget()
         }
     }
 }
@@ -137,6 +167,8 @@ struct RootView: View {
         .environment(\.goToTab, go)
         .onAppear(perform: restore)
         .modifier(KeepScoreFresh())
+        // Quitting is a fresh start on the Mac: the next launch opens on Score.
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in SavedPlace.forget() }
         // Store screenshots: a Sensitive check with nothing found, as on iOS.
         .task { if LaunchOptions.has("-sampleData") { check.recordSensitive(found: 0) } }
         .task { if LaunchOptions.has("-openSettings") { openSettings() } }
@@ -198,6 +230,7 @@ private struct KeepScoreFresh: ViewModifier {
                 WidgetCenter.shared.reloadAllTimelines()
             }
             .onChange(of: scenePhase) { old, phase in
+                if phase == .background { SavedPlace.markLeft() }
                 if phase == .active {
                     check.reloadIfNeeded()
                     history.reloadIfNeeded()

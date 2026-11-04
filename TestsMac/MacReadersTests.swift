@@ -126,3 +126,25 @@ final class MacLiveScoreTests: XCTestCase {
         XCTAssertEqual(name?.secondPane?.pane, MacSignalCatalogue.Pane.sharing)
     }
 }
+
+/// Coming back within a short while keeps the page; a hard close or a new build opens on Score.
+final class SavedPlaceTests: XCTestCase {
+    private let now = Date(timeIntervalSince1970: 1_000_000)
+
+    func testShortTripAwayKeepsThePlace() {
+        XCTAssertTrue(SavedPlace.isComingBack(leftAt: now.timeIntervalSince1970 - 120, build: "33", now: now, currentBuild: "33"))
+    }
+
+    func testLongAwayOpensOnScore() {
+        XCTAssertFalse(SavedPlace.isComingBack(leftAt: now.timeIntervalSince1970 - SavedPlace.keepFor - 1, build: "33", now: now, currentBuild: "33"))
+    }
+
+    func testNewBuildOrNoRecordOpensOnScore() {
+        XCTAssertFalse(SavedPlace.isComingBack(leftAt: now.timeIntervalSince1970 - 10, build: "32", now: now, currentBuild: "33"))
+        XCTAssertFalse(SavedPlace.isComingBack(leftAt: nil, build: nil, now: now, currentBuild: "33"))
+    }
+
+    func testClockMovedBackOpensOnScore() {
+        XCTAssertFalse(SavedPlace.isComingBack(leftAt: now.timeIntervalSince1970 + 60, build: "33", now: now, currentBuild: "33"))
+    }
+}
