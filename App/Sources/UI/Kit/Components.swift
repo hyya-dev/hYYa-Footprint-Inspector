@@ -51,7 +51,7 @@ struct Page<Content: View>: View {
             .frame(maxWidth: 720)
             .padding(.horizontal, 20)
             .padding(.top, 8)
-            .padding(.bottom, 120)
+            .padding(.bottom, 24)
             .frame(maxWidth: .infinity)
         }
         .scrollIndicators(.hidden)
@@ -136,7 +136,7 @@ struct Panel<Content: View>: View {
                     .overlay(shape.fill(LinearGradient(colors: [Brand.sand.opacity(0.06), .clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.35))))
             )
             .clipShape(shape)
-            .overlay(shape.strokeBorder(LinearGradient(colors: [Brand.sandDeep.opacity(0.7), Brand.sandDeep.opacity(0.18)], startPoint: .top, endPoint: .bottom), lineWidth: 0.75))
+            .overlay(shape.strokeBorder(Brand.edgeGradient, lineWidth: 0.75))
     }
 }
 

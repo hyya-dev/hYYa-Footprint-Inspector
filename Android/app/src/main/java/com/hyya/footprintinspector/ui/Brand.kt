@@ -52,6 +52,8 @@ import com.hyya.footprintinspector.model.Severity
 object Brand {
     val sand = Color(0xFFD2AE88)
     val sandDeep = Color(0xFF8F7560)
+    /** Card, panel and outline borders: the explain tone's blue (owner, 2026-11-04). */
+    val edge = Color(0xFF7FB2E5)
     val concern = Color(0xFFEC7F6A)
     val concernSoft = Color(0xFF2A1714)
     val green = Color(0xFF7CD9A8)
@@ -149,7 +151,7 @@ fun SectionTitle(title: String, trailing: String? = null) {
 fun Panel(content: @Composable ColumnScope.() -> Unit) {
     Column(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Brand.surface)
-            .border(BorderStroke(0.5.dp, Brand.sandDeep.copy(alpha = 0.6f)), RoundedCornerShape(16.dp)),
+            .border(BorderStroke(0.75.dp, Brush.verticalGradient(listOf(Brand.edge.copy(alpha = 0.55f), Brand.edge.copy(alpha = 0.15f)))), RoundedCornerShape(16.dp)),
         content = content,
     )
 }
@@ -215,7 +217,7 @@ fun PrimaryButton(text: String, modifier: Modifier = Modifier.fillMaxWidth(), fi
 fun GhostButton(text: String, modifier: Modifier = Modifier.fillMaxWidth(), onClick: () -> Unit) {
     Text(
         text, color = Brand.sand, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center,
-        modifier = modifier.pressable(onClick).clip(CircleShape).border(BorderStroke(1.dp, Brand.sandDeep), CircleShape)
+        modifier = modifier.pressable(onClick).clip(CircleShape).border(BorderStroke(1.dp, Brand.edge.copy(alpha = 0.55f)), CircleShape)
             .padding(vertical = 13.dp, horizontal = 20.dp),
     )
 }

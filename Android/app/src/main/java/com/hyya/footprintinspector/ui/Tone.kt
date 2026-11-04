@@ -66,6 +66,8 @@ enum class Tone(val tint: Color) {
     /** Only Google or the device maker can fix it. */
     LIMIT(Color(0xFFA7AFBF));
 
+    /** The card's border: the role colour where it carries meaning, the shared blue otherwise. */
+    val edge get() = if (this == EXPLAIN || this == CONTEXT) Brand.edge else tint
     val wash get() = tint.copy(alpha = 0.07f)
     val badge get() = tint.copy(alpha = 0.14f)
 }
@@ -107,7 +109,7 @@ fun ToneCard(
             .clip(shape)
             .background(Brand.surface)
             .background(Brush.verticalGradient(listOf(tone.wash, Color.Transparent), endY = 260f))
-            .border(BorderStroke(1.dp, Brush.verticalGradient(listOf(tone.tint.copy(alpha = 0.55f), tone.tint.copy(alpha = 0.15f)))), shape)
+            .border(BorderStroke(1.dp, Brush.verticalGradient(listOf(tone.edge.copy(alpha = 0.55f), tone.edge.copy(alpha = 0.15f)))), shape)
             .border(BorderStroke(1.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.10f), Color.Transparent), endY = 40f)), shape)
             .padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -169,7 +171,7 @@ fun NextStepCard(step: Tab) {
     val shape = RoundedCornerShape(18.dp)
     Row(
         Modifier.fillMaxWidth().pressable { go(step) }.clip(shape).background(Brand.sand.copy(alpha = 0.06f))
-            .border(BorderStroke(1.dp, Brand.sand.copy(alpha = 0.45f)), shape).padding(16.dp),
+            .border(BorderStroke(1.dp, Brand.edge.copy(alpha = 0.45f)), shape).padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.size(40.dp).clip(CircleShape).background(Brand.sand.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) {

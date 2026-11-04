@@ -204,7 +204,7 @@ private fun ReminderRow() {
         showDivider = false)
     Box(Modifier.fillMaxWidth().padding(bottom = 12.dp), contentAlignment = Alignment.Center) {
         Text("${choice.title}  ▾", color = Brand.sand, fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.pressable { open = true }.clip(CircleShape).border(BorderStroke(1.dp, Brand.sandDeep), CircleShape)
+            modifier = Modifier.pressable { open = true }.clip(CircleShape).border(BorderStroke(1.dp, Brand.edge.copy(alpha = 0.55f)), CircleShape)
                 .padding(horizontal = 22.dp, vertical = 9.dp))
         androidx.compose.material3.DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             ScanReminder.entries.forEach { r ->

@@ -75,7 +75,7 @@ struct SettingsView: View {
                             .foregroundStyle(Brand.sand)
                             .padding(.vertical, 9)
                             .padding(.horizontal, 22)
-                            .overlay(Capsule().strokeBorder(Brand.sandDeep.opacity(0.8), lineWidth: 0.75))
+                            .overlay(Capsule().strokeBorder(Brand.edge.opacity(0.55), lineWidth: 0.75))
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.bottom, 12)

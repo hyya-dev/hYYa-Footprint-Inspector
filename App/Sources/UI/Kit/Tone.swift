@@ -30,6 +30,14 @@ enum Tone: Sendable {
         }
     }
 
+    /// The card's border: the role colour where it carries meaning, the shared blue otherwise.
+    var edge: Color {
+        switch self {
+        case .alert, .fix, .limit: tint
+        case .explain, .context: Brand.edge
+        }
+    }
+
     /// The faint wash behind the card's top edge.
     var wash: Color { tint.opacity(0.07) }
     /// The badge fill behind tinted text.
@@ -73,7 +81,7 @@ struct ToneCard<Content: View, Trailing: View>: View {
             shape.fill(Brand.surface)
                 .overlay(shape.fill(LinearGradient(colors: [tone.wash, .clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.6))))
         )
-        .overlay(shape.strokeBorder(LinearGradient(colors: [tone.tint.opacity(0.55), tone.tint.opacity(0.15)], startPoint: .top, endPoint: .bottom), lineWidth: 1))
+        .overlay(shape.strokeBorder(LinearGradient(colors: [tone.edge.opacity(0.55), tone.edge.opacity(0.15)], startPoint: .top, endPoint: .bottom), lineWidth: 1))
         // Depth without glow: a fine light catch on the top edge and a soft shadow underneath.
         .overlay(alignment: .top) {
             shape.strokeBorder(LinearGradient(colors: [.white.opacity(0.10), .clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.08)), lineWidth: 1)

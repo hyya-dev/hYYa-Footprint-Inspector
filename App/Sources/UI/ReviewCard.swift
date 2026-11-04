@@ -48,7 +48,7 @@ struct ReviewCard: View {
                 shape.fill(Brand.surface)
                     .overlay(shape.fill(LinearGradient(colors: [Brand.sand.opacity(0.10), .clear], startPoint: .topLeading, endPoint: .bottomTrailing)))
             )
-            .overlay(shape.strokeBorder(LinearGradient(colors: [Brand.sand.opacity(0.8), Brand.sandDeep.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 0.75))
+            .overlay(shape.strokeBorder(Brand.edgeGradient, lineWidth: 0.75))
         }
         .buttonStyle(PressableCardStyle())
     }
@@ -117,7 +117,7 @@ struct HyyaCard: View {
                 shape.fill(Brand.surface)
                     .overlay(shape.fill(LinearGradient(colors: [Brand.sand.opacity(0.10), .clear], startPoint: .topLeading, endPoint: .bottomTrailing)))
             )
-            .overlay(shape.strokeBorder(LinearGradient(colors: [Brand.sand.opacity(0.8), Brand.sandDeep.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 0.75))
+            .overlay(shape.strokeBorder(Brand.edgeGradient, lineWidth: 0.75))
         }
         .buttonStyle(PressableCardStyle())
     }

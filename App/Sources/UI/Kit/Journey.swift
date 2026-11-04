@@ -105,7 +105,7 @@ struct NextStepCard: View {
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Brand.sand.opacity(0.06)))
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Brand.sand.opacity(0.45), style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
+            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Brand.edge.opacity(0.45), style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
         }
         .buttonStyle(PressableCardStyle())
         .accessibilityLabel("Next step: \(step.title). \(step.pitch)")

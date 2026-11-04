@@ -32,6 +32,9 @@ enum Brand {
     static let sand = Color(hex: 0xD2AE88)
     /// The footprint's own brown, for borders, separators and accent rules.
     static let sandDeep = Color(hex: 0x8F7560)
+    /// Card, panel and outline borders: the explain tone's blue (owner, 2026-11-04).
+    static let edge = Color(hex: 0x7FB2E5)
+    static var edgeGradient: LinearGradient { LinearGradient(colors: [edge.opacity(0.55), edge.opacity(0.15)], startPoint: .top, endPoint: .bottom) }
     static let sandSoft = Color(hex: 0xD2AE88, alpha: 0.12)
     /// Kept as an alias so older call sites follow the accent.
     static var cyan: Color { sand }
@@ -251,7 +254,7 @@ struct GhostButtonStyle: ButtonStyle {
             .foregroundStyle(tint)
             .padding(.vertical, 14)
             .padding(.horizontal, 20)
-            .overlay(Capsule().strokeBorder(Brand.sandDeep.opacity(0.8), lineWidth: 0.75))
+            .overlay(Capsule().strokeBorder(Brand.edge.opacity(0.55), lineWidth: 0.75))
             .opacity(configuration.isPressed ? 0.6 : 1)
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
             .sensoryFeedback(.selection, trigger: configuration.isPressed) { _, pressed in pressed }
