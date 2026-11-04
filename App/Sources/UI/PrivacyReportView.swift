@@ -17,6 +17,9 @@ struct PrivacyReportView: View {
     @State private var problem: String?
     @State private var opened = 0
     @State private var showNormal = false
+    /// Bumped whenever the report is cleared or a new read starts, so a read still running when
+    /// the app leaves active can't bring the report back.
+    @State private var readGeneration = 0
     @Environment(PrivacyCheck.self) private var check
     var onNext: (() -> Void)? = nil
 
@@ -67,7 +70,7 @@ struct PrivacyReportView: View {
             // Footprint and Settings.
             .hiddenNavigationBar()
             .fileImporter(isPresented: $importing, allowedContentTypes: Self.types) { result in load(result) }
-            .onChange(of: scenePhase) { _, phase in if phase != .active { report = nil } }
+            .onChange(of: scenePhase) { _, phase in if phase != .active { report = nil; readGeneration += 1 } }
             .onChange(of: report?.sharing.count) { _, n in if let n { check.recordTracker(sharing: n) } }
             .task { if LaunchOptions.has("-sampleData") && report == nil { report = .sample } }
             .sensoryFeedback(trigger: opened) { _, _ in (report?.sharing.isEmpty ?? true) ? .success : .warning }
@@ -193,10 +196,13 @@ struct PrivacyReportView: View {
     private func load(_ result: Result<URL, Error>) {
         problem = nil
         guard case .success(let url) = result else { return }
+        readGeneration += 1
+        let generation = readGeneration
         Task {
             do {
                 // Off the main thread: a very large file must not freeze the app.
                 let r = try await Task.detached(priority: .userInitiated) { try Self.readReport(at: url) }.value
+                guard generation == readGeneration, scenePhase == .active else { return }
                 withAnimation(reduceMotion ? nil : .spring(response: 0.45, dampingFraction: 0.85)) { report = r; showNormal = false }
                 opened += 1
             } catch {

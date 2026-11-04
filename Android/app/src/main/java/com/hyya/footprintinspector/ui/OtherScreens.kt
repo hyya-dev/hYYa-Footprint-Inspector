@@ -9,9 +9,11 @@ import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -61,12 +63,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import com.hyya.footprintinspector.BuildConfig
 import com.hyya.footprintinspector.R
 import com.hyya.footprintinspector.remind.ScanReminder
 import com.hyya.footprintinspector.catalogue.CheckUp
@@ -134,7 +136,7 @@ fun SensitiveScreen(scanner: com.hyya.footprintinspector.scan.Scanner) {
                         tint = if (on) Brand.ink else Brand.textSubtle, showDivider = i < Sensitive.categories.lastIndex,
                         onClick = {
                             chosen = if (on) chosen - c.id else chosen + c.id
-                            prefs(context).edit().putStringSet("sensitiveCategories", chosen).apply()
+                            scanner.saveSensitiveChoice(chosen)
                             results = null; revealed = false
                         }) {
                         Icon(if (on) Icons.Outlined.CheckCircle else Icons.Outlined.RadioButtonUnchecked, null,
@@ -340,7 +342,6 @@ object Links {
     const val CONTACT = "https://hyya.com/#contact"
     const val PRIVACY = "https://hyya.com/privacypolicy/hyya-footprint-inspector.html"
     const val SECURITY = "mailto:security@hyya.com?subject=Security%20report%20%E2%80%94%20hYYa%20Footprint%20Inspector"
-    const val SOURCE = "https://github.com/hyya-dev/hYYa-Footprint-Inspector"
     const val HYYA_AI = "https://play.google.com/store/apps/details?id=com.hyya.hyyaai"
     const val HYYA = "https://hyya.com"
     const val SHARE = "hYYa Footprint Inspector shows what any app can learn about your device, and how to fix it. Free, open source, nothing leaves your device.\n$PLAY"
@@ -354,14 +355,15 @@ fun SettingsScreen(scanner: Scanner, nav: Nav) {
         if (nav.stack.isNotEmpty()) BackBar("Settings", nav)
         HeroCard("Settings", "hYYa Footprint Inspector", "Everything here stays on this device.")
         // Rating card, as on iOS.
-        InfoCard("Enjoying hYYa Footprint Inspector?") {
+        // The whole card opens the link; the pill is its label, centred across the card.
+        ToneCard(Tone.CONTEXT, "Enjoying hYYa Footprint Inspector?", onClick = { openUrl(context, Links.PLAY) }) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Mascot(72)
                 Spacer(Modifier.width(12.dp))
                 Text("Your reviews keep us smiling while coding, and help others find a privacy app they can trust.",
                     color = Brand.textMuted, fontSize = 13.sp, lineHeight = 18.sp, modifier = Modifier.weight(1f))
             }
-            PrimaryButton("Rate the App", Modifier) { openUrl(context, Links.PLAY) }
+            CardPill("Rate the App")
         }
         SectionTitle("Your scans")
         Panel {
@@ -383,26 +385,24 @@ fun SettingsScreen(scanner: Scanner, nav: Nav) {
         }
         SectionTitle("More from hYYa")
         // The hYYa website, laid out like the rating card at the top.
-        InfoCard("hYYa ✨", Tone.CONTEXT) {
+        ToneCard(Tone.CONTEXT, "hYYa ✨", onClick = { openUrl(context, Links.HYYA) }) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(R.drawable.promo_hyya_dev), null,
                     modifier = Modifier.size(84.dp).clip(RoundedCornerShape(20.dp)), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
                 Spacer(Modifier.width(14.dp))
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.weight(1f)) {
-                    Text("Companions you can trust: private apps that keep everything on your device.", color = Brand.textMuted, fontSize = 13.sp, lineHeight = 18.sp)
-                    PrimaryButton("Visit hyya.com", Modifier) { openUrl(context, Links.HYYA) }
-                }
+                Text("Companions you can trust: private apps that keep everything on your device.", color = Brand.textMuted, fontSize = 13.sp, lineHeight = 18.sp,
+                    modifier = Modifier.weight(1f))
             }
-        }
-        Column(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Mascot(82)
-            Text(Brand.upper("hYYa Footprint Inspector"), color = Brand.textSubtle, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.4.sp)
-            Text("Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) · Open source, MPL 2.0", color = Brand.textSubtle, fontSize = 12.sp,
-                textAlign = TextAlign.Center)
-            Text("View the source code ↗", color = Brand.sand, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.clickableNoRipple { openUrl(context, Links.SOURCE) })
+            CardPill("Visit hyya.com")
         }
     }
+}
+
+/** The white pill inside a tappable card: it looks like the primary button, but the card is the button. */
+@Composable
+private fun ColumnScope.CardPill(text: String) {
+    Text(text, color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center,
+        modifier = Modifier.align(Alignment.CenterHorizontally).clip(CircleShape).background(Color.White).padding(vertical = 15.dp, horizontal = 22.dp))
 }
 
 @Composable

@@ -76,6 +76,12 @@ class Scanner(app: Application) : AndroidViewModel(app) {
         publishWidget(checked = true)
     }
 
+    /** The kinds chosen, kept only while no found count sits beside them, as on iOS. */
+    fun saveSensitiveChoice(ids: Set<String>) {
+        if ((sensitiveFound ?: 0) > 0) prefs.edit().remove("sensitiveCategories").apply()
+        else prefs.edit().putStringSet("sensitiveCategories", ids).apply()
+    }
+
     /** Ticking the last Check-up step can change the score. Held here: Android keeps it weakly. */
     private val checkUpListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         if (key == "checkUpDone" && prefs.contains(key)) publishWidget(checked = false)

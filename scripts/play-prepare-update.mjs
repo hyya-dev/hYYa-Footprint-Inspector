@@ -65,11 +65,13 @@ const gallery = {
 const edit = await api(token, "/edits", { method: "POST", body: {} });
 const E = `/edits/${edit.id}`;
 
+// The release name testers see in Play Console, from the build itself: "1.0.5 (18)".
+const versionName = readFileSync(`${ROOT}Android/app/build.gradle.kts`, "utf8").match(/versionName = "([^"]+)"/)[1];
 const aab = readFileSync(`${ROOT}Android/app/build/outputs/bundle/release/app-release.aab`);
 const b = await api(token, `https://androidpublisher.googleapis.com/upload/androidpublisher/v3/applications/${PACKAGE}${E}/bundles?uploadType=media`,
   { method: "POST", raw: aab, contentType: "application/octet-stream" });
 await call(token, `${E}/tracks/alpha`, { method: "PUT", body: { track: "alpha", releases: [{
-  name: "1.0.0 (" + b.versionCode + ")", versionCodes: [String(b.versionCode)], status: "completed",
+  name: `${versionName} (${b.versionCode})`, versionCodes: [String(b.versionCode)], status: "completed",
   // Each language's own note: the feature line above the fixed sentence (owner's rule).
   releaseNotes: listings.filter((l) => l.releaseNotes).map((l) => ({ language: l.language, text: l.releaseNotes })),
 }] } });

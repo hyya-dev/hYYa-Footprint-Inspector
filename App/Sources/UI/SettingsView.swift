@@ -12,7 +12,6 @@ enum hYYaLinks {
     static let contact = URL(string: "https://hyya.com/#contact")!
     static let privacy = URL(string: "https://hyya.com/privacypolicy/hyya-footprint-inspector.html")!
     static let security = URL(string: "mailto:security@hyya.com?subject=Security%20report%20%E2%80%94%20hYYa%20Footprint%20Inspector")!
-    static let source = URL(string: "https://github.com/hyya-dev/hYYa-Footprint-Inspector")!
     /// ⚠️ Showcase page owed by hyya.com. Used for Share until the App Store id exists.
     static let showcase = URL(string: "https://hyya.com/hyya-footprint-inspector.html")!
     /// App Store Connect record created 2026-10-17 (SKU hyya-footprint-inspector). The listing goes
@@ -122,29 +121,6 @@ struct SettingsView: View {
                         .buttonStyle(PressableCardStyle())
                 }
                 #endif
-
-                VStack(spacing: Brand.Space.sm) {
-                    SectionDivider()
-                    Image("MascotCutout")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 82)
-                        .accessibilityHidden(true)
-                    Text(Brand.brandUppercased("hYYa Footprint Inspector"))
-                        .font(.caption2.weight(.semibold))
-                        .tracking(1.4)
-                        .foregroundStyle(Brand.textSubtle)
-                    Text("Version \(Self.version) · Open source, MPL 2.0")
-                        .font(.caption)
-                        .foregroundStyle(Brand.textSubtle)
-                    Button { open(hYYaLinks.source) } label: {
-                        Label("View the source code", systemImage: "arrow.up.right")
-                            .labelStyle(TrailingIconLabelStyle())
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(Brand.sand)
-                    }
-                }
-                .frame(maxWidth: .infinity)
             }
             .hiddenNavigationBar()
             .alert("Notifications are off", isPresented: $notificationsOff) {
@@ -186,19 +162,6 @@ struct SettingsView: View {
     private func open(_ url: URL) {
         Haptics.selection()
         openURL(url)
-    }
-
-    static var version: String {
-        let info = Bundle.main.infoDictionary
-        let short = info?["CFBundleShortVersionString"] as? String ?? "?"
-        let build = info?["CFBundleVersion"] as? String ?? "?"
-        return "\(short) (\(build))"
-    }
-}
-
-struct TrailingIconLabelStyle: LabelStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        HStack(spacing: 4) { configuration.title; configuration.icon }
     }
 }
 

@@ -21,6 +21,6 @@ Also in the app:
 - Re-scan reminder: optional local notification (weekly or monthly), asked for only when chosen. No server, no push.
 - "Fix them with me": steps through fixable findings and opens System Settings; the app never changes a setting itself.
 
-New in 1.0.1: the first screen shows one privacy score for the checks done and links to each check; plainer wording for every finding; Check-up adds guidance steps (keep macOS updated, check the Passwords app for leaked passwords, Lockdown Mode for people at risk). These are instructions only: the app detects no malware and reads no passwords.
+The first screen shows one privacy score for the checks done and links to each check; plainer wording for every finding; Check-up adds guidance steps (keep macOS updated, check the Passwords app for leaked passwords, Lockdown Mode for people at risk). These are instructions only: the app detects no malware and reads no passwords.
 About the widget: the desktop widget shows only the privacy score and the date and time of the last check, read from a device-only keychain item shared with the app. It makes no network connections and shows no finding or app name.
 Check-up's new guidance steps (FileVault, lock screen, Apple Account, Find My, social media apps) are instructions only: the app reads none of these settings.

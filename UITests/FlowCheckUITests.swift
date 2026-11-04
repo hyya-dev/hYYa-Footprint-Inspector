@@ -39,6 +39,10 @@ final class FlowCheckUITests: XCTestCase {
                       "\(what): off screen (top at \(Int(f.minY)), visible area \(Int(window.minY))–\(Int(tabBarTop)))", file: file, line: line)
     }
 
+    private func card(_ s: String) -> XCUIElement {
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", s)).firstMatch
+    }
+
     private func text(_ s: String) -> XCUIElement {
         app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", s)).firstMatch
     }
@@ -251,11 +255,12 @@ final class FlowCheckUITests: XCTestCase {
     func testSettingsFlow() {
         app.launch()
         tab("Settings")
-        assertVisible(app.buttons["Rate the App"].firstMatch, "rating card")
+        // Each card is one button (1.0.5), so its label holds the pill's words.
+        assertVisible(card("Rate the App"), "rating card")
         let reminder = text("Re-scan reminder")
         scrollUntil(reminder)
         shot("settings-reminder")
-        let more = text("Visit hyya.com")
+        let more = card("Visit hyya.com")
         scrollUntil(more)
         shot("settings-more")
     }
