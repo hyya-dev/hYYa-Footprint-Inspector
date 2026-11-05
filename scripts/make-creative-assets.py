@@ -7,7 +7,7 @@
     python3 scripts/make-creative-assets.py <raw-iphone-dir> <out-dir>
 
 - Header, 21:9 at 3840 x 1646: theatrical, no headline. The detective in a spotlight on a dark stage,
-  his glowing digital footprint at his feet, between velvet curtains. Laid out inside the area that both
+  his glowing digital footprint at his feet, between six things an app can learn on digital glass cards. Laid out inside the area that both
   the iPhone and the iPad crop keep (see header()).
 - Search results, 3:2 at 3840 x 2560: says what the app does at a glance and shows the real
   interface, as Apple advises. The headline, three iPhone screens (the mascot is on the centre one) are all centred.
@@ -66,27 +66,51 @@ def concern(canvas, x, y, label, value, anchor, w):
     d.text((tx, y0 + pad_y + 72 + 12), value, font=vf, fill=MUTED)
 
 
-def curtain(w, h, flip=False):
-    """One velvet drape: vertical folds lit from the stage side, falling into black."""
-    import math
-    cw = int(w * 0.15)
-    im = Image.new("RGBA", (cw, h), (0, 0, 0, 0))
-    px = im.load()
-    for x in range(cw):
-        t = x / cw
-        fold = 0.55 + 0.45 * math.sin(t * math.pi * 7.5)          # folds
-        edge = (t ** 1.6) if not flip else ((1 - t) ** 1.6)          # brighter towards the stage
-        lit = 0.18 + 0.82 * edge
-        for y in range(h):
-            v = fold * lit * (0.55 + 0.45 * (1 - y / h))
-            px[x, y] = (int(96 * v + 8), int(16 * v + 4), int(18 * v + 4), 255)
-    if flip: im = im.transpose(Image.FLIP_LEFT_RIGHT)
-    return im.filter(ImageFilter.GaussianBlur(6))
+CYAN = (110, 210, 255)
+
+
+def glass_width(label, value):
+    d = ImageDraw.Draw(Image.new("RGB", (8, 8)))
+    return max(d.textlength(label, font=font(66, "Semibold")), d.textlength(value, font=font(50, "Regular"))) + 44 * 2 + 20 + 26
+
+
+def glass_card(canvas, x, y, label, value, anchor, w):
+    """Digital glass: the stage behind it frosted, a faint cyan tint and a bright hairline edge
+    that catches the light on top, with a soft cyan glow around it."""
+    lf, vf = font(66, "Semibold"), font(50, "Regular")
+    pad_x, pad_y, dot, r = 44, 28, 20, 38
+    h = int(66 + 50 + 16 + pad_y * 2)
+    x0 = int(x - w if anchor == "right" else x); y0 = int(y - h / 2); x1, y1 = int(x0 + w), y0 + h
+    mask = Image.new("L", canvas.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((x0, y0, x1, y1), r, fill=255)
+    # Outer glow
+    glow_l = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    ImageDraw.Draw(glow_l).rounded_rectangle((x0, y0, x1, y1), r, outline=(*CYAN, 230), width=16)
+    canvas.alpha_composite(glow_l.filter(ImageFilter.GaussianBlur(34)))
+    # Frosted body: blurred, lifted background plus a cool tint
+    frost = canvas.filter(ImageFilter.GaussianBlur(30))
+    tint = Image.new("RGBA", canvas.size, (90, 180, 255, 30))
+    frost = Image.alpha_composite(frost, tint)
+    canvas.paste(frost, (0, 0), mask)
+    # Light catching the top edge, and the hairline border
+    top = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    td = ImageDraw.Draw(top)
+    for i in range(h // 2):
+        td.line((x0, y0 + i, x1, y0 + i), fill=(200, 235, 255, int(40 * (1 - i / (h / 2)))))
+    canvas.paste(Image.alpha_composite(canvas, top), (0, 0), mask)
+    d = ImageDraw.Draw(canvas)
+    d.rounded_rectangle((x0, y0, x1, y1), r, outline=(150, 220, 255, 210), width=3)
+    d.line((x0 + r, y0 + 1, x1 - r, y0 + 1), fill=(235, 248, 255, 230), width=2)
+    tx = x0 + pad_x + dot + 26
+    d.ellipse((x0 + pad_x, y0 + pad_y + 26, x0 + pad_x + dot, y0 + pad_y + 26 + dot), fill=CORAL)
+    d.text((tx, y0 + pad_y - 6), label, font=lf, fill=INK)
+    d.text((tx, y0 + pad_y + 66 + 10), value, font=vf, fill=(196, 214, 228))
 
 
 def header(out):
-    """Theatrical (owner, 2026-11-05): a dark stage between velvet curtains, one spotlight on the
-    detective and the glowing digital footprint at his feet. No headline. Everything that matters
+    """Theatrical (owner, 2026-11-05): a dark stage, one spotlight on the detective and the glowing
+    digital footprint at his feet, six things an app can learn on digital glass cards. No curtains
+    (owner). No headline. Everything that matters
     sits in the area both crops keep: iPhone shows the full height but only the middle ~84% of the
     width, with buttons over the top corners; iPad shows the full width but loses ~15% top and
     bottom, with the tab bar over the top centre. Safe: x 0.10-0.90, y 0.30-0.85."""
@@ -125,22 +149,19 @@ def header(out):
     # The detective, centre stage, feet on the boards.
     m = mascot(int(h * 0.60))
     c.alpha_composite(m, ((w - m.width) // 2 + int(w * 0.02), floor_y + int(h * 0.04) - m.height))
-    # Curtains and a valance frame the stage.
-    left, right = curtain(w, h), curtain(w, h, flip=True)
-    c.alpha_composite(left, (0, 0)); c.alpha_composite(right, (w - right.width, 0))
-    val = Image.new("RGBA", (w, int(h * 0.13)), (0, 0, 0, 0))
-    vd = ImageDraw.Draw(val)
-    vd.rectangle((0, 0, w, val.height * 0.62), fill=(70, 12, 14, 255))
-    for i in range(0, w, 240):
-        vd.ellipse((i - 20, val.height * 0.30, i + 260, val.height * 0.98), fill=(70, 12, 14, 255))
-    vd.line((0, val.height * 0.62, w, val.height * 0.62), fill=(*SAND_DEEP, 255), width=6)
-    c.alpha_composite(val.filter(ImageFilter.GaussianBlur(3)), (0, 0))
     # A soft vignette pulls the eye to the light.
     vig = Image.new("L", (w, h), 0)
     ImageDraw.Draw(vig).ellipse((-w * 0.15, -h * 0.35, w * 1.15, h * 1.25), fill=255)
     vig = vig.filter(ImageFilter.GaussianBlur(260))
     black = Image.new("RGBA", (w, h), (0, 0, 0, 255))
     c = Image.composite(c, black, vig)
+    # Six things an app can learn, on digital glass cards either side of the spotlight.
+    m_left, m_right = w / 2 - w * 0.125, w / 2 + w * 0.15
+    lw = max(glass_width(*x) for x in CONCERNS[:3])
+    rw = max(glass_width(*x) for x in CONCERNS[3:])
+    for i, fy in enumerate((0.42, 0.58, 0.74)):
+        glass_card(c, m_left, h * fy, *CONCERNS[i], anchor="right", w=lw)
+        glass_card(c, m_right, h * fy, *CONCERNS[3 + i], anchor="left", w=rw)
     c.convert("RGB").save(out / "header-3840x1646.png", optimize=True)
 
 
