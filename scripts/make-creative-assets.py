@@ -7,7 +7,7 @@
     python3 scripts/make-creative-assets.py <raw-iphone-dir> <out-dir>
 
 - Header, 21:9 at 3840 x 1646: theatrical, no headline. The detective in a spotlight on a dark stage,
-  his glowing digital footprint at his feet, between six things an app can learn on digital glass cards. Laid out inside the area that both
+  his glowing digital footprint at his feet, between six things an app can learn on a detective's sticky notes. Laid out inside the area that both
   the iPhone and the iPad crop keep (see header()).
 - Search results, 3:2 at 3840 x 2560: says what the app does at a glance and shows the real
   interface, as Apple advises. The headline, three iPhone screens (the mascot is on the centre one) are all centred.
@@ -15,7 +15,7 @@ Quiet Noir palette, shared with the slides. No alpha channel (Apple rejects tran
 """
 import importlib.util, sys
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parent.parent
 spec = importlib.util.spec_from_file_location("slides", ROOT / "scripts/make-store-slides.py")
@@ -66,50 +66,42 @@ def concern(canvas, x, y, label, value, anchor, w):
     d.text((tx, y0 + pad_y + 72 + 12), value, font=vf, fill=MUTED)
 
 
-CYAN = (110, 210, 255)
-
-
-def glass_width(label, value):
-    d = ImageDraw.Draw(Image.new("RGB", (8, 8)))
-    return max(d.textlength(label, font=font(66, "Semibold")), d.textlength(value, font=font(50, "Regular"))) + 44 * 2 + 20 + 26
-
-
-def glass_card(canvas, x, y, label, value, anchor, w):
-    """Digital glass: the stage behind it frosted, a faint cyan tint and a bright hairline edge
-    that catches the light on top, with a soft cyan glow around it."""
-    lf, vf = font(66, "Semibold"), font(50, "Regular")
-    pad_x, pad_y, dot, r = 44, 28, 20, 38
-    h = int(66 + 50 + 16 + pad_y * 2)
-    x0 = int(x - w if anchor == "right" else x); y0 = int(y - h / 2); x1, y1 = int(x0 + w), y0 + h
-    mask = Image.new("L", canvas.size, 0)
-    ImageDraw.Draw(mask).rounded_rectangle((x0, y0, x1, y1), r, fill=255)
-    # Outer glow
-    glow_l = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
-    ImageDraw.Draw(glow_l).rounded_rectangle((x0, y0, x1, y1), r, outline=(*CYAN, 230), width=16)
-    canvas.alpha_composite(glow_l.filter(ImageFilter.GaussianBlur(34)))
-    # Frosted body: blurred, lifted background plus a cool tint
-    frost = canvas.filter(ImageFilter.GaussianBlur(30))
-    tint = Image.new("RGBA", canvas.size, (90, 180, 255, 30))
-    frost = Image.alpha_composite(frost, tint)
-    canvas.paste(frost, (0, 0), mask)
-    # Light catching the top edge, and the hairline border
-    top = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
-    td = ImageDraw.Draw(top)
-    for i in range(h // 2):
-        td.line((x0, y0 + i, x1, y0 + i), fill=(200, 235, 255, int(40 * (1 - i / (h / 2)))))
-    canvas.paste(Image.alpha_composite(canvas, top), (0, 0), mask)
-    d = ImageDraw.Draw(canvas)
-    d.rounded_rectangle((x0, y0, x1, y1), r, outline=(150, 220, 255, 210), width=3)
-    d.line((x0 + r, y0 + 1, x1 - r, y0 + 1), fill=(235, 248, 255, 230), width=2)
-    tx = x0 + pad_x + dot + 26
-    d.ellipse((x0 + pad_x, y0 + pad_y + 26, x0 + pad_x + dot, y0 + pad_y + 26 + dot), fill=CORAL)
-    d.text((tx, y0 + pad_y - 6), label, font=lf, fill=INK)
-    d.text((tx, y0 + pad_y + 66 + 10), value, font=vf, fill=(196, 214, 228))
+def sticky_note(canvas, cx, cy, label, value, angle, colour):
+    """A detective's sticky note: square-ish paper in a warm yellow, a red pin at the top, the clue
+    in marker and where it comes from in pen, slightly askew, with a soft shadow on the stage."""
+    marker = ImageFont.truetype("/System/Library/Fonts/Supplemental/MarkerFelt.ttc", 64, index=1)
+    pen = ImageFont.truetype("/System/Library/Fonts/Supplemental/Noteworthy.ttc", 42, index=0)
+    probe = ImageDraw.Draw(Image.new("RGB", (8, 8)))
+    nw = int(max(probe.textlength(label, font=marker), probe.textlength(value, font=pen)) + 100)
+    nh = 250
+    note = Image.new("RGBA", (nw + 120, nh + 120), (0, 0, 0, 0))
+    d = ImageDraw.Draw(note)
+    x0, y0 = 60, 60
+    # Shadow, then the paper with a slightly darker sticky strip and a curled bottom edge.
+    sh = Image.new("RGBA", note.size, (0, 0, 0, 0))
+    ImageDraw.Draw(sh).rectangle((x0 + 10, y0 + 22, x0 + nw + 10, y0 + nh + 26), fill=(0, 0, 0, 200))
+    note.alpha_composite(sh.filter(ImageFilter.GaussianBlur(22)))
+    r, g, b = (int(v * 0.84) for v in colour)          # paper in a dark room
+    for i in range(nh):
+        t = i / nh
+        shade = 1.0 - 0.10 * t
+        d.line((x0, y0 + i, x0 + nw, y0 + i), fill=(int(r * shade), int(g * shade), int(b * shade), 255))
+    d.rectangle((x0, y0, x0 + nw, y0 + 46), fill=(int(r * 0.9), int(g * 0.9), int(b * 0.88), 255))
+    # Red pin
+    px, py = x0 + nw // 2, y0 + 26
+    d.ellipse((px - 22, py - 22, px + 22, py + 22), fill=(178, 34, 34, 255))
+    d.ellipse((px - 10, py - 14, px + 2, py - 2), fill=(240, 120, 110, 255))
+    # Writing
+    ink, pen_ink = (34, 30, 40, 255), (60, 56, 70, 255)
+    d.text((x0 + 50, y0 + 70), label, font=marker, fill=ink)
+    d.text((x0 + 50, y0 + 158), value, font=pen, fill=pen_ink)
+    note = note.rotate(angle, resample=Image.BICUBIC, expand=True)
+    canvas.alpha_composite(note, (int(cx - note.width / 2), int(cy - note.height / 2)))
 
 
 def header(out):
     """Theatrical (owner, 2026-11-05): a dark stage, one spotlight on the detective and the glowing
-    digital footprint at his feet, six things an app can learn on digital glass cards. No curtains
+    digital footprint at his feet, six things an app can learn on a detective's sticky notes. No curtains
     (owner). No headline. Everything that matters
     sits in the area both crops keep: iPhone shows the full height but only the middle ~84% of the
     width, with buttons over the top corners; iPad shows the full width but loses ~15% top and
@@ -128,24 +120,10 @@ def header(out):
         a = int(170 * min(1, t / 0.35) * (1 - max(0, t - 0.55) / 0.45))
         fd.line((0, y, w, y), fill=(36, 27, 19, a))
     c.alpha_composite(floor.filter(ImageFilter.GaussianBlur(12)))
-    # The spotlight: a beam from above the centre, widening onto a pool of light on the boards.
-    beam = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    bd = ImageDraw.Draw(beam)
-    bd.polygon([(w * 0.47, -40), (w * 0.53, -40), (w * 0.66, floor_y), (w * 0.34, floor_y)], fill=(255, 236, 205, 46))
-    c.alpha_composite(beam.filter(ImageFilter.GaussianBlur(90)))
+    # A pool of light on the boards where he stands (no beam from above: owner).
     pool = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     ImageDraw.Draw(pool).ellipse((w * 0.31, floor_y - h * 0.07, w * 0.69, floor_y + h * 0.08), fill=(255, 226, 180, 120))
     c.alpha_composite(pool.filter(ImageFilter.GaussianBlur(70)))
-    # Dust drifting in the beam.
-    dust = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    dd = ImageDraw.Draw(dust)
-    for _ in range(160):
-        y = random.uniform(0.02, 0.80) * h
-        half = (0.03 + 0.13 * y / floor_y) * w
-        x = w / 2 + random.uniform(-half, half)
-        r = random.uniform(2, 6)
-        dd.ellipse((x - r, y - r, x + r, y + r), fill=(255, 240, 215, random.randint(40, 130)))
-    c.alpha_composite(dust.filter(ImageFilter.GaussianBlur(1.5)))
     # The detective, centre stage: the owner's dark artwork (store/creative/mascot-dark.jpg), its
     # near-black ground feathered into the stage so only he and his glowing footprint show.
     art = Image.open(ROOT / "store/creative/mascot-dark.jpg").convert("RGB")
@@ -166,13 +144,11 @@ def header(out):
     vig = vig.filter(ImageFilter.GaussianBlur(260))
     black = Image.new("RGBA", (w, h), (0, 0, 0, 255))
     c = Image.composite(c, black, vig)
-    # Six things an app can learn, on digital glass cards either side of the spotlight.
-    m_left, m_right = w / 2 - w * 0.125, w / 2 + w * 0.15
-    lw = max(glass_width(*x) for x in CONCERNS[:3])
-    rw = max(glass_width(*x) for x in CONCERNS[3:])
-    for i, fy in enumerate((0.42, 0.58, 0.74)):
-        glass_card(c, m_left, h * fy, *CONCERNS[i], anchor="right", w=lw)
-        glass_card(c, m_right, h * fy, *CONCERNS[3 + i], anchor="left", w=rw)
+    # Six things an app can learn, on a detective's sticky notes pinned either side of him.
+    spots = [(0.27, 0.40, -4), (0.225, 0.575, 3), (0.28, 0.745, -2), (0.73, 0.40, 3), (0.775, 0.575, -3), (0.72, 0.745, 2)]
+    colours = [(240, 214, 120), (236, 200, 150), (230, 222, 160), (236, 205, 128), (240, 214, 120), (228, 196, 150)]
+    for (fx, fy, angle), colour, (label, value) in zip(spots, colours, CONCERNS):
+        sticky_note(c, w * fx, h * fy, label, value, angle, colour)
     c.convert("RGB").save(out / "header-3840x1646.png", optimize=True)
 
 
