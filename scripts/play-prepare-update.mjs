@@ -56,10 +56,15 @@ for (const l of listings) for (const [f, max] of Object.entries(LIMITS))
 
 const slides = readdirSync(`${ROOT}store/slides/android-phone`).filter((f) => f.endsWith(".png")).sort()
   .map((f) => `${ROOT}store/slides/android-phone/${f}`);
+const tablets = readdirSync(`${ROOT}store/slides/android-tablet`).filter((f) => f.endsWith(".png")).sort()
+  .map((f) => `${ROOT}store/slides/android-tablet/${f}`);
 const gallery = {
   icon: [`${ROOT}store/slides/play-icon-512.png`],
   featureGraphic: [`${ROOT}store/slides/play-feature-1024x500.png`],
   phoneScreenshots: slides,
+  // Tablets (owner, 2026-11-05): one portrait set serves both 7-inch and 10-inch screens.
+  sevenInchScreenshots: tablets,
+  tenInchScreenshots: tablets,
 };
 
 const edit = await api(token, "/edits", { method: "POST", body: {} });
