@@ -4,7 +4,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 // Prepares a whole Play update in ONE edit and leaves it unsent: the release bundle on the closed
-// testing track (alpha), the listing text in every language (GooglePlayConsole/localized/), and the
+// production track (owner, 2026-11-06: every release goes to production; `--internal` sends it to
+// internal testing instead, for checking a build on the owner's S25 first), the listing text in every language (GooglePlayConsole/localized/), and the
 // slides in every language. Prints the edit id.
 //
 // 🚨 Once the app has a live release, committing an edit sends it for Google's review. So this
@@ -75,12 +76,13 @@ const versionName = readFileSync(`${ROOT}Android/app/build.gradle.kts`, "utf8").
 const aab = readFileSync(`${ROOT}Android/app/build/outputs/bundle/release/app-release.aab`);
 const b = await api(token, `https://androidpublisher.googleapis.com/upload/androidpublisher/v3/applications/${PACKAGE}${E}/bundles?uploadType=media`,
   { method: "POST", raw: aab, contentType: "application/octet-stream" });
-await call(token, `${E}/tracks/alpha`, { method: "PUT", body: { track: "alpha", releases: [{
+const TRACK = process.argv.includes("--internal") ? "internal" : "production";
+await call(token, `${E}/tracks/${TRACK}`, { method: "PUT", body: { track: TRACK, releases: [{
   name: `${versionName} (${b.versionCode})`, versionCodes: [String(b.versionCode)], status: "completed",
   // Each language's own note: the feature line above the fixed sentence (owner's rule).
   releaseNotes: listings.filter((l) => l.releaseNotes).map((l) => ({ language: l.language, text: l.releaseNotes })),
 }] } });
-console.log(`• closed testing: versionCode ${b.versionCode}`);
+console.log(`• ${TRACK}: versionCode ${b.versionCode}`);
 
 for (const l of listings)
   await call(token, `${E}/listings/${l.language}`, { method: "PUT", body: {
