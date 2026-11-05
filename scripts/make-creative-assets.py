@@ -66,35 +66,78 @@ def concern(canvas, x, y, label, value, anchor, w):
     d.text((tx, y0 + pad_y + 72 + 12), value, font=vf, fill=MUTED)
 
 
-def sticky_note(canvas, cx, cy, label, value, angle, colour):
-    """A detective's sticky note: square-ish paper in a warm yellow, a red pin at the top, the clue
-    in marker and where it comes from in pen, slightly askew, with a soft shadow on the stage."""
+def sticky_note(canvas, cx, cy, label, value, angle, colour, wear, pin):
+    """A detective's sticky note, aged: each one its own colour, pin and wear (a rolled corner, a
+    cut corner, a torn edge, a coffee ring, a dog-ear, tape and yellowing), slightly askew, with a
+    soft shadow on the stage. Clue in marker, where it comes from in pen."""
+    import random
+    rnd = random.Random(label)
     marker = ImageFont.truetype("/System/Library/Fonts/Supplemental/MarkerFelt.ttc", 64, index=1)
     pen = ImageFont.truetype("/System/Library/Fonts/Supplemental/Noteworthy.ttc", 42, index=0)
     probe = ImageDraw.Draw(Image.new("RGB", (8, 8)))
     nw = int(max(probe.textlength(label, font=marker), probe.textlength(value, font=pen)) + 100)
     nh = 250
-    note = Image.new("RGBA", (nw + 120, nh + 120), (0, 0, 0, 0))
-    d = ImageDraw.Draw(note)
-    x0, y0 = 60, 60
-    # Shadow, then the paper with a slightly darker sticky strip and a curled bottom edge.
-    sh = Image.new("RGBA", note.size, (0, 0, 0, 0))
-    ImageDraw.Draw(sh).rectangle((x0 + 10, y0 + 22, x0 + nw + 10, y0 + nh + 26), fill=(0, 0, 0, 200))
-    note.alpha_composite(sh.filter(ImageFilter.GaussianBlur(22)))
-    r, g, b = (int(v * 0.84) for v in colour)          # paper in a dark room
+    pad = 60
+    W, H = nw + pad * 2, nh + pad * 2
+    x0, y0, x1, y1 = pad, pad, pad + nw, pad + nh
+    # The paper's outline, shaped by the wear.
+    shape = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+    if wear == "cut":                       # a corner snipped off
+        shape = [(x0 + 70, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0 + 70)]
+    elif wear == "torn":                    # a ragged bottom edge
+        edge = [(x1, y1 - 6)]
+        x = x1
+        while x > x0:
+            x -= rnd.randint(14, 30); edge.append((max(x, x0), y1 - rnd.randint(0, 22)))
+        shape = [(x0, y0), (x1, y0)] + edge + [(x0, y1 - 10)]
+    elif wear == "curl":                    # bottom-right corner rolled up
+        shape = [(x0, y0), (x1, y0), (x1, y1 - 80), (x1 - 80, y1), (x0, y1)]
+    elif wear == "dogear":                  # top-right corner folded over
+        shape = [(x0, y0), (x1 - 64, y0), (x1, y0 + 64), (x1, y1), (x0, y1)]
+    mask = Image.new("L", (W, H), 0); ImageDraw.Draw(mask).polygon(shape, fill=255)
+    note = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    shadow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    shadow.putalpha(mask.point(lambda v: int(v * 0.8)))
+    note.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(20)), (10, 22))
+    # Paper: its colour dimmed for a dark room, a darker sticky strip, light falling off downwards.
+    r, g, b = (int(v * 0.84) for v in colour)
+    paper = Image.new("RGBA", (W, H), (0, 0, 0, 0)); pd = ImageDraw.Draw(paper)
     for i in range(nh):
-        t = i / nh
-        shade = 1.0 - 0.10 * t
-        d.line((x0, y0 + i, x0 + nw, y0 + i), fill=(int(r * shade), int(g * shade), int(b * shade), 255))
-    d.rectangle((x0, y0, x0 + nw, y0 + 46), fill=(int(r * 0.9), int(g * 0.9), int(b * 0.88), 255))
-    # Red pin
-    px, py = x0 + nw // 2, y0 + 26
-    d.ellipse((px - 22, py - 22, px + 22, py + 22), fill=(178, 34, 34, 255))
-    d.ellipse((px - 10, py - 14, px + 2, py - 2), fill=(240, 120, 110, 255))
-    # Writing
+        k = 1.0 - 0.12 * i / nh
+        pd.line((x0, y0 + i, x1, y0 + i), fill=(int(r * k), int(g * k), int(b * k), 255))
+    pd.rectangle((x0, y0, x1, y0 + 44), fill=(int(r * 0.9), int(g * 0.9), int(b * 0.88), 255))
+    if wear == "aged":                      # yellowed, browned edges and a crease
+        edge = Image.new("L", (W, H), 0)
+        ImageDraw.Draw(edge).rectangle((x0, y0, x1, y1), outline=255, width=26)
+        brown = Image.new("RGBA", (W, H), (120, 84, 30, 0)); brown.putalpha(edge.filter(ImageFilter.GaussianBlur(18)).point(lambda v: int(v * 0.55)))
+        paper.alpha_composite(brown)
+        pd.line((x0 + nw * 0.62, y0, x0 + nw * 0.55, y1), fill=(int(r * 0.78), int(g * 0.78), int(b * 0.76), 255), width=3)
+    if wear == "coffee":                    # a coffee ring in the corner
+        ring = Image.new("RGBA", (W, H), (0, 0, 0, 0)); rd = ImageDraw.Draw(ring)
+        cx2, cy2, rr = x1 - 70, y1 - 60, 78
+        rd.ellipse((cx2 - rr, cy2 - rr, cx2 + rr, cy2 + rr), outline=(110, 70, 30, 120), width=9)
+        rd.ellipse((cx2 - rr + 8, cy2 - rr + 4, cx2 + rr - 4, cy2 + rr - 6), outline=(110, 70, 30, 50), width=4)
+        paper.alpha_composite(ring.filter(ImageFilter.GaussianBlur(2)))
+    paper.putalpha(Image.composite(paper.getchannel("A"), Image.new("L", (W, H), 0), mask))
+    note.alpha_composite(paper)
+    nd = ImageDraw.Draw(note)
+    if wear == "curl":                      # the rolled-up flap, lit on its back
+        nd.polygon([(x1, y1 - 80), (x1 - 80, y1), (x1 - 92, y1 - 92)], fill=(int(r * 1.0), int(g * 0.98), int(b * 0.9), 255))
+        nd.line((x1, y1 - 80, x1 - 92, y1 - 92), fill=(int(r * 0.7), int(g * 0.7), int(b * 0.65), 255), width=2)
+    if wear == "dogear":                    # the folded-over corner
+        nd.polygon([(x1 - 64, y0), (x1, y0 + 64), (x1 - 64, y0 + 64)], fill=(int(r * 0.74), int(g * 0.74), int(b * 0.7), 255))
+    # Fixing: a pin of its own colour, or a strip of tape.
+    if pin == "tape":
+        tape = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        ImageDraw.Draw(tape).rectangle((x0 + nw / 2 - 70, y0 - 22, x0 + nw / 2 + 70, y0 + 26), fill=(235, 230, 210, 120))
+        note.alpha_composite(tape.rotate(-6, resample=Image.BICUBIC, center=(x0 + nw / 2, y0)))
+    else:
+        px, py = x0 + nw // 2, y0 + 24
+        nd.ellipse((px - 22, py - 22, px + 22, py + 22), fill=(*pin, 255))
+        nd.ellipse((px - 10, py - 14, px + 2, py - 2), fill=tuple(min(255, int(v * 1.5) + 40) for v in pin) + (255,))
     ink, pen_ink = (34, 30, 40, 255), (60, 56, 70, 255)
-    d.text((x0 + 50, y0 + 70), label, font=marker, fill=ink)
-    d.text((x0 + 50, y0 + 158), value, font=pen, fill=pen_ink)
+    nd.text((x0 + 50, y0 + 70), label, font=marker, fill=ink)
+    nd.text((x0 + 50, y0 + 158), value, font=pen, fill=pen_ink)
     note = note.rotate(angle, resample=Image.BICUBIC, expand=True)
     canvas.alpha_composite(note, (int(cx - note.width / 2), int(cy - note.height / 2)))
 
@@ -144,11 +187,17 @@ def header(out):
     vig = vig.filter(ImageFilter.GaussianBlur(260))
     black = Image.new("RGBA", (w, h), (0, 0, 0, 255))
     c = Image.composite(c, black, vig)
-    # Six things an app can learn, on a detective's sticky notes pinned either side of him.
+    # Six things an app can learn, on a detective's aged sticky notes either side of him.
     spots = [(0.27, 0.40, -4), (0.225, 0.575, 3), (0.28, 0.745, -2), (0.73, 0.40, 3), (0.775, 0.575, -3), (0.72, 0.745, 2)]
-    colours = [(240, 214, 120), (236, 200, 150), (230, 222, 160), (236, 205, 128), (240, 214, 120), (228, 196, 150)]
-    for (fx, fy, angle), colour, (label, value) in zip(spots, colours, CONCERNS):
-        sticky_note(c, w * fx, h * fy, label, value, angle, colour)
+    # Each note its own colour, wear and fixing (owner, 2026-11-05): no two alike.
+    notes = [((240, 214, 110), "curl", (178, 34, 34)),     # yellow, rolled corner, red pin
+             ((236, 170, 170), "cut", (40, 90, 170)),      # pink, snipped corner, blue pin
+             ((170, 214, 170), "coffee", (40, 130, 70)),   # mint, coffee ring, green pin
+             ((160, 200, 230), "torn", (220, 180, 40)),    # blue, torn edge, yellow pin
+             ((240, 178, 110), "dogear", (230, 230, 230)), # orange, folded corner, white pin
+             ((236, 224, 196), "aged", "tape")]            # cream, yellowed and creased, taped
+    for (fx, fy, angle), (colour, wear, pin), (label, value) in zip(spots, notes, CONCERNS):
+        sticky_note(c, w * fx, h * fy, label, value, angle, colour, wear, pin)
     c.convert("RGB").save(out / "header-3840x1646.png", optimize=True)
 
 
