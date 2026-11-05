@@ -62,7 +62,7 @@ const ENGLISH = new Set(["en-AU", "en-CA", "en-GB"]);
 // Extra private terms can be added with BANNED_TERMS=a|b in the gitignored .env file.
 const extraBanned = (existsSync(envFile) ? readFileSync(envFile, "utf8").split("\n").find((l) => l.startsWith("BANNED_TERMS=")) ?? "" : "").slice(13).trim();
 const BANNED = new RegExp(`${extraBanned ? `${extraBanned}|` : ""}spyware|spying apps?|malware|anti-?virus|\\bvirus\\b|#\\s*1|\\bbest\\b`, "i");
-const BRAND = "hYYa Footprint Inspector";
+const BRAND = "hYYa Digital Footprint Check";
 
 function check(l) {
   const issues = [];
@@ -87,6 +87,7 @@ function check(l) {
     }
   }
   for (const [k, v] of Object.entries(l)) if (BANNED.test(v)) issues.push(`${k} uses a banned word (${v.match(BANNED)[0]})`);
+  if (/privacy report|app privacy|datenschutzbericht|rapport de confidentialité|informe de privacidad|プライバシーレポート|隐私报告|隱私權報告|개인정보 보호 리포트/i.test(l.subtitle ?? "")) issues.push("subtitle must not use the App Privacy Report name");
   if (/\bfree\b/i.test(l.subtitle ?? "") || /gratuit|gratis|kostenlos|無料|免费|免費|무료|бесплат|مجان/i.test(l.subtitle ?? "")) issues.push("subtitle must not mention price or free");
   return issues;
 }
@@ -96,7 +97,7 @@ function prompt(language, feedback) {
 
 Rules:
 - Natural, native wording; calm and plain, never alarmist or hyped. Not a word-for-word translation.
-- subtitle: at most 30 characters. Use the local everyday terms people search for an "app privacy report" and a "privacy check/checkup" (the system's App Privacy Report keeps its localised name where it has one). No price, no "free", no superlatives.
+- subtitle: at most 30 characters. Translate the English subtitle's meaning, "a privacy score and an app tracker", into the local everyday words people search for. Never use the phrase "App Privacy Report" or its local name (it is the system's own feature name). No price, no "free", no superlatives.
 - keywords: comma-separated search terms people in this language really type, no spaces after commas, at most 100 UTF-8 bytes in total, every term longer than two characters where the script allows. Do not repeat any word from the name "${BRAND}" or from your subtitle. Cover ideas like: app permissions, tracking, privacy scanner, safety check, lockdown mode, location, camera, microphone, photos, contacts, data leak. Never "fingerprint" (people searching it want screen locks). English terms are fine only where locals commonly search in English.
 - promotionalText: at most 170 characters. Keep it device-neutral like the English (phone, tablet or computer): never name iPhone, iPad, Mac or Android.
 - description: at most 4000 characters, plain text. Keep the structure: paragraphs, the UPPERCASE section headings (translated, still uppercase where the script has case) and the • bullets. Keep "${BRAND}", "hYYa" and "Mozilla Public License 2.0" unchanged; "Settings" is the system's own localised name for the Settings app. Stay device-neutral like the English ("your device", "the system"): never name iPhone, iPad, iOS, Mac or Android.

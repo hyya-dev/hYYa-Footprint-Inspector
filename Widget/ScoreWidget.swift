@@ -15,7 +15,7 @@ struct ScoreWidget: Widget {
         StaticConfiguration(kind: "ScoreWidget", provider: ScoreProvider()) { entry in
             ScoreWidgetView(score: entry.score)
         }
-        .configurationDisplayName("hYYa Footprint Inspector")
+        .configurationDisplayName("hYYa Digital Footprint Check")
         .description("Your privacy score and your last check")
         .supportedFamilies([.systemSmall, .systemMedium])
         .contentMarginsDisabled()
@@ -119,7 +119,7 @@ struct ScoreWidgetView: View {
         ZStack(alignment: .trailing) {
             mascot(height: 132).padding(.trailing, 14)
             VStack(alignment: .leading, spacing: 0) {
-                Text("hYYa Footprint Inspector").font(.system(size: 12, weight: .semibold)).foregroundStyle(palette.accent)
+                Text("hYYa Digital Footprint Check").font(.system(size: 12, weight: .semibold)).foregroundStyle(palette.accent)
                 label.foregroundStyle(palette.muted).padding(.top, 8)
                 if let score {
                     HStack(alignment: .lastTextBaseline, spacing: 8) {

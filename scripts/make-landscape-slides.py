@@ -37,7 +37,7 @@ def make(s, raw, mascot, W, H, rotate):
     f = slides.font(px(56), "Semibold")
     nx, ny = left + m.width + px(26), px(90) + m.height // 2 - px(36)
     d.text((nx, ny), "hYYa", font=f, fill=slides.SAND)
-    d.text((nx + d.textlength("hYYa ", font=f), ny), "Footprint Inspector", font=f, fill=slides.INK)
+    d.text((nx + d.textlength("hYYa ", font=f), ny), "Digital Footprint Check", font=f, fill=slides.INK)
     d.rounded_rectangle((nx, ny + px(80), nx + px(66), ny + px(86)), 3, fill=slides.SAND)
     top = px(90) + m.height + px(70)
     y = slides.draw_headline(d, s["headline"], left, top, px(1300), px(104))

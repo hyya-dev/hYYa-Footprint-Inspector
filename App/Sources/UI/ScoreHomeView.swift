@@ -55,7 +55,7 @@ struct ScoreHomeView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.top, short ? 0 : 12)
             VStack(alignment: .leading, spacing: 12) {
-                Brand.eyebrow("hYYa Footprint Inspector")
+                Brand.eyebrow("hYYa Digital Footprint Check")
                 AccentRule()
                 Text("What do your apps know about you?")
                     .scaledFont(34, weight: .bold, relativeTo: .largeTitle)

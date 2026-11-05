@@ -1,6 +1,6 @@
 # Security policy
 
-hYYa Footprint Inspector has no server and collects no data, so the realistic risks are in the app
+hYYa Digital Footprint Check has no server and collects no data, so the realistic risks are in the app
 itself:
 - a value read or shown in a way that leaks it
 - something stored that shouldn't be

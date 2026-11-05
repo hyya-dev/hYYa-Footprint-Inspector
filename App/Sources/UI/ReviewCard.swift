@@ -5,7 +5,7 @@
 import StoreKit
 import SwiftUI
 
-/// "Rate hYYa Footprint Inspector". Opens the App Store's write-review page once the app has an
+/// "Rate hYYa Digital Footprint Check". Opens the App Store's write-review page once the app has an
 /// App Store id (a tap must always do something visible). Until then it falls back to Apple's
 /// in-app rating prompt.
 struct ReviewCard: View {
@@ -29,7 +29,7 @@ struct ReviewCard: View {
                                 Image(systemName: "star.fill").font(.caption).foregroundStyle(Brand.sand)
                             }
                         }
-                        Text(tapped ? "Thank you for rating" : "Enjoying hYYa Footprint Inspector?")
+                        Text(tapped ? "Thank you for rating" : "Enjoying hYYa Digital Footprint Check?")
                             .font(.headline)
                             .foregroundStyle(Brand.ink)
                         Text("Your reviews keep us smiling while coding, and help others find a privacy app they can trust.")

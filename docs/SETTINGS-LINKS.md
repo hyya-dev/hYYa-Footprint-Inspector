@@ -38,7 +38,7 @@ on). The real device may behave differently. To check:
 
 | Link | Lands on |
 |---|---|
-| `UIApplication.openSettingsURLString` | ✅ **Our own page** (Settings › Apps › Footprint Inspector) |
+| `UIApplication.openSettingsURLString` | ✅ **Our own page** (Settings › Apps › hYYa Footprint) |
 | `UIApplication.openNotificationSettingsURLString` | ⚠️ The **global** Notifications page. We never ask for notifications, so iOS has no per-app page for us |
 | `App-prefs:` | Settings home |
 | `App-prefs:Privacy`, all `App-prefs:Privacy&path=…` | ❌ Settings › **Apps** list |

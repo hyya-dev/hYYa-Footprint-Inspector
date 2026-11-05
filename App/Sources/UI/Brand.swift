@@ -9,7 +9,7 @@ import UIKit
 import AppKit
 #endif
 
-/// hYYa Footprint Inspector design layer: "Quiet Noir" (owner, 2026-10-17: black ground from
+/// hYYa Digital Footprint Check design layer: "Quiet Noir" (owner, 2026-10-17: black ground from
 /// their reference, but "the glow is too much" and the layout must be elegant).
 ///
 /// - Ground: pure black. Content sits in quiet near-black panels with hairline separators.

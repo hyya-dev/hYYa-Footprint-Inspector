@@ -7,7 +7,7 @@
     python3 scripts/make-store-slides.py <raw-dir> <out-dir> <width> <height> [slides.json]
 
 Layout (Quiet Noir): black ground with a soft sand glow; the mascot and the full name
-"hYYa Footprint Inspector" at the top; a benefit headline with one sand phrase; three highlight
+"hYYa Digital Footprint Check" at the top; a benefit headline with one sand phrase; three highlight
 chips; and the real app screen in a device frame that runs off the bottom edge. The mascot
 appears once, in the header lockup (owner: repeating it is overkill). Copy comes from
 store/slides.json.
@@ -124,7 +124,7 @@ def make_slide(spec, raw_dir, w, h, mascot):
     nx = margin + m_small.width + int(24 * unit)
     ny = top + m_small.height // 2 - int(34 * unit)
     d.text((nx, ny), "hYYa", font=name_f, fill=SAND)
-    d.text((nx + d.textlength("hYYa ", font=name_f), ny), "Footprint Inspector", font=name_f, fill=INK)
+    d.text((nx + d.textlength("hYYa ", font=name_f), ny), "Digital Footprint Check", font=name_f, fill=INK)
     d.rounded_rectangle((nx, ny + int(78 * unit), nx + int(64 * unit), ny + int(84 * unit)), 3, fill=SAND)
 
     # Headline and highlights

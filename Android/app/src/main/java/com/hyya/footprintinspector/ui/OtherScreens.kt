@@ -344,7 +344,7 @@ object Links {
     const val SECURITY = "mailto:security@hyya.com?subject=Security%20report%20%E2%80%94%20hYYa%20Footprint%20Inspector"
     const val HYYA_AI = "https://play.google.com/store/apps/details?id=com.hyya.hyyaai"
     const val HYYA = "https://hyya.com"
-    const val SHARE = "hYYa Footprint Inspector shows what any app can learn about your device, and how to fix it. Free, open source, nothing leaves your device.\n$PLAY"
+    const val SHARE = "hYYa Digital Footprint Check shows what any app can learn about your device, and how to fix it. Free, open source, nothing leaves your device.\n$PLAY"
 }
 
 @Composable
@@ -353,10 +353,10 @@ fun SettingsScreen(scanner: Scanner, nav: Nav) {
     var count by remember { mutableIntStateOf(scanner.history.snapshots.size) }
     Page {
         if (nav.stack.isNotEmpty()) BackBar("Settings", nav)
-        HeroCard("Settings", "hYYa Footprint Inspector", "Everything here stays on this device.")
+        HeroCard("Settings", "hYYa Digital Footprint Check", "Everything here stays on this device.")
         // Rating card, as on iOS.
         // The whole card opens the link; the pill is its label, centred across the card.
-        ToneCard(Tone.CONTEXT, "Enjoying hYYa Footprint Inspector?", onClick = { openUrl(context, Links.PLAY) }) {
+        ToneCard(Tone.CONTEXT, "Enjoying hYYa Digital Footprint Check?", onClick = { openUrl(context, Links.PLAY) }) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Mascot(72)
                 Spacer(Modifier.width(12.dp))

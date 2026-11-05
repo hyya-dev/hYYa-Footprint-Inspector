@@ -1,4 +1,4 @@
-hYYa Footprint Inspector for Mac is a free privacy-education app. It reads the same information any sandboxed Mac App Store app can read and shows it ONLY to the person using the Mac, so they can see their own "fingerprint" and reduce it. Nothing is collected, stored off the device or transmitted: there is no account, no server, no analytics, no third-party SDK, and the app has no network entitlement. The App Privacy label is "Data Not Collected".
+hYYa Digital Footprint Check for Mac is a free privacy-education app. It reads the same information any sandboxed Mac App Store app can read and shows it ONLY to the person using the Mac, so they can see their own "fingerprint" and reduce it. Nothing is collected, stored off the device or transmitted: there is no account, no server, no analytics, no third-party SDK, and the app has no network entitlement. The App Privacy label is "Data Not Collected".
 
 No login is required. To review:
 1. Click "Start with check 1". Results appear in a few seconds.
@@ -6,7 +6,7 @@ No login is required. To review:
 3. Each permission category ("Seen once you allow it") asks for that permission only when the user clicks "Show me", and shows counts and summaries only.
 4. "Sensitive apps": the user picks categories, then clicks Check. Results are hidden until clicked, cleared when the app goes to the background, and never sent. Only the count found stays on the device, never which apps.
 5. "Check-up" walks through the Privacy & Security pages of System Settings.
-6. Settings opens in its own window (hYYa Footprint Inspector menu › Settings, or ⌘,).
+6. Settings opens in its own window (hYYa Digital Footprint Check menu › Settings, or ⌘,).
 
 About device identifiers and personal information (5.1.1, 5.1.2): the app displays the Mac's serial number, hardware UUID, the user's full name, computer name, network hardware addresses, running apps and installed apps. It does this ONLY to show the user, on screen, that any app can read these without asking. None of these values are stored, logged, hashed for tracking or sent anywhere. Scan history keeps only salted one-way hashes, used to show "what changed since your last scan", and is excluded from backups.
 

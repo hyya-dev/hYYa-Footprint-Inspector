@@ -1,4 +1,4 @@
-hYYa Footprint Inspector is a free privacy-education app. It reads the same device information any iOS app can read and shows it ONLY to the person holding the device, so they can see their own "fingerprint" and reduce it. Nothing is collected, stored off the device or transmitted: there is no account, no server, no analytics and no third-party SDK. The App Privacy label is "Data Not Collected".
+hYYa Digital Footprint Check is a free privacy-education app. It reads the same device information any iOS app can read and shows it ONLY to the person holding the device, so they can see their own "fingerprint" and reduce it. Nothing is collected, stored off the device or transmitted: there is no account, no server, no analytics and no third-party SDK. The App Privacy label is "Data Not Collected".
 
 No login is required. To review:
 1. Tap "Start with check 1" on the first screen. Results appear in about 3 seconds, with one privacy score that averages the checks done so far.

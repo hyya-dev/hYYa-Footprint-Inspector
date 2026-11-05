@@ -7,7 +7,7 @@ import XCTest
 /// Captures the raw screens for the App Store slides. Run it on a Simulator (never a real phone:
 /// a real device's values, such as its vendor ID, must not end up in public screenshots).
 ///
-///   xcodebuild test -scheme "hYYa Footprint Inspector UITests" \
+///   xcodebuild test -scheme "hYYa Digital Footprint Check UITests" \
 ///     -only-testing:hYYaFootprintInspectorUITests/StoreScreenshotsUITests \
 ///     -destination "platform=iOS Simulator,name=iPhone 17 Pro Max" -resultBundlePath …
 ///

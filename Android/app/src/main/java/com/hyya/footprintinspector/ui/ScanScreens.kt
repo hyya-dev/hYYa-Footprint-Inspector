@@ -452,7 +452,7 @@ fun HomeScreen(scanner: Scanner, nav: Nav) {
         if (value == null) {
             val short = androidx.compose.ui.platform.LocalConfiguration.current.let { it.screenWidthDp > it.screenHeightDp }
             if (!short) Mascot(180, Modifier.align(Alignment.CenterHorizontally))
-            Eyebrow("hYYa Footprint Inspector")
+            Eyebrow("hYYa Digital Footprint Check")
             AccentRule()
             Text("What do your apps know about you?", color = Brand.ink, fontSize = 30.sp, fontWeight = FontWeight.Bold, lineHeight = 34.sp)
             Text("Four quick checks show what apps can learn about you, then help you fix it.",
@@ -499,7 +499,7 @@ private fun shareResult(context: android.content.Context, overall: com.hyya.foot
         line("Tracker", com.hyya.footprintinspector.model.OverallScore.Part.TRACKER),
         line("Check-up", com.hyya.footprintinspector.model.OverallScore.Part.CHECKUP),
         "",
-        "Check yours with hYYa Footprint Inspector. Free, open source, and nothing leaves your device.",
+        "Check yours with hYYa Digital Footprint Check. Free, open source, and nothing leaves your device.",
         Links.PLAY,
     ).joinToString("\n")
     context.startActivity(android.content.Intent.createChooser(

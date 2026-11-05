@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">hYYa Footprint Inspector</string>
+    <string name="app_name">hYYa Footprint</string>
+    <string name="app_full_name">hYYa Digital Footprint Check</string>
     <string name="widget_description">Your privacy score and your last check</string>
     <string name="widget_label">PRIVACY SCORE</string>
     <string name="widget_out_of">out of 100</string>

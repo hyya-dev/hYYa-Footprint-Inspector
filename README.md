@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="App/Resources/Assets.xcassets/MascotCutout.imageset/mascot-cutout.png" width="160" alt="The hYYa Footprint Inspector detective">
+  <img src="App/Resources/Assets.xcassets/MascotCutout.imageset/mascot-cutout.png" width="160" alt="The hYYa Digital Footprint Check detective">
 </p>
 
-<h1 align="center">hYYa Footprint Inspector</h1>
+<h1 align="center">hYYa Digital Footprint Check</h1>
 
 <p align="center">
   <b>See what any app can learn about your device, and how to hide it.</b><br>
@@ -19,7 +19,7 @@
   <img src="https://img.shields.io/badge/Google%20Play-closed%20testing-lightgrey" alt="Google Play: closed testing">
 </p>
 
-<p align="center"><img src="docs/images/readme-hero.jpg" alt="Screens from hYYa Footprint Inspector" width="100%"></p>
+<p align="center"><img src="docs/images/readme-hero.jpg" alt="Screens from hYYa Digital Footprint Check" width="100%"></p>
 
 ## Why
 
@@ -33,7 +33,7 @@ Every app you install can quietly read dozens of details about your device witho
 Each one looks harmless. Together they can recognise your device across apps, a technique called
 **fingerprinting**. Grant a permission and an app can see far more.
 
-hYYa Footprint Inspector reads exactly what any app can read, shows it to you in plain language,
+hYYa Digital Footprint Check reads exactly what any app can read, shows it to you in plain language,
 flags what's worth a look, and walks you through hiding what can be hidden.
 
 ## What it does
@@ -79,7 +79,7 @@ Apple platforms: Xcode 27 or later,
 
 ```sh
 xcodegen generate
-xcodebuild -project hYYaFootprintInspector.xcodeproj -scheme "hYYa Footprint Inspector" \
+xcodebuild -project hYYaFootprintInspector.xcodeproj -scheme "hYYa Digital Footprint Check" \
   -destination "platform=iOS Simulator,name=iPhone 17 Pro" test
 ```
 

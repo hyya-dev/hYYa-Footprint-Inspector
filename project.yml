@@ -19,7 +19,7 @@ settings:
     # Apple silicon only: same convention as the sibling hYYa apps.
     ARCHS: arm64
     MARKETING_VERSION: "1.0.5"
-    CURRENT_PROJECT_VERSION: "33"
+    CURRENT_PROJECT_VERSION: "34"
     CODE_SIGN_STYLE: Automatic
     DEVELOPMENT_TEAM: "8PYFWUL3ND"
     SWIFT_STRICT_CONCURRENCY: complete
@@ -37,7 +37,7 @@ targets:
       - target: hYYaFootprintInspectorWidgetIOS
     settings:
       base:
-        PRODUCT_NAME: "hYYa Footprint Inspector"
+        PRODUCT_NAME: "hYYa Digital Footprint Check"
         PRODUCT_MODULE_NAME: "FootprintInspector"
         PRODUCT_BUNDLE_IDENTIFIER: com.hyya.footprintinspector
         CODE_SIGN_ENTITLEMENTS: App/iOS/FootprintInspector.entitlements
@@ -45,7 +45,7 @@ targets:
         # wording, the Bonjour service list and LSApplicationQueriesSchemes.
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_FILE: App/Info.plist
-        INFOPLIST_KEY_CFBundleDisplayName: "hYYa Footprint Inspector"
+        INFOPLIST_KEY_CFBundleDisplayName: "hYYa Footprint"
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         # Black launch screen, so opening the app doesn't flash white before the black UI.
         INFOPLIST_KEY_UILaunchScreen_BackgroundColor: LaunchBackground
@@ -71,11 +71,11 @@ targets:
       - target: hYYaFootprintInspectorWidgetMac
     settings:
       base:
-        PRODUCT_NAME: "hYYa Footprint Inspector"
+        PRODUCT_NAME: "hYYa Digital Footprint Check"
         PRODUCT_MODULE_NAME: "FootprintInspector"
         PRODUCT_BUNDLE_IDENTIFIER: com.hyya.footprintinspector
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: "hYYa Footprint Inspector"
+        INFOPLIST_KEY_CFBundleDisplayName: "hYYa Digital Footprint Check"
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
         # Export compliance: standard system encryption only (same answer as iOS).
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
@@ -116,11 +116,11 @@ targets:
           - Info.plist
     settings:
       base:
-        PRODUCT_NAME: "hYYa Footprint Inspector Widget"
+        PRODUCT_NAME: "hYYa Digital Footprint Check Widget"
         PRODUCT_BUNDLE_IDENTIFIER: com.hyya.footprintinspector.widget
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_FILE: Widget/Info.plist
-        INFOPLIST_KEY_CFBundleDisplayName: "hYYa Footprint Inspector"
+        INFOPLIST_KEY_CFBundleDisplayName: "hYYa Digital Footprint Check"
         CODE_SIGN_ENTITLEMENTS: Widget/WidgetIOS.entitlements
         TARGETED_DEVICE_FAMILY: "1,2"
         SKIP_INSTALL: YES
@@ -135,11 +135,11 @@ targets:
           - Info.plist
     settings:
       base:
-        PRODUCT_NAME: "hYYa Footprint Inspector Widget"
+        PRODUCT_NAME: "hYYa Digital Footprint Check Widget"
         PRODUCT_BUNDLE_IDENTIFIER: com.hyya.footprintinspector.widget
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_FILE: Widget/Info.plist
-        INFOPLIST_KEY_CFBundleDisplayName: "hYYa Footprint Inspector"
+        INFOPLIST_KEY_CFBundleDisplayName: "hYYa Digital Footprint Check"
         CODE_SIGN_ENTITLEMENTS: Widget/WidgetMac.entitlements
         ENABLE_HARDENED_RUNTIME: YES
         SKIP_INSTALL: YES
@@ -160,7 +160,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.hyya.footprintinspector.mactests
         GENERATE_INFOPLIST_FILE: YES
-        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/hYYa Footprint Inspector.app/Contents/MacOS/hYYa Footprint Inspector"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/hYYa Digital Footprint Check.app/Contents/MacOS/hYYa Digital Footprint Check"
         BUNDLE_LOADER: "$(TEST_HOST)"
     dependencies:
       - target: hYYaFootprintInspectorMac
@@ -174,7 +174,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.hyya.footprintinspector.tests
         GENERATE_INFOPLIST_FILE: YES
-        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/hYYa Footprint Inspector.app/hYYa Footprint Inspector"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/hYYa Digital Footprint Check.app/hYYa Digital Footprint Check"
         BUNDLE_LOADER: "$(TEST_HOST)"
     dependencies:
       - target: hYYaFootprintInspectorIOS

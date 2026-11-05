@@ -41,7 +41,7 @@ struct ShareCardView: View {
                     .overlay(alignment: .bottom) { Rectangle().fill(Brand.rule).frame(height: 0.5) }
                 }
             }
-            Text("Check yours with hYYa Footprint Inspector. Free, open source, and nothing leaves your device.")
+            Text("Check yours with hYYa Digital Footprint Check. Free, open source, and nothing leaves your device.")
                 .font(.footnote)
                 .foregroundStyle(Brand.textMuted)
                 .fixedSize(horizontal: false, vertical: true)

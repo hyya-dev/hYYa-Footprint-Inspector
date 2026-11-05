@@ -36,7 +36,7 @@ def make(spec_slide, raw, mascot):
     f = slides.font(58, "Semibold")
     nx, ny = left + m.width + 28, 150 + m.height // 2 - 38
     d.text((nx, ny), "hYYa", font=f, fill=slides.SAND)
-    d.text((nx + d.textlength("hYYa ", font=f), ny), "Footprint Inspector", font=f, fill=slides.INK)
+    d.text((nx + d.textlength("hYYa ", font=f), ny), "Digital Footprint Check", font=f, fill=slides.INK)
     d.rounded_rectangle((nx, ny + 84, nx + 70, ny + 90), 3, fill=slides.SAND)
     y = slides.draw_headline(d, spec_slide["headline"], left, 150 + m.height + 120, 900, 112)
     slides.chips(d, spec_slide["highlights"], left, y + 60, 900, 46)

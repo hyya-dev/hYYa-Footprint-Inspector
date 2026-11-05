@@ -453,7 +453,7 @@ struct MacAppsSource: SignalSource {
 
     func read() async -> [SignalReading] {
         let installed = MacSample.on ? Self.sampleApps : Self.installedAppNames()
-        let running = MacSample.on ? ["Finder", "Safari", "Mail", "Notes", "Music", "hYYa Footprint Inspector"]
+        let running = MacSample.on ? ["Finder", "Safari", "Mail", "Notes", "Music", "hYYa Digital Footprint Check"]
             : NSWorkspace.shared.runningApplications.filter { $0.activationPolicy == .regular }.compactMap(\.localizedName).sorted()
         let background = MacSample.on ? 940 : Self.processCount()
         let browser = NSWorkspace.shared.urlForApplication(toOpen: URL(string: "https://example.com")!)?
@@ -492,7 +492,7 @@ struct MacAppsSource: SignalSource {
     }
 
     private static let sampleApps = ["Calendar", "Keynote", "Mail", "Maps", "Messages", "Music", "Notes", "Numbers",
-                                     "Pages", "Photos", "Preview", "Reminders", "Safari", "hYYa Footprint Inspector"]
+                                     "Pages", "Photos", "Preview", "Reminders", "Safari", "hYYa Digital Footprint Check"]
 }
 
 // MARK: - Account and App Store

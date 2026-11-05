@@ -6,13 +6,13 @@ key phrases (privacy check, app permissions, device fingerprint, digital footpri
 appear naturally a few times.
 
 ## App name (30)
-hYYa Footprint Inspector
+hYYa Digital Footprint Check
 
 ## Short description (80)
 See what apps know, check permissions and fix it step by step. Free and private.
 
 ## Full description (4000)
-Your apps can learn more about you than you think. hYYa Footprint Inspector shows you what they can see, what has special access, and how to fix it, in plain words.
+Your apps can learn more about you than you think. hYYa Digital Footprint Check shows you what they can see, what has special access, and how to fix it, in plain words.
 
 FOUR SIMPLE STEPS
 1. Footprint: one tap checks what any app can read about your device.
@@ -44,7 +44,7 @@ PRIVATE BY DESIGN
 
 Meet the detective: he's on every page and has a tip if you tap him.
 
-hYYa Footprint Inspector is part of the hYYa family of privacy-first apps.
+hYYa Digital Footprint Check is part of the hYYa family of privacy-first apps.
 
 ## Release notes (500)
 This release contains general bug fixes and stability improvements.

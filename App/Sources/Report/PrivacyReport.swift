@@ -111,7 +111,7 @@ struct PrivacyReport: Sendable {
         var id: String { bundleID }
 
         var isThisApp: Bool { bundleID == Bundle.main.bundleIdentifier }
-        var name: String { isThisApp ? "hYYa Footprint Inspector (this app)" : AppNames.name(for: bundleID) }
+        var name: String { isThisApp ? "hYYa Digital Footprint Check (this app)" : AppNames.name(for: bundleID) }
         var sortedUses: [(DataKind, Int)] { uses.sorted { $0.key < $1.key }.map { ($0.key, $0.value) } }
 
         func kind(of site: Site) -> SiteKind { SiteKind.of(site.domain, app: bundleID) }
@@ -384,7 +384,7 @@ enum AppNames {
         // The made-up apps in the sample report (tests and store screenshots).
         "com.example.photoeditor": "Photo Editor", "com.example.weatherplus": "Weather Plus", "com.example.chat": "Chat",
         // hYYa's apps.
-        "com.hyya.footprintinspector": "hYYa Footprint Inspector", "com.hyya.prayerpal": "hYYa PrayerPal", "com.hyya.encryptednotes": "hYYa Encrypted Notes",
+        "com.hyya.footprintinspector": "hYYa Digital Footprint Check", "com.hyya.prayerpal": "hYYa PrayerPal", "com.hyya.encryptednotes": "hYYa Encrypted Notes",
         "com.hyya.encryptedfolder": "hYYa Encrypted Folder", "com.hyya.subscriptionstracker": "hYYa Subscriptions Tracker",
         "com.hyya.hyya-ai": "hYYa ai", "com.hyya.ink": "hYYa ink", "com.hyya.anarchybrowser": "hYYa Anarchy Browser",
         // Common apps whose IDs don't say their name.

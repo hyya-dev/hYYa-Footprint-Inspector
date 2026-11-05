@@ -35,12 +35,12 @@ struct SettingsView: View {
     @AppStorage(ScanReminder.storageKey) private var reminder = ScanReminder.off.rawValue
     @State private var notificationsOff = false
 
-    static let shareMessage = "hYYa Footprint Inspector shows what any app can learn about your device, and how to fix it. Free, open source, nothing leaves your device."
+    static let shareMessage = "hYYa Digital Footprint Check shows what any app can learn about your device, and how to fix it. Free, open source, nothing leaves your device."
 
     var body: some View {
         NavigationStack {
             Page {
-                HeroCard(eyebrow: "Settings", title: "hYYa Footprint Inspector",
+                HeroCard(eyebrow: "Settings", title: "hYYa Digital Footprint Check",
                          subtitle: "Everything here stays on this device.", mood: .idle, mascotSize: 96)
 
                 ReviewCard()
@@ -126,7 +126,7 @@ struct SettingsView: View {
             .alert("Notifications are off", isPresented: $notificationsOff) {
                 Button("OK", role: .cancel) {}
             } message: {
-                Text("To get a re-scan reminder, allow notifications for hYYa Footprint Inspector in Settings, then choose a reminder again.")
+                Text("To get a re-scan reminder, allow notifications for hYYa Digital Footprint Check in Settings, then choose a reminder again.")
             }
             .confirmationDialog("Clear all saved scans?", isPresented: $confirmingClear, titleVisibility: .visible) {
                 Button("Clear history", role: .destructive) {

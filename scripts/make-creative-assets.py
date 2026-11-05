@@ -6,9 +6,9 @@
 
     python3 scripts/make-creative-assets.py <raw-iphone-dir> <out-dir>
 
-- Header, 21:9 at 3840 x 1646: one idea and no headline. The mascot studies the footprint between
-  six things an app can learn, everyday and sensitive, flagged like the app's findings. Laid out inside the
-  area that both the iPhone and the iPad crop keep (see header()).
+- Header, 21:9 at 3840 x 1646: theatrical, no headline. The detective in a spotlight on a dark stage,
+  his glowing digital footprint at his feet, between velvet curtains. Laid out inside the area that both
+  the iPhone and the iPad crop keep (see header()).
 - Search results, 3:2 at 3840 x 2560: says what the app does at a glance and shows the real
   interface, as Apple advises. The headline, three iPhone screens (the mascot is on the centre one) are all centred.
 Quiet Noir palette, shared with the slides. No alpha channel (Apple rejects transparency).
@@ -66,22 +66,91 @@ def concern(canvas, x, y, label, value, anchor, w):
     d.text((tx, y0 + pad_y + 72 + 12), value, font=vf, fill=MUTED)
 
 
+def curtain(w, h, flip=False):
+    """One velvet drape: vertical folds lit from the stage side, falling into black."""
+    import math
+    cw = int(w * 0.15)
+    im = Image.new("RGBA", (cw, h), (0, 0, 0, 0))
+    px = im.load()
+    for x in range(cw):
+        t = x / cw
+        fold = 0.55 + 0.45 * math.sin(t * math.pi * 7.5)          # folds
+        edge = (t ** 1.6) if not flip else ((1 - t) ** 1.6)          # brighter towards the stage
+        lit = 0.18 + 0.82 * edge
+        for y in range(h):
+            v = fold * lit * (0.55 + 0.45 * (1 - y / h))
+            px[x, y] = (int(96 * v + 8), int(16 * v + 4), int(18 * v + 4), 255)
+    if flip: im = im.transpose(Image.FLIP_LEFT_RIGHT)
+    return im.filter(ImageFilter.GaussianBlur(6))
+
+
 def header(out):
-    """Everything sits in the area both crops keep: iPhone shows the full height but only the middle
-    ~84% of the width, with buttons over the top corners; iPad shows the full width but loses ~15%
-    top and bottom, with the tab bar over the top centre. Safe: x 0.10–0.90, y 0.30–0.85."""
+    """Theatrical (owner, 2026-11-05): a dark stage between velvet curtains, one spotlight on the
+    detective and the glowing digital footprint at his feet. No headline. Everything that matters
+    sits in the area both crops keep: iPhone shows the full height but only the middle ~84% of the
+    width, with buttons over the top corners; iPad shows the full width but loses ~15% top and
+    bottom, with the tab bar over the top centre. Safe: x 0.10-0.90, y 0.30-0.85."""
+    import random
+    random.seed(7)
     w, h = 3840, 1646
-    c = glow(w, h, 0.57)
-    m = mascot(int(h * 0.55))
-    c.alpha_composite(m, ((w - m.width) // 2, int(h * 0.85) - m.height))
-    gap = 70
-    left_edge, right_edge = (w - m.width) / 2 - gap, (w + m.width) / 2 + gap
-    lw = max(concern_width(*x) for x in CONCERNS[:3])
-    rw = max(concern_width(*x) for x in CONCERNS[3:])
-    for i, fy in enumerate((0.445, 0.60, 0.755)):
-        concern(c, left_edge, h * fy, *CONCERNS[i], anchor="right", w=lw)
-        concern(c, right_edge, h * fy, *CONCERNS[3 + i], anchor="left", w=rw)
+    c = Image.new("RGBA", (w, h), (0, 0, 0, 255))
+    floor_y = int(h * 0.84)
+    # Stage floor: warm boards rising out of the dark behind the detective, fading again at the front.
+    floor = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    fd = ImageDraw.Draw(floor)
+    top = int(h * 0.62)
+    for y in range(top, h):
+        t = (y - top) / (h - top)
+        a = int(170 * min(1, t / 0.35) * (1 - max(0, t - 0.55) / 0.45))
+        fd.line((0, y, w, y), fill=(36, 27, 19, a))
+    c.alpha_composite(floor.filter(ImageFilter.GaussianBlur(12)))
+    # The spotlight: a beam from above the centre, widening onto a pool of light on the boards.
+    beam = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    bd = ImageDraw.Draw(beam)
+    bd.polygon([(w * 0.47, -40), (w * 0.53, -40), (w * 0.66, floor_y), (w * 0.34, floor_y)], fill=(255, 236, 205, 46))
+    c.alpha_composite(beam.filter(ImageFilter.GaussianBlur(90)))
+    pool = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    ImageDraw.Draw(pool).ellipse((w * 0.31, floor_y - h * 0.07, w * 0.69, floor_y + h * 0.08), fill=(255, 226, 180, 120))
+    c.alpha_composite(pool.filter(ImageFilter.GaussianBlur(70)))
+    # Dust drifting in the beam.
+    dust = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    dd = ImageDraw.Draw(dust)
+    for _ in range(160):
+        y = random.uniform(0.02, 0.80) * h
+        half = (0.03 + 0.13 * y / floor_y) * w
+        x = w / 2 + random.uniform(-half, half)
+        r = random.uniform(2, 6)
+        dd.ellipse((x - r, y - r, x + r, y + r), fill=(255, 240, 215, random.randint(40, 130)))
+    c.alpha_composite(dust.filter(ImageFilter.GaussianBlur(1.5)))
+    # The detective, centre stage, feet on the boards.
+    m = mascot(int(h * 0.60))
+    c.alpha_composite(m, ((w - m.width) // 2 + int(w * 0.02), floor_y + int(h * 0.04) - m.height))
+    # Curtains and a valance frame the stage.
+    left, right = curtain(w, h), curtain(w, h, flip=True)
+    c.alpha_composite(left, (0, 0)); c.alpha_composite(right, (w - right.width, 0))
+    val = Image.new("RGBA", (w, int(h * 0.13)), (0, 0, 0, 0))
+    vd = ImageDraw.Draw(val)
+    vd.rectangle((0, 0, w, val.height * 0.62), fill=(70, 12, 14, 255))
+    for i in range(0, w, 240):
+        vd.ellipse((i - 20, val.height * 0.30, i + 260, val.height * 0.98), fill=(70, 12, 14, 255))
+    vd.line((0, val.height * 0.62, w, val.height * 0.62), fill=(*SAND_DEEP, 255), width=6)
+    c.alpha_composite(val.filter(ImageFilter.GaussianBlur(3)), (0, 0))
+    # A soft vignette pulls the eye to the light.
+    vig = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(vig).ellipse((-w * 0.15, -h * 0.35, w * 1.15, h * 1.25), fill=255)
+    vig = vig.filter(ImageFilter.GaussianBlur(260))
+    black = Image.new("RGBA", (w, h), (0, 0, 0, 255))
+    c = Image.composite(c, black, vig)
     c.convert("RGB").save(out / "header-3840x1646.png", optimize=True)
+
+
+def play_feature(out, header_png):
+    """Google Play's feature graphic, 1024 x 500: the same stage as the App Store header, cropped
+    to its centre so the curtains still frame the spotlight."""
+    h = Image.open(header_png).convert("RGB")
+    cw = int(h.height * 1024 / 500)
+    x0 = (h.width - cw) // 2
+    h.crop((x0, 0, x0 + cw, h.height)).resize((1024, 500), Image.LANCZOS).save(out / "play-feature-1024x500.png", optimize=True)
 
 
 def search_results(raw, out):
@@ -120,4 +189,5 @@ if __name__ == "__main__":
     out.mkdir(parents=True, exist_ok=True)
     header(out)
     search_results(raw, out)
+    play_feature(out, out / "header-3840x1646.png")
     print(out)

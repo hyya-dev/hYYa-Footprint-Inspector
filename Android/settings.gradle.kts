@@ -3,5 +3,5 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories { google(); mavenCentral() }
 }
-rootProject.name = "hYYa Footprint Inspector"
+rootProject.name = "hYYa Digital Footprint Check"
 include(":app")

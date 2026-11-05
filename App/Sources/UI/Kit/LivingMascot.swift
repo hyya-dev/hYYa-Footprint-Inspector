@@ -64,7 +64,7 @@ struct LivingMascot: View {
                 if new == .happy { jump() }
             }
             .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.8), trigger: tapCount)
-            .accessibilityLabel("The hYYa Footprint Inspector detective")
+            .accessibilityLabel("The hYYa Digital Footprint Check detective")
             .accessibilityHint("Double-tap for a tip")
     }
 

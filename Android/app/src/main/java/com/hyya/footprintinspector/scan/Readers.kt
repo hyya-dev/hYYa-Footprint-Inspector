@@ -268,7 +268,7 @@ private fun reinstall(c: Context): List<Reading> {
 
 object SampleData {
     val apps = listOf("Calendar", "Camera", "Chrome", "Clock", "Contacts", "Drive", "Files", "Gmail", "Maps", "Messages",
-        "Phone", "Photos", "Play Store", "Settings", "hYYa Footprint Inspector")
+        "Phone", "Photos", "Play Store", "Settings", "hYYa Digital Footprint Check")
 }
 
 /** A restart within a week counts as done (owner, 2026-10-28). Elapsed time includes deep sleep. */
