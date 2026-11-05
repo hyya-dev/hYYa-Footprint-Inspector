@@ -23,10 +23,10 @@ enum Tone: Sendable {
     var tint: Color {
         switch self {
         case .alert: Brand.concern                      // #EC7F6A, 6.9:1
-        case .explain: Color(hex: 0x7FB2E5)             // 8.6:1
+        case .explain: Color(dark: 0x7FB2E5, paper: 0x244973) // 8.6:1 on black
         case .context: Brand.sand                       // #D2AE88, 9.4:1
         case .fix: Brand.green                          // #7CD9A8, 11:1
-        case .limit: Color(hex: 0xA7AFBF)               // 8.3:1
+        case .limit: Color(dark: 0xA7AFBF, paper: 0x424753)   // 8.3:1 on black
         }
     }
 
@@ -77,17 +77,8 @@ struct ToneCard<Content: View, Trailing: View>: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)
-        .background(
-            shape.fill(Brand.surface)
-                .overlay(shape.fill(LinearGradient(colors: [tone.wash, .clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.6))))
-        )
-        .overlay(shape.strokeBorder(LinearGradient(colors: [tone.edge.opacity(0.55), tone.edge.opacity(0.15)], startPoint: .top, endPoint: .bottom), lineWidth: 1))
-        // Depth without glow: a fine light catch on the top edge and a soft shadow underneath.
-        .overlay(alignment: .top) {
-            shape.strokeBorder(LinearGradient(colors: [.white.opacity(0.10), .clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.08)), lineWidth: 1)
-                .allowsHitTesting(false)
-        }
-        .shadow(color: .black.opacity(0.55), radius: 16, x: 0, y: 10)
+        .padding(.top, 6)
+        .stickyNote(Paper.for(tone), seed: "\(tone)-\(title ?? symbol ?? "")")
         .scrollIn3D()
     }
 }
@@ -169,7 +160,7 @@ struct SummaryRing: View {
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 14)) : AnyLayout(HStackLayout(spacing: 18))
         layout {
             ZStack {
-                Circle().stroke(Color.white.opacity(0.06), lineWidth: 14)
+                Circle().stroke(Brand.border, lineWidth: 14)
                 ForEach(Array(slices.enumerated()), id: \.offset) { i, s in
                     let start = Double(slices.prefix(i).reduce(0) { $0 + $1.count }) / Double(total)
                     let end = start + Double(s.count) / Double(total)
@@ -197,9 +188,9 @@ struct SummaryRing: View {
             Spacer(minLength: 0)
         }
         .padding(16)
+        .padding(.top, 6)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Brand.surface))
-        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Color.white.opacity(0.08), lineWidth: 1))
+        .stickyNote(.blue, seed: "summary-\(caption ?? centre ?? "")")
         .onAppear { withAnimation(reduceMotion ? nil : .easeOut(duration: 0.8)) { shown = true } }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(slices.map { "\($0.count) \($0.label)" }.joined(separator: ", "))

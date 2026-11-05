@@ -196,7 +196,8 @@ struct ChecksPanel: View {
     @CheckStored(\.trackerChecked) private var trackerStored
 
     var body: some View {
-        Panel {
+        // Yellow before any check; then the colour of the overall score.
+        Panel(paper: Paper.for(score: overall.value)) {
             ForEach(Array(AppTab.checks.enumerated()), id: \.element) { i, tab in
                 Button {
                     Haptics.selection()

@@ -15,7 +15,6 @@ struct ReviewCard: View {
     @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
         // Mascot beside the text; above it at the largest text sizes, as on the page tops.
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12)) : AnyLayout(HStackLayout(alignment: .center, spacing: 14))
         // The whole card rates the app; the pill is its label, centred across the card.
@@ -43,12 +42,9 @@ struct ReviewCard: View {
                 CardPill(title: "Rate the App")
             }
             .padding(16)
+            .padding(.top, 8)
             .frame(maxWidth: .infinity)
-            .background(
-                shape.fill(Brand.surface)
-                    .overlay(shape.fill(LinearGradient(colors: [Brand.sand.opacity(0.10), .clear], startPoint: .topLeading, endPoint: .bottomTrailing)))
-            )
-            .overlay(shape.strokeBorder(Brand.edgeGradient, lineWidth: 0.75))
+            .stickyNote(.purple, seed: "rate")
         }
         .buttonStyle(PressableCardStyle())
     }
@@ -88,7 +84,6 @@ struct HyyaCard: View {
     @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
         let layout = typeSize.isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12)) : AnyLayout(HStackLayout(alignment: .center, spacing: 14))
         Button { Haptics.selection(); openURL(hYYaLinks.website) } label: {
             VStack(spacing: 14) {
@@ -112,12 +107,9 @@ struct HyyaCard: View {
                 CardPill(title: "Visit hyya.com")
             }
             .padding(16)
+            .padding(.top, 8)
             .frame(maxWidth: .infinity)
-            .background(
-                shape.fill(Brand.surface)
-                    .overlay(shape.fill(LinearGradient(colors: [Brand.sand.opacity(0.10), .clear], startPoint: .topLeading, endPoint: .bottomTrailing)))
-            )
-            .overlay(shape.strokeBorder(Brand.edgeGradient, lineWidth: 0.75))
+            .stickyNote(.blue, seed: "hyya")
         }
         .buttonStyle(PressableCardStyle())
     }

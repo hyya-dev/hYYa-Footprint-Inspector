@@ -125,18 +125,22 @@ extension HeroCard where Trailing == EmptyView {
 
 // MARK: - Panels and rows
 
-/// A quiet near-black panel that groups rows, like a grouped list.
+/// A group of rows written on one sticky note (owner, 2026-11-05).
 struct Panel<Content: View>: View {
+    var paper: Paper = .yellow
+    var seed: String
     @ViewBuilder var content: Content
+
+    init(paper: Paper = .yellow, seed: String? = nil, file: String = #fileID, line: Int = #line, @ViewBuilder content: () -> Content) {
+        self.paper = paper
+        self.seed = seed ?? "\(file):\(line)"
+        self.content = content()
+    }
+
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
         VStack(alignment: .leading, spacing: 0) { content }
-            .background(
-                shape.fill(Brand.surface)
-                    .overlay(shape.fill(LinearGradient(colors: [Brand.sand.opacity(0.06), .clear], startPoint: .top, endPoint: .init(x: 0.5, y: 0.35))))
-            )
-            .clipShape(shape)
-            .overlay(shape.strokeBorder(Brand.edgeGradient, lineWidth: 0.75))
+            .padding(.top, 10)
+            .stickyNote(paper, seed: seed)
     }
 }
 

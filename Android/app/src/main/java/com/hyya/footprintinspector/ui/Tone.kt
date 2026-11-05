@@ -33,6 +33,7 @@ import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -54,22 +55,31 @@ import androidx.compose.ui.unit.sp
  * the card's edge, a faint wash, its icon and its badge; body text stays white or grey. Every
  * tint is at least 6:1 against the panel. Dark only (Quiet Noir).
  */
-enum class Tone(val tint: Color) {
+enum class Tone {
     /** Worth a look, concerning notes. */
-    ALERT(Color(0xFFEC7F6A)),
+    ALERT,
     /** What a clue tells an app; the mascot's notes (the mascot's blue). */
-    EXPLAIN(Color(0xFF7FB2E5)),
+    EXPLAIN,
     /** Why the system allows it, details, background. */
-    CONTEXT(Color(0xFFD2AE88)),
+    CONTEXT,
     /** How to fix it. */
-    FIX(Color(0xFF7CD9A8)),
+    FIX,
     /** Only Google or the device maker can fix it. */
-    LIMIT(Color(0xFFA7AFBF));
+    LIMIT;
+
+    /** The role colour: light on the dark ground, measured dark ink on a sticky note. */
+    val tint: Color @Composable @ReadOnlyComposable get() = if (LocalOnPaper.current) when (this) {
+        ALERT -> Color(0xFF81291C); EXPLAIN -> Color(0xFF244973); CONTEXT -> Color(0xFF60411F); FIX -> Color(0xFF135132); LIMIT -> Color(0xFF424753)
+    } else when (this) {
+        ALERT -> Color(0xFFEC7F6A); EXPLAIN -> Color(0xFF7FB2E5); CONTEXT -> Color(0xFFD2AE88); FIX -> Color(0xFF7CD9A8); LIMIT -> Color(0xFFA7AFBF)
+    }
 
     /** The card's border: the role colour where it carries meaning, the shared blue otherwise. */
-    val edge get() = if (this == EXPLAIN || this == CONTEXT) Brand.edge else tint
-    val wash get() = tint.copy(alpha = 0.07f)
-    val badge get() = tint.copy(alpha = 0.14f)
+    val edge: Color @Composable @ReadOnlyComposable get() = if (this == EXPLAIN || this == CONTEXT) Brand.edge else tint
+    val wash: Color @Composable @ReadOnlyComposable get() = tint.copy(alpha = 0.07f)
+    val badge: Color @Composable @ReadOnlyComposable get() = tint.copy(alpha = 0.14f)
+    /** The paper for this role. */
+    val paper get() = when (this) { ALERT -> Paper.PINK; EXPLAIN -> Paper.BLUE; CONTEXT -> Paper.YELLOW; FIX -> Paper.GREEN; LIMIT -> Paper.GRAY }
 }
 
 /** Tips toward the finger and ticks when pressed: the press feel for every tappable card and row. */
@@ -99,19 +109,13 @@ fun ToneCard(
     icon: ImageVector? = null,
     onClick: (() -> Unit)? = null,
     trailing: @Composable (RowScope.() -> Unit)? = null,
+    paper: Paper = tone.paper,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val shape = RoundedCornerShape(18.dp)
+    // Written on a sticky note of the role's colour (owner, 2026-11-05).
+    StickyNote(paper, "$tone-${title ?: ""}", onClick = onClick) {
     Column(
-        Modifier.fillMaxWidth()
-            .then(if (onClick != null) Modifier.pressable(onClick) else Modifier)
-            .shadow(14.dp, shape, ambientColor = Color.Black, spotColor = Color.Black)
-            .clip(shape)
-            .background(Brand.surface)
-            .background(Brush.verticalGradient(listOf(tone.wash, Color.Transparent), endY = 260f))
-            .border(BorderStroke(1.dp, Brush.verticalGradient(listOf(tone.edge.copy(alpha = 0.55f), tone.edge.copy(alpha = 0.15f)))), shape)
-            .border(BorderStroke(1.dp, Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.10f), Color.Transparent), endY = 40f)), shape)
-            .padding(18.dp),
+        Modifier.fillMaxWidth().padding(18.dp).padding(top = 6.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         if (title != null) {
@@ -127,6 +131,7 @@ fun ToneCard(
             }
         }
         content()
+    }
     }
 }
 
@@ -188,16 +193,17 @@ fun NextStepCard(step: Tab) {
 
 /** A ring chart summing up a page, as on iOS: coral worth a look, amber worth knowing, green fine. */
 data class Slice(val label: String, val count: Int, val color: Color)
-val Amber = Color(0xFFF2C27A)
+/** "Worth knowing" amber; a darker measured shade on paper (3:1 for marks on all six). */
+val Amber: Color @Composable @ReadOnlyComposable get() = if (LocalOnPaper.current) Color(0xFF85570F) else Color(0xFFF2C27A)
 
 @Composable
 fun SummaryRing(slices: List<Slice>, caption: String? = null, centre: String? = null) {
     val total = slices.sumOf { it.count }.coerceAtLeast(1)
     val progress = androidx.compose.runtime.remember { androidx.compose.animation.core.Animatable(0f) }
     androidx.compose.runtime.LaunchedEffect(slices) { progress.snapTo(0f); progress.animateTo(1f, androidx.compose.animation.core.tween(800)) }
-    val shape = RoundedCornerShape(18.dp)
+    StickyNote(Paper.BLUE, "summary-${caption ?: centre ?: ""}") {
     Row(
-        Modifier.fillMaxWidth().clip(shape).background(Brand.surface).border(BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)), shape).padding(16.dp),
+        Modifier.fillMaxWidth().padding(16.dp).padding(top = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.size(100.dp), contentAlignment = Alignment.Center) {
@@ -232,6 +238,7 @@ fun SummaryRing(slices: List<Slice>, caption: String? = null, centre: String? = 
             }
         }
     }
+    }
 }
 
 /**
@@ -246,7 +253,7 @@ fun ChecksPanel(overall: com.hyya.footprintinspector.model.OverallScore, scanner
         Tab.SENSITIVE to com.hyya.footprintinspector.model.OverallScore.Part.SENSITIVE,
         Tab.TRACKER to com.hyya.footprintinspector.model.OverallScore.Part.TRACKER,
         Tab.CHECKUP to com.hyya.footprintinspector.model.OverallScore.Part.CHECKUP)
-    Panel {
+    Panel(paper = Paper.forScore(overall.value)) {
         tabs.forEachIndexed { i, (tab, part) ->
             val value = parts[part]
             val status = when (tab) {

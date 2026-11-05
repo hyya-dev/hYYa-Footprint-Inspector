@@ -356,7 +356,7 @@ fun SettingsScreen(scanner: Scanner, nav: Nav) {
         HeroCard("Settings", "hYYa Digital Footprint Check", "Everything here stays on this device.")
         // Rating card, as on iOS.
         // The whole card opens the link; the pill is its label, centred across the card.
-        ToneCard(Tone.CONTEXT, "Enjoying hYYa Digital Footprint Check?", onClick = { openUrl(context, Links.PLAY) }) {
+        ToneCard(Tone.CONTEXT, "Enjoying hYYa Digital Footprint Check?", onClick = { openUrl(context, Links.PLAY) }, paper = Paper.PURPLE) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Mascot(72)
                 Spacer(Modifier.width(12.dp))
@@ -385,7 +385,7 @@ fun SettingsScreen(scanner: Scanner, nav: Nav) {
         }
         SectionTitle("More from hYYa")
         // The hYYa website, laid out like the rating card at the top.
-        ToneCard(Tone.CONTEXT, "hYYa ✨", onClick = { openUrl(context, Links.HYYA) }) {
+        ToneCard(Tone.CONTEXT, "hYYa ✨", onClick = { openUrl(context, Links.HYYA) }, paper = Paper.BLUE) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(R.drawable.promo_hyya_dev), null,
                     modifier = Modifier.size(84.dp).clip(RoundedCornerShape(20.dp)), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
@@ -401,8 +401,8 @@ fun SettingsScreen(scanner: Scanner, nav: Nav) {
 /** The white pill inside a tappable card: it looks like the primary button, but the card is the button. */
 @Composable
 private fun ColumnScope.CardPill(text: String) {
-    Text(text, color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center,
-        modifier = Modifier.align(Alignment.CenterHorizontally).clip(CircleShape).background(Color.White).padding(vertical = 15.dp, horizontal = 22.dp))
+    Text(text, color = Brand.onCta, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.Center,
+        modifier = Modifier.align(Alignment.CenterHorizontally).clip(CircleShape).background(Brand.cta).padding(vertical = 15.dp, horizontal = 22.dp))
 }
 
 @Composable
