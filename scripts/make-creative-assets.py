@@ -146,9 +146,20 @@ def header(out):
         r = random.uniform(2, 6)
         dd.ellipse((x - r, y - r, x + r, y + r), fill=(255, 240, 215, random.randint(40, 130)))
     c.alpha_composite(dust.filter(ImageFilter.GaussianBlur(1.5)))
-    # The detective, centre stage, feet on the boards.
-    m = mascot(int(h * 0.60))
-    c.alpha_composite(m, ((w - m.width) // 2 + int(w * 0.02), floor_y + int(h * 0.04) - m.height))
+    # The detective, centre stage: the owner's dark artwork (store/creative/mascot-dark.jpg), its
+    # near-black ground feathered into the stage so only he and his glowing footprint show.
+    art = Image.open(ROOT / "store/creative/mascot-dark.jpg").convert("RGB")
+    size = int(h * 0.86)
+    art = art.resize((size, size), Image.LANCZOS)
+    feather = Image.new("L", (size, size), 0)
+    ImageDraw.Draw(feather).ellipse((size * 0.06, size * 0.04, size * 0.94, size * 1.02), fill=255)
+    feather = feather.filter(ImageFilter.GaussianBlur(size * 0.07))
+    # Keep only what is lighter than the artwork's ground, so no dark square shows on the stage.
+    lum = art.convert("L").point(lambda v: 0 if v < 14 else min(255, (v - 14) * 6))
+    from PIL import ImageChops
+    alpha = ImageChops.multiply(feather, lum)
+    piece = art.convert("RGBA"); piece.putalpha(alpha)
+    c.alpha_composite(piece, ((w - size) // 2, int(h * 0.95) - size))
     # A soft vignette pulls the eye to the light.
     vig = Image.new("L", (w, h), 0)
     ImageDraw.Draw(vig).ellipse((-w * 0.15, -h * 0.35, w * 1.15, h * 1.25), fill=255)
