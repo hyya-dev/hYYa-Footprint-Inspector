@@ -67,7 +67,7 @@ flags what's worth a look, and walks you through hiding what can be hidden.
   - Sensitive-app results are shown only to you. History can keep how many were found, never which.
   - No place names are looked up for your photos.
 - **App Store privacy label: "Data Not Collected".** The Android app has no internet permission. Full policy:
-  [hyya.com/privacypolicy/hyya-footprint-inspector.html](https://hyya.com/privacypolicy/hyya-footprint-inspector.html)
+  [hyya.com/privacypolicy/hyya-digital-footprint-check.html](https://hyya.com/privacypolicy/hyya-digital-footprint-check.html)
 
 Read the code to check. That's why it's open source. Each store release has a matching tag, such
 as [`v1.0.2`](https://github.com/hyya-dev/hYYa-Digital-Footprint-Check/releases/tag/v1.0.2).

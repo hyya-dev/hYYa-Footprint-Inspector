@@ -55,4 +55,4 @@ Tools
 ## Contact
 - Website: https://hyya.com
 - Email: h@hyya.com (as the other hYYa apps)
-- Privacy policy: https://hyya.com/privacypolicy/hyya-footprint-inspector.html
+- Privacy policy: https://hyya.com/privacypolicy/hyya-digital-footprint-check.html

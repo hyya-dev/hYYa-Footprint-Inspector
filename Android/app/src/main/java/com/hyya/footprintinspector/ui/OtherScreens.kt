@@ -340,7 +340,7 @@ fun CheckUpStepScreen(index: Int, nav: Nav) {
 object Links {
     const val PLAY = "https://play.google.com/store/apps/details?id=com.hyya.footprintinspector"
     const val CONTACT = "https://hyya.com/#contact"
-    const val PRIVACY = "https://hyya.com/privacypolicy/hyya-footprint-inspector.html"
+    const val PRIVACY = "https://hyya.com/privacypolicy/hyya-digital-footprint-check.html"
     const val SECURITY = "mailto:security@hyya.com?subject=Security%20report%20%E2%80%94%20hYYa%20Footprint%20Inspector"
     const val HYYA_AI = "https://play.google.com/store/apps/details?id=com.hyya.hyyaai"
     const val HYYA = "https://hyya.com"
