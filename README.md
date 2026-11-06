@@ -70,7 +70,7 @@ flags what's worth a look, and walks you through hiding what can be hidden.
   [hyya.com/privacypolicy/hyya-footprint-inspector.html](https://hyya.com/privacypolicy/hyya-footprint-inspector.html)
 
 Read the code to check. That's why it's open source. Each store release has a matching tag, such
-as [`v1.0.2`](https://github.com/hyya-dev/hYYa-Footprint-Inspector/releases/tag/v1.0.2).
+as [`v1.0.2`](https://github.com/hyya-dev/hYYa-Digital-Footprint-Check/releases/tag/v1.0.2).
 
 ## Building
 
