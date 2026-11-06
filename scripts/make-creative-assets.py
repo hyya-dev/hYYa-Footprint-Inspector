@@ -167,9 +167,9 @@ def header(out):
     pool = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     ImageDraw.Draw(pool).ellipse((w * 0.31, floor_y - h * 0.07, w * 0.69, floor_y + h * 0.08), fill=(255, 226, 180, 120))
     c.alpha_composite(pool.filter(ImageFilter.GaussianBlur(70)))
-    # The detective, centre stage: the owner's dark artwork (store/creative/mascot-dark.jpg), its
+    # The detective, centre stage: the owner's dark artwork (store/creative/mascot-night-red.jpg), its
     # near-black ground feathered into the stage so only he and his glowing footprint show.
-    art = Image.open(ROOT / "store/creative/mascot-dark.jpg").convert("RGB")
+    art = Image.open(ROOT / "store/creative/mascot-night-red.jpg").convert("RGB")
     size = int(h * 0.86)
     art = art.resize((size, size), Image.LANCZOS)
     feather = Image.new("L", (size, size), 0)

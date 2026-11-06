@@ -213,12 +213,11 @@ extension View {
 
 struct MascotEmblem: View {
     var size: CGFloat = 150
+    @Environment(\.colorScheme) private var scheme
     var body: some View {
-        Image("MascotCutout")
-            .resizable()
-            .scaledToFit()
+        MascotArt()
             .frame(width: size, height: size)
-            .neonGlow(Brand.cyan, radius: size * 0.12, intensity: 0.45)
+            .neonGlow(Brand.cyan, radius: size * 0.12, intensity: scheme == .dark ? 0 : 0.45)
             .accessibilityHidden(true)
     }
 }

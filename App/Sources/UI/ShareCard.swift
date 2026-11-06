@@ -26,7 +26,7 @@ struct ShareCardView: View {
                         .foregroundStyle(ScoreHomeView.tint(overall.level))
                 }
                 Spacer(minLength: 0)
-                Image("MascotCutout").resizable().scaledToFit().frame(width: 110, height: 110)
+                MascotArt().frame(width: 110, height: 110)
             }
             VStack(spacing: 0) {
                 ForEach(AppTab.checks) { tab in

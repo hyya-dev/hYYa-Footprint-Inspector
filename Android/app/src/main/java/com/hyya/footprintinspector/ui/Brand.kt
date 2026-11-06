@@ -116,9 +116,11 @@ fun Page(resetOn: Any? = null, content: @Composable ColumnScope.() -> Unit) {
     }
 }
 
+/** The detective: the night render on the dark page (owner, 2026-11-06), the cut-out on paper. */
 @Composable
 fun Mascot(size: Int, modifier: Modifier = Modifier) {
-    Image(painterResource(R.drawable.mascot_cutout), contentDescription = null, modifier = modifier.size(size.dp))
+    val art = if (LocalOnPaper.current) R.drawable.mascot_cutout else R.drawable.mascot_night
+    Image(painterResource(art), contentDescription = null, modifier = modifier.size(size.dp))
 }
 
 @Composable

@@ -81,7 +81,7 @@ struct ScoreWidgetView: View {
     }
 
     private func mascot(height: CGFloat) -> some View {
-        Image("MascotCutout").resizable().scaledToFit().frame(height: height).accessibilityHidden(true)
+        MascotArt().frame(height: height).accessibilityHidden(true)
     }
 
     private var label: some View {

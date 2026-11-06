@@ -48,7 +48,7 @@
         android:layout_weight="1"
         android:importantForAccessibility="no"
         android:scaleType="fitCenter"
-        android:src="@drawable/mascot_cutout" />
+        android:src="@drawable/widget_mascot" />
 
     <LinearLayout
         android:id="@+id/widget_footer"

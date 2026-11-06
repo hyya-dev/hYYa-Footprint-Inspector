@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="App/Resources/Assets.xcassets/MascotCutout.imageset/mascot-cutout.png" width="160" alt="The hYYa Digital Footprint Check detective">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/mascot-night.png">
+    <img src="App/Resources/Assets.xcassets/MascotCutout.imageset/mascot-cutout.png" width="160" alt="The hYYa Digital Footprint Check detective">
+  </picture>
 </p>
 
 <h1 align="center">hYYa Digital Footprint Check</h1>

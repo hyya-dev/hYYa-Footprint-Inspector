@@ -140,7 +140,7 @@ struct RootView: View {
             .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 280)
             .safeAreaInset(edge: .bottom) {
                 VStack(spacing: 6) {
-                    Image("MascotCutout").resizable().scaledToFit().frame(height: 64).accessibilityHidden(true)
+                    MascotArt().frame(height: 64).accessibilityHidden(true)
                     Text(Brand.brandUppercased("hYYa Digital Footprint Check"))
                         .font(.caption2.weight(.semibold)).tracking(1.2)
                         .foregroundStyle(Brand.textSubtle)

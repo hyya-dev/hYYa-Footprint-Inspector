@@ -30,6 +30,7 @@ struct LivingMascot: View {
     var tips: [String] = LivingMascot.defaultTips
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var scheme
     @State private var tipIndex = -1
     @State private var hop = false
     @State private var tapCount = 0
@@ -88,12 +89,11 @@ struct LivingMascot: View {
                     .blur(radius: 6)
                     .scaleEffect(1 - float / size * 2)
                     .offset(y: size * 0.04)
-                Image("MascotCutout")
-                    .resizable()
-                    .scaledToFit()
+                MascotArt()
                     .frame(width: size, height: size)
-                    // Rim-lit by the screen: cyan normally, orange when something is worth a look.
-                    .neonGlow(mood == .concerned ? Brand.orange : Brand.sand, radius: size * 0.08, intensity: 0.35)
+                    // The cut-out on paper is rim-lit by the screen: sand normally, orange when something
+                    // is worth a look. The night render brings its own light.
+                    .neonGlow(mood == .concerned ? Brand.orange : Brand.sand, radius: size * 0.08, intensity: scheme == .dark ? 0 : 0.35)
                     .scaleEffect(breathe)
                     .rotationEffect(.degrees(wiggle + lean), anchor: .bottom)
                     .offset(y: float - (hop ? size * 0.12 : 0))

@@ -22,7 +22,7 @@ SAND = (210, 174, 136)
 SAND_DEEP = (143, 117, 96)
 INK = (245, 245, 247)
 MUTED = (161, 161, 168)
-MASCOT = ROOT / "App/Resources/Assets.xcassets/MascotCutout.imageset/mascot-cutout.png"
+MASCOT = ROOT / "store/creative/mascot-night.png"  # the night render, faded into the dark slide (owner, 2026-11-06)
 
 
 def font(size, weight="Bold"):
