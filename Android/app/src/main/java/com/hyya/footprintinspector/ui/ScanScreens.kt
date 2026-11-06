@@ -157,9 +157,9 @@ private fun Results(scanner: Scanner, nav: Nav) {
             color = Brand.textMuted, fontSize = 15.sp, lineHeight = 21.sp)
         val seen = scanner.findings
         SummaryRing(listOf(
-            Slice("worth a look", seen.count { it.severity == Severity.HIGH }, Tone.ALERT.tint),
-            Slice("worth knowing", seen.count { it.severity == Severity.MEDIUM }, Amber),
-            Slice("minor", seen.count { it.severity == Severity.LOW }, Tone.FIX.tint),
+            Slice("worth a look", seen.count { it.severity == Severity.HIGH }, SliceKind.ALERT),
+            Slice("worth knowing", seen.count { it.severity == Severity.MEDIUM }, SliceKind.AMBER),
+            Slice("minor", seen.count { it.severity == Severity.LOW }, SliceKind.FINE),
         ), "clues")
         PrimaryButton("Scan again") { scanner.scan() }
         Text("How the score works", color = Brand.sand, fontSize = 13.sp, textAlign = TextAlign.Center,

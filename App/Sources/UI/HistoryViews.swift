@@ -66,7 +66,7 @@ struct ComparisonCard: View {
         }
     }
 
-    private func changeList(_ title: String, ids: [String], symbol: String, tint: Color) -> some View {
+    private func changeList(_ title: String, ids: [String], symbol: String, tint: InkStyle) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title).font(.subheadline.weight(.semibold))
             ForEach(Self.titles(ids), id: \.self) { name in

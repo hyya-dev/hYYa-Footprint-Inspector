@@ -68,9 +68,9 @@ enum class Tone {
     LIMIT;
 
     /** The role colour: light on the dark ground, measured dark ink on a sticky note. */
-    val tint: Color @Composable @ReadOnlyComposable get() = if (LocalOnPaper.current) when (this) {
-        ALERT -> Color(0xFF81291C); EXPLAIN -> Color(0xFF244973); CONTEXT -> Color(0xFF60411F); FIX -> Color(0xFF135132); LIMIT -> Color(0xFF424753)
-    } else when (this) {
+    val tint: Color @Composable @ReadOnlyComposable get() = LocalPaper.current?.takeIf { LocalOnPaper.current }?.let { p -> when (this) {
+        ALERT -> p.ink(InkRole.CONCERN); EXPLAIN -> p.ink(InkRole.EDGE); CONTEXT -> p.ink(InkRole.ACCENT); FIX -> p.ink(InkRole.FIX); LIMIT -> p.ink(InkRole.SUBTLE)
+    } } ?: when (this) {
         ALERT -> Color(0xFFEC7F6A); EXPLAIN -> Color(0xFF7FB2E5); CONTEXT -> Color(0xFFD2AE88); FIX -> Color(0xFF7CD9A8); LIMIT -> Color(0xFFA7AFBF)
     }
 
@@ -79,7 +79,7 @@ enum class Tone {
     val wash: Color @Composable @ReadOnlyComposable get() = tint.copy(alpha = 0.07f)
     val badge: Color @Composable @ReadOnlyComposable get() = tint.copy(alpha = 0.14f)
     /** The paper for this role. */
-    val paper get() = when (this) { ALERT -> Paper.PINK; EXPLAIN -> Paper.BLUE; CONTEXT -> Paper.YELLOW; FIX -> Paper.GREEN; LIMIT -> Paper.GRAY }
+    val paper get() = when (this) { ALERT -> Paper.PURPLE; EXPLAIN -> Paper.BLUE; CONTEXT -> Paper.GRAY; FIX -> Paper.GREEN; LIMIT -> Paper.GRAY }
 }
 
 /** Tips toward the finger and ticks when pressed: the press feel for every tappable card and row. */
@@ -192,9 +192,15 @@ fun NextStepCard(step: Tab) {
 }
 
 /** A ring chart summing up a page, as on iOS: coral worth a look, amber worth knowing, green fine. */
-data class Slice(val label: String, val count: Int, val color: Color)
+data class Slice(val label: String, val count: Int, val kind: SliceKind)
+
+/** What a ring segment means. Its colour is resolved on the note, so it takes that paper's measured ink. */
+enum class SliceKind {
+    ALERT, AMBER, FINE;
+    val color: Color @Composable @ReadOnlyComposable get() = when (this) { ALERT -> Tone.ALERT.tint; AMBER -> Amber; FINE -> Tone.FIX.tint }
+}
 /** "Worth knowing" amber; a darker measured shade on paper (3:1 for marks on all six). */
-val Amber: Color @Composable @ReadOnlyComposable get() = if (LocalOnPaper.current) Color(0xFF85570F) else Color(0xFFF2C27A)
+val Amber: Color @Composable @ReadOnlyComposable get() = LocalPaper.current?.takeIf { LocalOnPaper.current }?.ink(InkRole.AMBER) ?: Color(0xFFF2C27A)
 
 @Composable
 fun SummaryRing(slices: List<Slice>, caption: String? = null, centre: String? = null) {
@@ -207,16 +213,18 @@ fun SummaryRing(slices: List<Slice>, caption: String? = null, centre: String? = 
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.size(100.dp), contentAlignment = Alignment.Center) {
+            val colours = slices.map { it.kind.color }
+            val track = Color.Black.copy(alpha = 0.08f)
             androidx.compose.foundation.Canvas(Modifier.size(100.dp)) {
                 val stroke = 14.dp.toPx()
                 val inset = stroke / 2
                 val arcSize = androidx.compose.ui.geometry.Size(size.width - stroke, size.height - stroke)
                 val tl = androidx.compose.ui.geometry.Offset(inset, inset)
-                drawArc(Color.White.copy(alpha = 0.06f), 0f, 360f, false, tl, arcSize, style = androidx.compose.ui.graphics.drawscope.Stroke(stroke))
+                drawArc(track, 0f, 360f, false, tl, arcSize, style = androidx.compose.ui.graphics.drawscope.Stroke(stroke))
                 var start = -90f
-                slices.forEach { s ->
+                slices.forEachIndexed { i, s ->
                     val sweep = 360f * s.count / total * progress.value
-                    if (sweep > 0f) drawArc(s.color, start, (sweep - 1.5f).coerceAtLeast(0.5f), false, tl, arcSize, style = androidx.compose.ui.graphics.drawscope.Stroke(stroke))
+                    if (sweep > 0f) drawArc(colours[i], start, (sweep - 1.5f).coerceAtLeast(0.5f), false, tl, arcSize, style = androidx.compose.ui.graphics.drawscope.Stroke(stroke))
                     start += 360f * s.count / total * progress.value
                 }
             }
@@ -229,7 +237,7 @@ fun SummaryRing(slices: List<Slice>, caption: String? = null, centre: String? = 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             slices.forEach { s ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(10.dp).clip(CircleShape).background(s.color))
+                    Box(Modifier.size(10.dp).clip(CircleShape).background(s.kind.color))
                     Spacer(Modifier.width(8.dp))
                     Text("${s.count}", color = Brand.ink, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.width(6.dp))

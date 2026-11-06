@@ -40,8 +40,8 @@ struct CheckUpView: View {
                             RowCard(symbol: done.contains(step.id) ? "checkmark" : step.symbol,
                                     title: step.title,
                                     subtitle: step.hint ?? step.path,
-                                    tileFG: done.contains(step.id) ? .white : Brand.accent,
-                                    tileBG: done.contains(step.id) ? Brand.mint : Brand.lilacSoft) {
+                                    tileFG: done.contains(step.id) ? InkStyle.white : Brand.accent,
+                                    tileBG: done.contains(step.id) ? Brand.mint.color : Brand.lilacSoft) {
                                 Image(systemName: done.contains(step.id) ? "checkmark.circle.fill" : "chevron.right")
                                     .foregroundStyle(done.contains(step.id) ? Tone.fix.tint : Brand.textSubtle)
                             }
@@ -172,7 +172,7 @@ struct CheckUpStepView: View {
                 isDone.toggle()
                 if isDone { Haptics.success(); dismiss() }
             }
-            .buttonStyle(PrimaryCTAButtonStyle(fill: isDone ? Brand.green : Brand.cta,
+            .buttonStyle(PrimaryCTAButtonStyle(fill: isDone ? Brand.green.color : Brand.cta,
                                                depthColor: isDone ? Color(hex: 0x0E8A56) : Brand.ctaDepth))
         }
         .navigationTitle("")

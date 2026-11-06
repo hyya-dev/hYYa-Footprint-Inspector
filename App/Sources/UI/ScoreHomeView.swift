@@ -120,7 +120,7 @@ struct ScoreHomeView: View {
         }
     }
 
-    static func tint(_ level: OverallScore.Level?) -> Color {
+    static func tint(_ level: OverallScore.Level?) -> InkStyle {
         switch level {
         case .good?: Tone.fix.tint
         case .fair?: Brand.sand

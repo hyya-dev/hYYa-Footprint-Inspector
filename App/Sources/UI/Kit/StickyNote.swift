@@ -22,22 +22,23 @@ enum Paper: CaseIterable, Sendable {
         }
     }
 
-    /// The paper for a role: coral notes for "worth a look", green for fixes, blue for what a clue
-    /// tells an app, yellow for background, gray for "only Apple can fix".
+    /// The paper for a role: purple for "worth a look", green for fixes, blue for what a clue tells
+    /// an app, gray for background and for "only Apple can fix". Owner, 2026-11-06: no pink ("too ugly"),
+    /// and as little yellow as possible ("too strong").
     static func `for`(_ tone: Tone) -> Paper {
         switch tone {
-        case .alert: .pink
+        case .alert: .purple
         case .explain: .blue
-        case .context: .yellow
+        case .context: .gray
         case .fix: .green
         case .limit: .gray
         }
     }
 
-    /// The paper for a 0–100 score: green when well protected, purple in the middle, pink when heavy; yellow before any check.
+    /// The paper for a 0–100 score: green when well protected, blue in the middle, purple when heavy; gray before any check.
     static func `for`(score: Int?) -> Paper {
-        guard let score else { return .yellow }
-        return score >= 75 ? .green : score >= 50 ? .purple : .pink
+        guard let score else { return .gray }
+        return score >= 75 ? .green : score >= 50 ? .blue : .purple
     }
 }
 
@@ -47,6 +48,9 @@ enum Paper: CaseIterable, Sendable {
 struct StickyNote: ViewModifier {
     let paper: Paper
     let seed: String
+    /// How it's fixed to the page. One rule (owner, 2026-11-06, "standardise"): a note that holds a
+    /// list of rows is taped across the top; a single note is pinned.
+    let fixing: NoteFixing
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// The note's height: a tall note tilts less, so no corner swings more than 6 points out.
     @State private var height: CGFloat = 0
@@ -66,13 +70,13 @@ struct StickyNote: ViewModifier {
         // Between about -1.2° and +1.2°, never exactly level.
         let steps = [-1.2, -0.9, -0.6, -0.35, 0.35, 0.6, 0.9, 1.2]
         let tilt = steps[Int(h % UInt64(steps.count))]
-        let fixing = Int((h >> 8) % 4)          // 0–2 a pin, 3 tape
         let pins: [Color] = [Color(hex: 0xB22222), Color(hex: 0x2B5AA8), Color(hex: 0x2E8A4E), Color(hex: 0xD8B020)]
         let pin = pins[Int((h >> 16) % UInt64(pins.count))]
         let wear = Wear.allCases[Int((h >> 24) % UInt64(Wear.allCases.count))]
         let shape = NoteShape(wear: wear, seed: h)
         content
             .environment(\.colorScheme, .light)
+            .environment(\.paper, paper)
             .background(
                 paper.colour   // solid: the measured contrast holds everywhere on the note
                     .overlay(alignment: .top) { Rectangle().fill(.black.opacity(0.03)).frame(height: 14) }
@@ -94,7 +98,7 @@ struct StickyNote: ViewModifier {
             }
             .overlay(alignment: .top) {
                 Group {
-                    if fixing == 3 {
+                    if fixing == .tape {
                         Rectangle().fill(Color(hex: 0xF3EEDC, alpha: 0.55)).frame(width: 64, height: 18)
                             .rotationEffect(.degrees(-4)).offset(y: -9)
                     } else {
@@ -117,13 +121,16 @@ struct StickyNote: ViewModifier {
 extension View {
     /// Writes this section on a sticky note. Give each call site its own seed; the default is the
     /// caller's file and line, so two notes on a page never match.
-    func stickyNote(_ paper: Paper = .yellow, seed: String? = nil, file: String = #fileID, line: Int = #line) -> some View {
-        modifier(StickyNote(paper: paper, seed: seed ?? "\(file):\(line)"))
+    func stickyNote(_ paper: Paper = .gray, seed: String? = nil, fixing: NoteFixing = .pin, file: String = #fileID, line: Int = #line) -> some View {
+        modifier(StickyNote(paper: paper, seed: seed ?? "\(file):\(line)", fixing: fixing))
     }
 }
 
-/// How a note has aged. Each note gets one, from its seed.
-enum Wear: CaseIterable { case torn, cutCorner, curl, dogEar, coffee, aged }
+/// How a note is held on the page.
+enum NoteFixing: Sendable { case pin, tape }
+
+/// How a note has aged. Each note gets one, from its seed. No coffee ring (owner, 2026-11-06: it read as dirt).
+enum Wear: CaseIterable { case torn, cutCorner, curl, dogEar, aged }
 
 /// The paper's outline: a ragged bottom edge, a snipped corner or a rolled corner; otherwise square.
 struct NoteShape: Shape {
@@ -149,7 +156,7 @@ struct NoteShape: Shape {
         case .dogEar:
             p.move(to: r.origin); p.addLine(to: CGPoint(x: r.maxX - 24, y: r.minY)); p.addLine(to: CGPoint(x: r.maxX, y: r.minY + 24))
             p.addLine(to: CGPoint(x: r.maxX, y: r.maxY)); p.addLine(to: CGPoint(x: r.minX, y: r.maxY))
-        case .coffee, .aged:
+        case .aged:
             p.addRect(r)
         }
         p.closeSubpath()
@@ -164,9 +171,6 @@ struct WearMarks: View {
     var body: some View {
         GeometryReader { g in
             switch wear {
-            case .coffee:
-                Circle().strokeBorder(Color(hex: 0x6E4618, alpha: 0.16), lineWidth: 5)
-                    .frame(width: 92, height: 92).position(x: g.size.width - 40, y: g.size.height - 34)
             case .aged:
                 ZStack {
                     RoundedRectangle(cornerRadius: 2).strokeBorder(Color(hex: 0x7A5420, alpha: 0.18), lineWidth: 10).blur(radius: 6)

@@ -38,17 +38,46 @@ enum class Paper(val colour: Color) {
     BLUE(Color(0xFFA1EEFD)), PURPLE(Color(0xFFA1B5F8)), GRAY(Color(0xFFDADADB));
 
     companion object {
-        /** Green when well protected, purple in the middle, pink when heavy; yellow before any check. */
+        /** Green when well protected, blue in the middle, purple when heavy; gray before any check (owner, 2026-11-06: no pink, little yellow). */
         fun forScore(score: Int?) = when {
-            score == null -> YELLOW
+            score == null -> GRAY
             score >= 75 -> GREEN
-            score >= 50 -> PURPLE
-            else -> PINK
+            score >= 50 -> BLUE
+            else -> PURPLE
         }
     }
 }
 
-private enum class Wear { TORN, CUT_CORNER, CURL, DOG_EAR, COFFEE, AGED }
+
+/** What an ink is for, on a sticky note. */
+enum class InkRole { TEXT, MUTED, SUBTLE, ACCENT, CONCERN, FIX, EDGE, AMBER, RULE }
+
+/** The paper the content sits on; null on the dark page. */
+val LocalPaper = androidx.compose.runtime.staticCompositionLocalOf<Paper?> { null }
+
+/**
+ * The ink for each role on this paper (owner, 2026-11-06: "the best colour for clear reading"), the same
+ * table as iOS Ink.swift: body text in the paper's own hue, almost black (9 to 13:1); secondary 7:1 (AAA);
+ * hints, headings and meaning colours 6:1; "worth knowing" marks 3.3:1, lighter so ring segments differ
+ * in lightness as well as hue. Gray paper takes a warm charcoal.
+ */
+fun Paper.ink(role: InkRole): Color = Color(when (role) {
+        InkRole.TEXT -> when (this) { Paper.YELLOW -> 0xFF25230E; Paper.PINK -> 0xFF251010; Paper.GREEN -> 0xFF162414; Paper.BLUE -> 0xFF042025; Paper.PURPLE -> 0xFF111526; Paper.GRAY -> 0xFF1A1511 }
+        InkRole.MUTED -> when (this) { Paper.YELLOW -> 0xFF504D30; Paper.PINK -> 0xFF4C2E2D; Paper.GREEN -> 0xFF3D5039; Paper.BLUE -> 0xFF284E55; Paper.PURPLE -> 0xFF242B43; Paper.GRAY -> 0xFF49433E }
+        InkRole.SUBTLE -> when (this) { Paper.YELLOW -> 0xFF59573D; Paper.PINK -> 0xFF553938; Paper.GREEN -> 0xFF485944; Paper.BLUE -> 0xFF36575E; Paper.PURPLE -> 0xFF2F364C; Paper.GRAY -> 0xFF534C47 }
+        InkRole.ACCENT -> when (this) { Paper.YELLOW -> 0xFF7E4921; Paper.PINK -> 0xFF653205; Paper.GREEN -> 0xFF7D4820; Paper.BLUE -> 0xFF7A451D; Paper.PURPLE -> 0xFF582A00; Paper.GRAY -> 0xFF744017 }
+        InkRole.CONCERN -> when (this) { Paper.YELLOW -> 0xFF9E2D23; Paper.PINK -> 0xFF830D09; Paper.GREEN -> 0xFF9C2C22; Paper.BLUE -> 0xFF99291F; Paper.PURPLE -> 0xFF740001; Paper.GRAY -> 0xFF93231A }
+        InkRole.FIX -> when (this) { Paper.YELLOW -> 0xFF0D6332; Paper.PINK -> 0xFF014B23; Paper.GREEN -> 0xFF0B6231; Paper.BLUE -> 0xFF045F2E; Paper.PURPLE -> 0xFF023F1D; Paper.GRAY -> 0xFF005A2B }
+        InkRole.EDGE -> when (this) { Paper.YELLOW -> 0xFF275792; Paper.PINK -> 0xFF0D4079; Paper.GREEN -> 0xFF255691; Paper.BLUE -> 0xFF23538E; Paper.PURPLE -> 0xFF01366E; Paper.GRAY -> 0xFF1D4E88 }
+        InkRole.AMBER -> when (this) { Paper.YELLOW -> 0xFFAD721C; Paper.PINK -> 0xFF905B00; Paper.GREEN -> 0xFFAC701B; Paper.BLUE -> 0xFFA86D15; Paper.PURPLE -> 0xFF835201; Paper.GRAY -> 0xFFA3680A }
+        InkRole.RULE -> when (this) { Paper.YELLOW -> 0xFFA19F82; Paper.PINK -> 0xFF9B7B79; Paper.GREEN -> 0xFF8EA28A; Paper.BLUE -> 0xFF7C9FA6; Paper.PURPLE -> 0xFF707891; Paper.GRAY -> 0xFF99928C }
+})
+
+/** How a note is held on the page: a note that holds a list of rows is taped across the top, a single note is pinned (owner, 2026-11-06). */
+enum class Fixing { PIN, TAPE }
+
+/** How a note has aged. No coffee ring (owner, 2026-11-06: it read as dirt). */
+private enum class Wear { TORN, CUT_CORNER, CURL, DOG_EAR, AGED }
 
 /**
  * A detective's sticky note: the content on light paper in dark ink (LocalOnPaper), pinned or
@@ -56,14 +85,14 @@ private enum class Wear { TORN, CUT_CORNER, CURL, DOG_EAR, COFFEE, AGED }
  * never shows two the same, yet a note looks the same every time. It grows with its content.
  */
 @Composable
-fun StickyNote(paper: Paper, seed: String, onClick: (() -> Unit)? = null, content: @Composable BoxScope.() -> Unit) {
+fun StickyNote(paper: Paper, seed: String, fixing: Fixing = Fixing.PIN, onClick: (() -> Unit)? = null, content: @Composable BoxScope.() -> Unit) {
     val h = seed.fold(1469598103934665603uL) { acc, c -> (acc xor c.code.toULong()) * 1099511628211uL }
     val tilts = floatArrayOf(-1.2f, -0.9f, -0.6f, -0.35f, 0.35f, 0.6f, 0.9f, 1.2f)
     val tilt = tilts[(h % 8uL).toInt()]
-    val tape = (h shr 8) % 4uL == 3uL
+    val tape = fixing == Fixing.TAPE
     val pins = listOf(Color(0xFFB22222), Color(0xFF2B5AA8), Color(0xFF2E8A4E), Color(0xFFD8B020))
     val pin = pins[((h shr 16) % 4uL).toInt()]
-    val wear = Wear.entries[((h shr 24) % 6uL).toInt()]
+    val wear = Wear.entries[((h shr 24) % Wear.entries.size.toULong()).toInt()]
     val shape = GenericShape { size, _ ->
         val w = size.width; val ht = size.height; val c = 64f
         when (wear) {
@@ -97,7 +126,6 @@ fun StickyNote(paper: Paper, seed: String, onClick: (() -> Unit)? = null, conten
             Canvas(Modifier.matchParentSize()) {
                 drawRect(Color.Black.copy(alpha = 0.03f), size = Size(size.width, 36f))
                 when (wear) {
-                    Wear.COFFEE -> drawCircle(Color(0x296E4618), radius = 100f, center = Offset(size.width - 90f, size.height - 80f), style = Stroke(12f))
                     Wear.AGED -> {
                         drawRect(Color(0x2E7A5420), style = Stroke(22f))
                         drawLine(Color.Black.copy(alpha = 0.07f), Offset(size.width * 0.64f, 0f), Offset(size.width * 0.58f, size.height), 3f)
@@ -113,7 +141,7 @@ fun StickyNote(paper: Paper, seed: String, onClick: (() -> Unit)? = null, conten
                     else -> Unit
                 }
             }
-            CompositionLocalProvider(LocalOnPaper provides true) { content() }
+            CompositionLocalProvider(LocalOnPaper provides true, LocalPaper provides paper) { content() }
         }
         if (tape) {
             Box(Modifier.align(Alignment.TopCenter).offset(y = (-8).dp).size(64.dp, 18.dp).rotate(-4f).background(Color(0x8CF3EEDC)))

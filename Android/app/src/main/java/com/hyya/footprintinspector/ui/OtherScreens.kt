@@ -105,8 +105,8 @@ fun SensitiveScreen(scanner: com.hyya.footprintinspector.scan.Scanner) {
         results?.let { r ->
             val found = Sensitive.categories.flatMap { c -> (r[c.id] ?: emptyList()).map { c to it } }
             val checked = Sensitive.categories.filter { it.id in chosen }.sumOf { it.apps.size }
-            SummaryRing(listOf(Slice(if (found.size == 1) "app any app can spot" else "apps any app can spot", found.size, Tone.ALERT.tint),
-                Slice("not on this device", (checked - found.size).coerceAtLeast(0), Tone.FIX.tint)), "checked")
+            SummaryRing(listOf(Slice(if (found.size == 1) "app any app can spot" else "apps any app can spot", found.size, SliceKind.ALERT),
+                Slice("not on this device", (checked - found.size).coerceAtLeast(0), SliceKind.FINE)), "checked")
             if (found.isEmpty()) {
                 MascotSays("None of these apps answered. Any app asking the same would find nothing.", tone = Tone.FIX)
             } else {
@@ -238,9 +238,9 @@ fun TrackerScreen(scanner: com.hyya.footprintinspector.scan.Scanner, nav: Nav) {
             }
         } else {
             SummaryRing(listOf(
-                Slice("worth a look", watch.count { it.isConcerning }, Tone.ALERT.tint),
-                Slice("worth knowing", watch.count { it.severity == com.hyya.footprintinspector.model.Severity.MEDIUM }, Amber),
-                Slice("all clear", watch.count { it.severity == com.hyya.footprintinspector.model.Severity.LOW }, Tone.FIX.tint),
+                Slice("worth a look", watch.count { it.isConcerning }, SliceKind.ALERT),
+                Slice("worth knowing", watch.count { it.severity == com.hyya.footprintinspector.model.Severity.MEDIUM }, SliceKind.AMBER),
+                Slice("all clear", watch.count { it.severity == com.hyya.footprintinspector.model.Severity.LOW }, SliceKind.FINE),
             ), "checks")
             SectionTitle("What has special access", watch.count { it.isConcerning }.takeIf { it > 0 }?.toString())
             Panel { watch.forEachIndexed { i, f -> TrackerRow(f, nav, i < watch.lastIndex) } }

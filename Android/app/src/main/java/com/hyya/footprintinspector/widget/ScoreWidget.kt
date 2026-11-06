@@ -21,7 +21,7 @@ import com.hyya.footprintinspector.R
  * The Home Screen widget: the mascot, the overall score and when the last check ran. Holds nothing
  * else: no findings, no app names. Light and dark come from the system through values-night.
  */
-class ScoreWidget : AppWidgetProvider() {
+open class ScoreWidget : AppWidgetProvider() {
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
         ids.forEach { manager.updateAppWidget(it, views(context)) }
     }
@@ -32,12 +32,14 @@ class ScoreWidget : AppWidgetProvider() {
 
         fun update(context: Context) {
             val manager = AppWidgetManager.getInstance(context)
-            val ids = manager.getAppWidgetIds(ComponentName(context, ScoreWidget::class.java))
-            if (ids.isNotEmpty()) manager.updateAppWidget(ids, views(context))
+            for (provider in listOf(ScoreWidget::class.java, ScoreWidgetMedium::class.java)) {
+                val ids = manager.getAppWidgetIds(ComponentName(context, provider))
+                if (ids.isNotEmpty()) manager.updateAppWidget(ids, views(context))
+            }
         }
 
         /** Small until the widget is wide enough for the medium layout. */
-        private fun views(context: Context): RemoteViews {
+        internal fun views(context: Context): RemoteViews {
             val prefs = context.getSharedPreferences("app", Context.MODE_PRIVATE)
             val score = if (prefs.contains(SCORE)) prefs.getInt(SCORE, 0) else null
             val checkedAt = prefs.getLong(CHECKED_AT, 0)
@@ -69,3 +71,9 @@ class ScoreWidget : AppWidgetProvider() {
         }
     }
 }
+
+/**
+ * The same widget offered at medium size in the widget picker (4 x 2), as iOS lists small and medium
+ * separately; Android otherwise shows only the default size there (owner, 2026-11-06).
+ */
+class ScoreWidgetMedium : ScoreWidget()

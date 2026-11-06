@@ -60,7 +60,7 @@ struct ScoreGuideCard: View {
 private struct ScoreBands: View {
     let value: Int
 
-    private func band(_ name: String, _ range: String, _ color: Color, _ align: HorizontalAlignment) -> some View {
+    private func band(_ name: String, _ range: String, _ color: InkStyle, _ align: HorizontalAlignment) -> some View {
         VStack(alignment: align, spacing: 1) {
             Text(name).font(.caption.weight(.semibold)).foregroundStyle(color)
             Text(range).font(.caption2).foregroundStyle(Brand.textSubtle)
@@ -178,7 +178,7 @@ struct FixWizard: View {
             let layout = verticalSizeClass == .compact ? AnyLayout(HStackLayout(spacing: 12)) : AnyLayout(VStackLayout(spacing: 8))
             layout {
                 Button("Done, next") { done.insert(f.id); Haptics.success(); index += 1 }
-                    .buttonStyle(PrimaryCTAButtonStyle(fill: Brand.green, depthColor: Color(hex: 0x0E8A56)))
+                    .buttonStyle(PrimaryCTAButtonStyle(fill: Brand.green.color, depthColor: Color(hex: 0x0E8A56)))
                 Button("Skip this one") { index += 1 }
                     .buttonStyle(GhostButtonStyle())
                     .frame(maxWidth: .infinity)

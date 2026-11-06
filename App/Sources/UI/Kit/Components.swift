@@ -127,11 +127,11 @@ extension HeroCard where Trailing == EmptyView {
 
 /// A group of rows written on one sticky note (owner, 2026-11-05).
 struct Panel<Content: View>: View {
-    var paper: Paper = .yellow
+    var paper: Paper = .gray
     var seed: String
     @ViewBuilder var content: Content
 
-    init(paper: Paper = .yellow, seed: String? = nil, file: String = #fileID, line: Int = #line, @ViewBuilder content: () -> Content) {
+    init(paper: Paper = .gray, seed: String? = nil, file: String = #fileID, line: Int = #line, @ViewBuilder content: () -> Content) {
         self.paper = paper
         self.seed = seed ?? "\(file):\(line)"
         self.content = content()
@@ -140,7 +140,7 @@ struct Panel<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) { content }
             .padding(.top, 10)
-            .stickyNote(paper, seed: seed)
+            .stickyNote(paper, seed: seed, fixing: .tape)
     }
 }
 
@@ -149,7 +149,7 @@ struct AccentRule: View {
     var width: CGFloat = 36
     var body: some View {
         Capsule()
-            .fill(LinearGradient(colors: [Brand.sand, Brand.sandDeep], startPoint: .leading, endPoint: .trailing))
+            .fill(LinearGradient(colors: [Brand.sand.color, Brand.sandDeep], startPoint: .leading, endPoint: .trailing))
             .frame(width: width, height: 3)
             .accessibilityHidden(true)
     }
@@ -173,7 +173,7 @@ struct RowCard<Accessory: View>: View {
     let symbol: String
     let title: String
     var subtitle: String? = nil
-    var tileFG: Color = Brand.sand
+    var tileFG: InkStyle = Brand.sand
     var tileBG: Color = .clear
     @ViewBuilder var accessory: Accessory
 
@@ -214,7 +214,7 @@ struct RowCard<Accessory: View>: View {
 }
 
 extension RowCard where Accessory == Image {
-    init(symbol: String, title: String, subtitle: String? = nil, tileFG: Color = Brand.sand, tileBG: Color = .clear) {
+    init(symbol: String, title: String, subtitle: String? = nil, tileFG: InkStyle = Brand.sand, tileBG: Color = .clear) {
         self.init(symbol: symbol, title: title, subtitle: subtitle, tileFG: tileFG, tileBG: tileBG) {
             Image(systemName: "chevron.right")
         }
@@ -278,7 +278,7 @@ struct MascotSays: View {
 struct ScoreOrb: View {
     let value: Int
     var size: CGFloat = 132
-    var tint: Color = Brand.sand
+    var tint: InkStyle = Brand.sand
     var label = "Privacy score"
     /// The ring and its number grow with the person's text size, up to 1.6 times.
     @ScaledMetric(relativeTo: .largeTitle) private var scale: CGFloat = 1
@@ -289,10 +289,10 @@ struct ScoreOrb: View {
                 .stroke(Color.white.opacity(0.08), lineWidth: 3)
             Circle()
                 .trim(from: 0, to: CGFloat(value) / 100)
-                .stroke(LinearGradient(colors: [tint, Color.white], startPoint: .bottomLeading, endPoint: .topTrailing),
+                .stroke(LinearGradient(colors: [tint.color, Color.white], startPoint: .bottomLeading, endPoint: .topTrailing),
                         style: StrokeStyle(lineWidth: 3, lineCap: .round))
                 .rotationEffect(.degrees(-90))
-                .neonGlow(tint, radius: 8, intensity: 0.6)
+                .neonGlow(tint.color, radius: 8, intensity: 0.6)
                 .animation(.spring(response: 0.9, dampingFraction: 0.85), value: value)
             VStack(spacing: 0) {
                 Text("\(value)")
@@ -317,7 +317,7 @@ struct ScoreOrb: View {
 struct Pill: View {
     let text: String
     var symbol: String? = nil
-    var fg: Color = Brand.textMuted
+    var fg: InkStyle = Brand.textMuted
     var bg: Color = Color.white.opacity(0.06)
 
     var body: some View {
@@ -336,7 +336,7 @@ struct Pill: View {
 /// A small icon. Kept for call sites that want an icon with a soft square behind it.
 struct IconTile: View {
     let symbol: String
-    var fg: Color = Brand.textMuted
+    var fg: InkStyle = Brand.textMuted
     var bg: Color = Color.white.opacity(0.06)
     var size: CGFloat = 40
 
@@ -352,7 +352,7 @@ struct IconTile: View {
 /// Numbered steps.
 struct StepList: View {
     let steps: [String]
-    var tint: Color = Brand.sand
+    var tint: InkStyle = Brand.sand
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {

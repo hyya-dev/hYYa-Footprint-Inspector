@@ -58,25 +58,28 @@ object Brand {
     // Each colour has a dark-ground value and a sticky-note value (owner, 2026-11-05). Inside a
     // StickyNote, LocalOnPaper is true and the same names give dark ink measured to reach WCAG 2.2
     // AA (4.5:1 text, 3:1 marks) on all six papers, as on iOS.
-    val sand: Color @Composable @ReadOnlyComposable get() = pick(0xFFD2AE88, 0xFF60411F)
-    val sandDeep: Color @Composable @ReadOnlyComposable get() = pick(0xFF8F7560, 0xFF60411F)
+    val sand: Color @Composable @ReadOnlyComposable get() = pick(0xFFD2AE88, InkRole.ACCENT)
+    val sandDeep: Color @Composable @ReadOnlyComposable get() = pick(0xFF8F7560, InkRole.ACCENT)
     /** Card, panel and outline borders: the explain tone's blue (owner, 2026-11-04). */
-    val edge: Color @Composable @ReadOnlyComposable get() = pick(0xFF7FB2E5, 0xFF2F4969)
-    val concern: Color @Composable @ReadOnlyComposable get() = pick(0xFFEC7F6A, 0xFF81291C)
+    val edge: Color @Composable @ReadOnlyComposable get() = pick(0xFF7FB2E5, InkRole.EDGE)
+    val concern: Color @Composable @ReadOnlyComposable get() = pick(0xFFEC7F6A, InkRole.CONCERN)
     val concernSoft = Color(0xFF2A1714)
-    val green: Color @Composable @ReadOnlyComposable get() = pick(0xFF7CD9A8, 0xFF135132)
-    val ink: Color @Composable @ReadOnlyComposable get() = pick(0xFFF5F5F7, 0xFF26222B)
-    val textMuted: Color @Composable @ReadOnlyComposable get() = pick(0xFFA1A1A8, 0xFF4A4550)
-    val textSubtle: Color @Composable @ReadOnlyComposable get() = pick(0xFF6C6C73, 0xFF4A464D)
+    val green: Color @Composable @ReadOnlyComposable get() = pick(0xFF7CD9A8, InkRole.FIX)
+    val ink: Color @Composable @ReadOnlyComposable get() = pick(0xFFF5F5F7, InkRole.TEXT)
+    val textMuted: Color @Composable @ReadOnlyComposable get() = pick(0xFFA1A1A8, InkRole.MUTED)
+    val textSubtle: Color @Composable @ReadOnlyComposable get() = pick(0xFF6C6C73, InkRole.SUBTLE)
     val surface: Color @Composable @ReadOnlyComposable get() = if (LocalOnPaper.current) Color.Black.copy(alpha = 0.06f) else Color(0xFF111113)
     val tile: Color @Composable @ReadOnlyComposable get() = if (LocalOnPaper.current) Color.Black.copy(alpha = 0.08f) else Color(0xFF1D1915)
     val rule: Color @Composable @ReadOnlyComposable get() = sandDeep.copy(alpha = 0.35f)
     /** The primary button: white on black, dark ink on paper. */
-    val cta: Color @Composable @ReadOnlyComposable get() = pick(0xFFFFFFFF, 0xFF26222B)
-    val onCta: Color @Composable @ReadOnlyComposable get() = pick(0xFF000000, 0xFFFFFFFF)
+    val cta: Color @Composable @ReadOnlyComposable get() = pick(0xFFFFFFFF, InkRole.TEXT)
+    val onCta: Color @Composable @ReadOnlyComposable get() = if (LocalOnPaper.current) Color.White else Color.Black
 
     @Composable @ReadOnlyComposable
-    private fun pick(dark: Long, paper: Long) = Color(if (LocalOnPaper.current) paper else dark)
+    private fun pick(dark: Long, role: InkRole): Color {
+        val paper = LocalPaper.current
+        return if (LocalOnPaper.current && paper != null) paper.ink(role) else Color(dark)
+    }
 
     @Composable @ReadOnlyComposable
     fun color(s: Severity) = when (s) {
@@ -165,8 +168,8 @@ fun SectionTitle(title: String, trailing: String? = null) {
 
 /** A group of rows written on one sticky note (owner, 2026-11-05). */
 @Composable
-fun Panel(paper: Paper = Paper.YELLOW, seed: String? = null, content: @Composable ColumnScope.() -> Unit) {
-    StickyNote(paper, seed ?: currentCompositeKeyHash.toString()) {
+fun Panel(paper: Paper = Paper.GRAY, seed: String? = null, content: @Composable ColumnScope.() -> Unit) {
+    StickyNote(paper, seed ?: currentCompositeKeyHash.toString(), fixing = Fixing.TAPE) {
         Column(Modifier.fillMaxWidth().padding(top = 8.dp), content = content)
     }
 }

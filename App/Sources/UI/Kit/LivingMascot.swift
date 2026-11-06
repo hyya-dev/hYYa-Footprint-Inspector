@@ -93,7 +93,7 @@ struct LivingMascot: View {
                     .frame(width: size, height: size)
                     // The cut-out on paper is rim-lit by the screen: sand normally, orange when something
                     // is worth a look. The night render brings its own light.
-                    .neonGlow(mood == .concerned ? Brand.orange : Brand.sand, radius: size * 0.08, intensity: scheme == .dark ? 0 : 0.35)
+                    .neonGlow(mood == .concerned ? Brand.orange.color : Brand.sand.color, radius: size * 0.08, intensity: scheme == .dark ? 0 : 0.35)
                     .scaleEffect(breathe)
                     .rotationEffect(.degrees(wiggle + lean), anchor: .bottom)
                     .offset(y: float - (hop ? size * 0.12 : 0))

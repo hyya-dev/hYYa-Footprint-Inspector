@@ -20,18 +20,18 @@ enum Tone: Sendable {
     /// Only Apple, Google or the maker can fix it: nothing for the person to do.
     case limit
 
-    var tint: Color {
+    var tint: InkStyle {
         switch self {
         case .alert: Brand.concern                      // #EC7F6A, 6.9:1
-        case .explain: Color(dark: 0x7FB2E5, paper: 0x244973) // 8.6:1 on black
+        case .explain: InkStyle(role: .edge, color: Color(dark: 0x7FB2E5, paper: 0x244973)) // 8.6:1 on black
         case .context: Brand.sand                       // #D2AE88, 9.4:1
         case .fix: Brand.green                          // #7CD9A8, 11:1
-        case .limit: Color(dark: 0xA7AFBF, paper: 0x424753)   // 8.3:1 on black
+        case .limit: InkStyle(role: .subtle, color: Color(dark: 0xA7AFBF, paper: 0x424753))   // 8.3:1 on black
         }
     }
 
     /// The card's border: the role colour where it carries meaning, the shared blue otherwise.
-    var edge: Color {
+    var edge: InkStyle {
         switch self {
         case .alert, .fix, .limit: tint
         case .explain, .context: Brand.edge
@@ -39,9 +39,9 @@ enum Tone: Sendable {
     }
 
     /// The faint wash behind the card's top edge.
-    var wash: Color { tint.opacity(0.07) }
+    var wash: some ShapeStyle { tint.opacity(0.07) }
     /// The badge fill behind tinted text.
-    var badge: Color { tint.opacity(0.14) }
+    var badge: some ShapeStyle { tint.opacity(0.14) }
 }
 
 /// A card with a role: a tinted icon and title, optional trailing badge, then free content.
@@ -144,7 +144,7 @@ struct FlowRow: Layout {
 /// A ring chart summing up a page at a glance, with a legend. Coral is worth a look, amber worth
 /// knowing, green fine: the same meaning on every page.
 struct SummaryRing: View {
-    struct Slice: Identifiable { let label: String; let count: Int; let color: Color; var id: String { label } }
+    struct Slice: Identifiable { let label: String; let count: Int; let color: InkStyle; var id: String { label } }
     let slices: [Slice]
     var centre: String? = nil
     var caption: String? = nil
@@ -199,6 +199,6 @@ struct SummaryRing: View {
 
 extension SummaryRing.Slice {
     static func alert(_ n: Int, _ label: String) -> Self { .init(label: label, count: n, color: Tone.alert.tint) }
-    static func amber(_ n: Int, _ label: String) -> Self { .init(label: label, count: n, color: Color(hex: 0xF2C27A)) }
+    static func amber(_ n: Int, _ label: String) -> Self { .init(label: label, count: n, color: Brand.amberGlow) }
     static func fine(_ n: Int, _ label: String) -> Self { .init(label: label, count: n, color: Tone.fix.tint) }
 }

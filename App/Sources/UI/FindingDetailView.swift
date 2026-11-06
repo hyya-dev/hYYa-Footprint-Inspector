@@ -189,7 +189,7 @@ struct FindingDetailView: View {
                     Haptics.success()
                     Task { await scanner.scan(quietly: true) }
                 }
-                .buttonStyle(PrimaryCTAButtonStyle(fill: Brand.green, depthColor: Color(hex: 0x0E8A56)))
+                .buttonStyle(PrimaryCTAButtonStyle(fill: Brand.green.color, depthColor: Color(hex: 0x0E8A56)))
                 .disabled(cleared)
             }
             if def.isRestart {

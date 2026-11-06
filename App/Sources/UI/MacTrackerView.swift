@@ -67,7 +67,7 @@ struct MacTrackerView: View {
                             Button("Open in System Settings") { SettingsLink.open(pane: place.pane); Haptics.selection() }
                                 .buttonStyle(GhostButtonStyle())
                             Button(isDone ? "Checked ✓" : "I've checked this") { toggle(place.id) }
-                                .buttonStyle(PrimaryCTAButtonStyle(fill: isDone ? Brand.green : Brand.cta,
+                                .buttonStyle(PrimaryCTAButtonStyle(fill: isDone ? Brand.green.color : Brand.cta,
                                                                    depthColor: isDone ? Color(hex: 0x0E8A56) : Brand.ctaDepth))
                         }
                     }
