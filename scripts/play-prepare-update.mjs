@@ -15,6 +15,7 @@
 //   PLAY_SERVICE_ACCOUNT_JSON=… node scripts/play-prepare-update.mjs
 //   PLAY_SERVICE_ACCOUNT_JSON=… node scripts/play-prepare-update.mjs --send <edit id>
 
+import crypto from "node:crypto";
 import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { accessToken, api, pushGraphics, PACKAGE } from "./play-api.mjs";
@@ -74,8 +75,15 @@ const E = `/edits/${edit.id}`;
 // The release name testers see in Play Console, from the build itself: "1.0.5 (18)".
 const versionName = readFileSync(`${ROOT}Android/app/build.gradle.kts`, "utf8").match(/versionName = "([^"]+)"/)[1];
 const aab = readFileSync(`${ROOT}Android/app/build/outputs/bundle/release/app-release.aab`);
-const b = await api(token, `https://androidpublisher.googleapis.com/upload/androidpublisher/v3/applications/${PACKAGE}${E}/bundles?uploadType=media`,
+// A build already uploaded (for example to internal testing for the S25 check) can't be uploaded
+// again: reuse it when the bundle Play holds for that version code is this exact file.
+const versionCode = Number(readFileSync(`${ROOT}Android/app/build.gradle.kts`, "utf8").match(/versionCode = (\d+)/)[1]);
+const held = (await api(token, `${E}/bundles`)).bundles?.find((x) => x.versionCode === versionCode);
+const sha256 = crypto.createHash("sha256").update(aab).digest("hex");
+if (held && held.sha256 !== sha256) throw new Error(`versionCode ${versionCode} is on Play with a different bundle: bump the version code`);
+const b = held ?? await api(token, `https://androidpublisher.googleapis.com/upload/androidpublisher/v3/applications/${PACKAGE}${E}/bundles?uploadType=media`,
   { method: "POST", raw: aab, contentType: "application/octet-stream" });
+if (held) console.log(`• reusing uploaded versionCode ${versionCode} (same bundle)`);
 const TRACK = process.argv.includes("--internal") ? "internal" : "production";
 await call(token, `${E}/tracks/${TRACK}`, { method: "PUT", body: { track: TRACK, releases: [{
   name: `${versionName} (${b.versionCode})`, versionCodes: [String(b.versionCode)], status: "completed",
