@@ -107,13 +107,14 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="@string/app_full_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.FootprintInspector">
         <service android:name="androidx.work.impl.foreground.SystemForegroundService" tools:node="remove" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:label="@string/app_name"
             android:taskAffinity="">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -122,7 +123,8 @@
         </activity>
         <receiver
             android:name=".widget.ScoreWidget"
-            android:exported="false">
+            android:exported="false"
+            android:label="@string/app_full_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -130,7 +132,8 @@
         </receiver>
         <receiver
             android:name=".widget.ScoreWidgetMedium"
-            android:exported="false">
+            android:exported="false"
+            android:label="@string/app_full_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>

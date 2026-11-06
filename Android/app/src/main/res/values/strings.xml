@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Only the home screen icon uses the short name (the full name is cut off there); everything else uses app_full_name. -->
     <string name="app_name">hYYa Footprint</string>
     <string name="app_full_name">hYYa Digital Footprint Check</string>
     <string name="widget_description">Your privacy score and your last check</string>
