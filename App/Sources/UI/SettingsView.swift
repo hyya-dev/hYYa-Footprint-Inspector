@@ -8,10 +8,9 @@ import WidgetKit
 
 enum hYYaLinks {
     static let website = URL(string: "https://hyya.com")!
-    static let hyyaAIAppStore = URL(string: "https://apps.apple.com/app/id6767114813")!
     static let contact = URL(string: "https://hyya.com/#contact")!
     static let privacy = URL(string: "https://hyya.com/privacypolicy/hyya-digital-footprint-check.html")!
-    static let security = URL(string: "mailto:security@hyya.com?subject=Security%20report%20%E2%80%94%20hYYa%20Footprint%20Inspector")!
+    static let security = URL(string: "mailto:security@hyya.com?subject=Security%20report%20%E2%80%94%20hYYa%20Digital%20Footprint%20Check")!
     /// ⚠️ Showcase page owed by hyya.com. Used for Share until the App Store id exists.
     static let showcase = URL(string: "https://hyya.com/hyya-digital-footprint-check.html")!
     /// App Store Connect record created 2026-10-17 (SKU hyya-footprint-inspector). The listing goes

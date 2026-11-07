@@ -110,8 +110,9 @@ xcodebuild -project hYYaFootprintInspector.xcodeproj -scheme "hYYa Footprint Ins
 
 `project.yml` is the source of truth; the `.xcodeproj` is generated and not committed.
 
-Android: open `Android/` in Android Studio, or run `./gradlew assembleDebug` there. For a build
-without the Settings card that links to other hYYa apps on Google Play, add `-Pfdroid=true`.
+Android: open `Android/` in Android Studio, or run `./gradlew assembleDebug` there. Add
+`-Pfdroid=true` for the F-Droid edition: it has no card pointing to other hYYa apps, and its rating
+and share links go to this repository and the app's page on hyya.com instead of Google Play.
 
 | Folder | What's in it |
 |---|---|

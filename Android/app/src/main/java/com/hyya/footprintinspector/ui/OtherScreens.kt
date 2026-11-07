@@ -338,13 +338,19 @@ fun CheckUpStepScreen(index: Int, nav: Nav) {
 // MARK: Settings
 
 object Links {
-    const val PLAY = "https://play.google.com/store/apps/details?id=com.hyya.footprintinspector"
+    private const val PLAY = "https://play.google.com/store/apps/details?id=com.hyya.footprintinspector"
+    private const val WEBPAGE = "https://hyya.com/hyya-digital-footprint-check.html"
+    private const val GITHUB = "https://github.com/hyya-dev/hYYa-Digital-Footprint-Check"
+    private val fdroid = com.hyya.footprintinspector.BuildConfig.FDROID
+    /** Where the rating card goes: Google Play, or in the F-Droid edition the source repository. */
+    val RATE = if (fdroid) GITHUB else PLAY
+    /** The link shared with friends: Google Play, or in the F-Droid edition the app's page on hyya.com. */
+    val SHARE_LINK = if (fdroid) WEBPAGE else PLAY
     const val CONTACT = "https://hyya.com/#contact"
     const val PRIVACY = "https://hyya.com/privacypolicy/hyya-digital-footprint-check.html"
-    const val SECURITY = "mailto:security@hyya.com?subject=Security%20report%20%E2%80%94%20hYYa%20Footprint%20Inspector"
-    const val HYYA_AI = "https://play.google.com/store/apps/details?id=com.hyya.hyyaai"
+    const val SECURITY = "mailto:security@hyya.com?subject=Security%20report%20%E2%80%94%20hYYa%20Digital%20Footprint%20Check"
     const val HYYA = "https://hyya.com"
-    const val SHARE = "hYYa Digital Footprint Check shows what any app can learn about your device, and how to fix it. Free, open source, nothing leaves your device.\n$PLAY"
+    val SHARE = "hYYa Digital Footprint Check shows what any app can learn about your device, and how to fix it. Free, open source, nothing leaves your device.\n$SHARE_LINK"
 }
 
 @Composable
@@ -356,14 +362,14 @@ fun SettingsScreen(scanner: Scanner, nav: Nav) {
         HeroCard("Settings", "hYYa Digital Footprint Check", "Everything here stays on this device.")
         // Rating card, as on iOS.
         // The whole card opens the link; the pill is its label, centred across the card.
-        ToneCard(Tone.CONTEXT, "Enjoying hYYa Digital Footprint Check?", onClick = { openUrl(context, Links.PLAY) }, paper = Paper.PURPLE) {
+        ToneCard(Tone.CONTEXT, "Enjoying hYYa Digital Footprint Check?", onClick = { openUrl(context, Links.RATE) }, paper = Paper.PURPLE) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Mascot(72)
                 Spacer(Modifier.width(12.dp))
                 Text("Your reviews keep us smiling while coding, and help others find a privacy app they can trust.",
                     color = Brand.textMuted, fontSize = 13.sp, lineHeight = 18.sp, modifier = Modifier.weight(1f))
             }
-            CardPill("Rate the App")
+            CardPill(if (com.hyya.footprintinspector.BuildConfig.FDROID) "Feedback on GitHub" else "Rate the App")
         }
         SectionTitle("Your scans")
         Panel {
@@ -413,22 +419,6 @@ private fun ColumnScope.CardPill(text: String) {
 
 @Composable
 private fun OutIcon() = Icon(Icons.AutoMirrored.Outlined.OpenInNew, null, tint = Brand.textSubtle, modifier = Modifier.size(16.dp))
-
-@Composable
-private fun PromoRow(image: Int, title: String, tagline: String, divider: Boolean, onClick: () -> Unit) {
-    Column {
-        Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 14.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Image(painterResource(image), null, Modifier.size(44.dp).clip(RoundedCornerShape(11.dp)))
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                Text(title, color = Brand.ink, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                Text(tagline, color = Brand.textSubtle, fontSize = 12.sp)
-            }
-            Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = Brand.textSubtle)
-        }
-        if (divider) androidx.compose.material3.HorizontalDivider(Modifier.padding(start = 70.dp), color = Brand.rule, thickness = 0.5.dp)
-    }
-}
 
 /** Restarted within the last week. */
 fun restartedRecently() = com.hyya.footprintinspector.scan.RecentRestart.isRecent(android.os.SystemClock.elapsedRealtime())

@@ -500,7 +500,7 @@ private fun shareResult(context: android.content.Context, overall: com.hyya.foot
         line("Check-up", com.hyya.footprintinspector.model.OverallScore.Part.CHECKUP),
         "",
         "Check yours with hYYa Digital Footprint Check. Free, open source, and nothing leaves your device.",
-        Links.PLAY,
+        Links.SHARE_LINK,
     ).joinToString("\n")
     context.startActivity(android.content.Intent.createChooser(
         android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain").putExtra(android.content.Intent.EXTRA_TEXT, text), null)

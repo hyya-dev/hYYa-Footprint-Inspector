@@ -28,8 +28,9 @@ android {
 
     defaultConfig {
         applicationId = "com.hyya.footprintinspector"
-        // `-Pfdroid=true` builds the F-Droid edition: it leaves out the Settings card that points to
-        // other hYYa apps, so the build carries no promotion of non-free apps. Play builds are unchanged.
+        // `-Pfdroid=true` builds the F-Droid edition: no Settings card pointing to other hYYa apps, and the
+        // rating and share links go to the source repository and hyya.com instead of Google Play.
+        // Play builds are unchanged.
         buildConfigField("boolean", "FDROID", (project.findProperty("fdroid")?.toString() == "true").toString())
         minSdk = 33
         targetSdk = 36
