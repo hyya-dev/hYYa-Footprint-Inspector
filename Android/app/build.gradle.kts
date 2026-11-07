@@ -36,7 +36,7 @@ android {
         targetSdk = 36
         // versionName is the marketing version (1.0.0 on every store); versionCode is the
         // build number and may be bumped freely, but Play refuses a code it already holds.
-        versionCode = 24
+        versionCode = 25
         versionName = "1.0.6"
     }
 
