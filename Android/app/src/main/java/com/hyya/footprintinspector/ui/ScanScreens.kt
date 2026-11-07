@@ -440,7 +440,7 @@ fun FixScreen(scanner: Scanner, nav: Nav) {
 /**
  * The home page: one privacy score for all four checks, each check's own part, and the way to
  * share it. The score is kept between launches and moves as soon as any check changes
- * (owner, 2026-10-28).
+ *.
  */
 @Composable
 fun HomeScreen(scanner: Scanner, nav: Nav) {

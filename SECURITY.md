@@ -16,7 +16,7 @@ Please report privately. Don't open a public issue. Either:
 Please include:
 - what you found
 - how to reproduce it
-- the iOS version
+- the device and system version (iOS, iPadOS, macOS or Android)
 - the app version, from Settings in the app
 
 We'll acknowledge it within a few days, keep you updated, and credit you in the release notes if
@@ -24,4 +24,6 @@ you'd like.
 
 ## Supported versions
 
-Only the latest App Store release, and `main`, receive fixes.
+Only the latest release on each store receives fixes: the App Store (iPhone, iPad and Mac) and
+Google Play (Android), plus `main`. Signed Android APKs on GitHub Releases follow the Google Play
+version.

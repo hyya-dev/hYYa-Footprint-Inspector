@@ -112,7 +112,7 @@ fun ToneCard(
     paper: Paper = tone.paper,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    // Written on a sticky note of the role's colour (owner, 2026-11-05).
+    // Written on a sticky note of the role's colour.
     StickyNote(paper, "$tone-${title ?: ""}", onClick = onClick) {
     Column(
         Modifier.fillMaxWidth().padding(18.dp).padding(top = 6.dp),

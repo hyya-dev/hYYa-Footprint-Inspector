@@ -13,7 +13,7 @@ import Network
 import StoreKit
 import SystemConfiguration
 
-/// Store screenshots must never show the owner's real Mac. Launched with `-sampleData`, the
+/// Store screenshots must never show a real Mac's details. Launched with `-sampleData`, the
 /// readers that would show a name, a permanent ID, a device name or an app list show made-up
 /// values instead. Nothing else changes.
 enum MacSample {

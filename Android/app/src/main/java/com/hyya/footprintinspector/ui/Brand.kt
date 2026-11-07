@@ -55,12 +55,12 @@ import com.hyya.footprintinspector.model.Severity
 val LocalOnPaper = androidx.compose.runtime.staticCompositionLocalOf { false }
 
 object Brand {
-    // Each colour has a dark-ground value and a sticky-note value (owner, 2026-11-05). Inside a
+    // Each colour has a dark-ground value and a sticky-note value. Inside a
     // StickyNote, LocalOnPaper is true and the same names give dark ink measured to reach WCAG 2.2
     // AA (4.5:1 text, 3:1 marks) on all six papers, as on iOS.
     val sand: Color @Composable @ReadOnlyComposable get() = pick(0xFFD2AE88, InkRole.ACCENT)
     val sandDeep: Color @Composable @ReadOnlyComposable get() = pick(0xFF8F7560, InkRole.ACCENT)
-    /** Card, panel and outline borders: the explain tone's blue (owner, 2026-11-04). */
+    /** Card, panel and outline borders: the explain tone's blue. */
     val edge: Color @Composable @ReadOnlyComposable get() = pick(0xFF7FB2E5, InkRole.EDGE)
     val concern: Color @Composable @ReadOnlyComposable get() = pick(0xFFEC7F6A, InkRole.CONCERN)
     val concernSoft = Color(0xFF2A1714)
@@ -119,7 +119,7 @@ fun Page(resetOn: Any? = null, content: @Composable ColumnScope.() -> Unit) {
     }
 }
 
-/** The detective: the night render on the dark page (owner, 2026-11-06), the cut-out on paper. */
+/** The detective: the night render on the dark page, the cut-out on paper. */
 @Composable
 fun Mascot(size: Int, modifier: Modifier = Modifier) {
     val art = if (LocalOnPaper.current) R.drawable.mascot_cutout else R.drawable.mascot_night
@@ -166,7 +166,7 @@ fun SectionTitle(title: String, trailing: String? = null) {
     }
 }
 
-/** A group of rows written on one sticky note (owner, 2026-11-05). */
+/** A group of rows written on one sticky note. */
 @Composable
 fun Panel(paper: Paper = Paper.GRAY, seed: String? = null, content: @Composable ColumnScope.() -> Unit) {
     StickyNote(paper, seed ?: currentCompositeKeyHash.toString(), fixing = Fixing.TAPE) {

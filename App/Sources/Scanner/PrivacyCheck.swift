@@ -9,7 +9,7 @@ import SwiftUI
 /// The four checks as one journey, so the Score page can show one overall score and where to go
 /// next. Only counts and choices are kept, never which apps were found or what they shared. They
 /// live in a file of their own, outside iCloud and computer backups, so the score is still there
-/// after a restart (owner, 2026-10-28). Settings › Clear history removes them.
+/// after a restart. Settings › Clear history removes them.
 @MainActor
 @Observable
 final class PrivacyCheck {

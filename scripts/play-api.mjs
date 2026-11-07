@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 /**
  * Shared Google Play Developer API plumbing. No dependencies, same approach as the `asc-*.mjs`
  * scripts: hand-rolled RS256 JWT with `node:crypto`, because this repo has no `node_modules` and
@@ -71,8 +75,8 @@ const UPLOAD_BASE = `https://androidpublisher.googleapis.com/upload/androidpubli
  * [langs], inside the edit at [E] (`/edits/<id>`), several sets at once.
  *
  * ⚠️ Why it is shaped like this (2026-10-13): one set after another took about two minutes a
- * language — some twenty minutes a production send, twice with the rehearsal — and the owner took
- * the wait for a hang. The sets are independent, so they run side by side (`concurrency` at a
+ * language — some twenty minutes a production send, twice with the rehearsal — and the wait
+ * looked like a hang. The sets are independent, so they run side by side (`concurrency` at a
  * time). ⛔ But the images WITHIN a set go one after another: Play orders a gallery by upload order,
  * and parallel uploads inside a set would shuffle the slides. Every set is then read back and its
  * order checked against [files] by sha256 (`verifyGraphics`) — fail closed, before any commit.

@@ -25,8 +25,7 @@ enum AppTab: String, CaseIterable, Identifiable, Hashable {
         }
     }
 
-    /// One word, for the navbar: six buttons fit side by side on the smallest iPhone (owner,
-    /// 2026-10-28).
+    /// One word, for the navbar: six buttons fit side by side on the smallest iPhone.
     var shortTitle: String { self == .sensitive ? "Sensitive" : title }
 
     var symbol: String {
@@ -288,8 +287,8 @@ struct ChecksPanel: View {
 /// A page with a list (Check-up areas) whose rows open a detail. Only on a wide screen held
 /// sideways (an open iPhone Duo, iPad) does the detail sit beside the list, both always showing;
 /// everywhere else, including an open Duo held upright, it's one column and rows push. A split
-/// that hides its list behind a button left an open Duo upright on a blank page (owner,
-/// 2026-10-28). The Mac's pages already sit inside its own sidebar.
+/// that hides its list behind a button left an open Duo upright on a blank page.
+/// The Mac's pages already sit inside its own sidebar.
 struct ListDetailStack<Content: View, Placeholder: View>: View {
     @ViewBuilder var content: Content
     @ViewBuilder var placeholder: Placeholder

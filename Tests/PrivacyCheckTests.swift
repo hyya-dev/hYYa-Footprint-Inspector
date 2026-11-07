@@ -61,7 +61,7 @@ struct PrivacyCheckTests {
     }
 }
 
-/// Owner's Mac test, 2026-10-28: the score must survive a restart and follow what was fixed.
+/// Regression test (Mac): the score must survive a restart and follow what was fixed.
 @MainActor
 struct LiveScoreTests {
     @Test func checkResultsAreKeptAndCleared() throws {
@@ -258,7 +258,7 @@ struct ReportHardeningTests {
     }
 }
 
-/// Owner's Duo test of build 19 (2026-10-28): the navbar goes where the Duo puts its own.
+/// Regression test from a Duo test of build 19: the navbar goes where the Duo puts its own.
 struct NavbarPlacementTests {
     private func place(_ w: CGFloat, _ h: CGFloat, leading: CGFloat = 0, trailing: CGFloat = 0) -> NavBarRoot<EmptyView>.Place {
         NavBarRoot<EmptyView>.place(size: CGSize(width: w, height: h), insets: EdgeInsets(top: 0, leading: leading, bottom: 0, trailing: trailing))

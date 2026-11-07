@@ -9,7 +9,7 @@ import UIKit
 import AppKit
 #endif
 
-/// hYYa Digital Footprint Check design layer: "Quiet Noir" (owner, 2026-10-17: black ground from
+/// hYYa Digital Footprint Check design layer: "Quiet Noir" (black ground from
 /// their reference, but "the glow is too much" and the layout must be elegant).
 ///
 /// - Ground: pure black. Content sits in quiet near-black panels with hairline separators.
@@ -32,7 +32,7 @@ enum Brand {
     static let sand = InkStyle(role: .accent, color: Color(dark: 0xD2AE88, paper: 0x60411F))
     /// The footprint's own brown, for borders, separators and accent rules.
     static let sandDeep = Color(dark: 0x8F7560, paper: 0x5C4128)
-    /// Card, panel and outline borders: the explain tone's blue (owner, 2026-11-04).
+    /// Card, panel and outline borders: the explain tone's blue.
     static let edge = InkStyle(role: .edge, color: Color(dark: 0x7FB2E5, paper: 0x2F4969))
     static var edgeGradient: LinearGradient { LinearGradient(colors: [edge.color.opacity(0.55), edge.color.opacity(0.15)], startPoint: .top, endPoint: .bottom) }
     static let sandSoft = Color(dark: 0xD2AE88, darkAlpha: 0.12, paper: 0x60411F, paperAlpha: 0.12)
@@ -133,8 +133,8 @@ enum Brand {
 }
 
 extension Color {
-    /// A colour for the dark ground and its counterpart on a sticky note's light paper (owner,
-    /// 2026-11-05). Every paper ink is the lightest shade of its hue that reaches WCAG 2.2 AA body
+    /// A colour for the dark ground and its counterpart on a sticky note's light paper.
+    /// Every paper ink is the lightest shade of its hue that reaches WCAG 2.2 AA body
     /// text contrast (4.5:1) on all six papers; measured, not guessed. Notes switch their subtree to the light scheme, so the same Brand names read
     /// as dark ink on paper and light ink on black.
     init(dark: UInt32, darkAlpha: Double = 1, paper: UInt32, paperAlpha: Double = 1) {

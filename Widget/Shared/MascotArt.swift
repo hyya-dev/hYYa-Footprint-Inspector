@@ -4,7 +4,7 @@
 
 import SwiftUI
 
-/// The detective. On a dark ground he is the night render (owner, 2026-11-06): its night scene
+/// The detective. On a dark ground he is the night render: its night scene
 /// fades into the page, so he stands in his own red beam. On light paper, such as a sticky note or
 /// the light widget, he stays the cut-out, which that scene would only wash out.
 struct MascotArt: View {

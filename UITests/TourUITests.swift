@@ -6,7 +6,7 @@ import XCTest
 
 /// Opens every page and sub-page the way a person would and photographs each one top to bottom
 /// (`tour-NN-…`), upright and sideways, for a person to look through before any build goes to
-/// TestFlight (owner, 2026-10-28). Sample data only, on Simulators.
+/// TestFlight. Sample data only, on Simulators.
 final class TourUITests: XCTestCase {
     private var app: XCUIApplication!
     private var n = 0

@@ -92,7 +92,7 @@ final class MacPlainWordsTests: XCTestCase {
     }
 }
 
-/// Owner's Mac test, 2026-10-28.
+/// Regression test (Mac).
 @MainActor
 final class MacLiveScoreTests: XCTestCase {
     /// Tracker counts on a Mac once every place is ticked, and never before.

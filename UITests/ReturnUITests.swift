@@ -5,7 +5,7 @@
 import XCTest
 
 /// Leaving the app to change a setting, then coming back, must land on the same page and the same
-/// open card (owner, 2026-10-28: it came back to the Score page instead).
+/// open card (it came back to the Score page instead).
 final class ReturnUITests: XCTestCase {
     private var app: XCUIApplication!
 

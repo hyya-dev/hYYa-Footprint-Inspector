@@ -1,4 +1,7 @@
 #!/bin/zsh
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Captures the seven store screens on this project's iPhone Duo Simulator from launch switches
 # alone (no taps), in whatever pose Device Hub has it in. Sample data only.
 #   scripts/capture-duo.sh <out-dir> [display: outer|inner]

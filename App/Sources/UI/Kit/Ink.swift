@@ -10,7 +10,7 @@ enum InkRole: CaseIterable, Sendable {
 }
 
 extension Paper {
-    /// The ink for each role on this paper (owner, 2026-11-06: "the best colour for clear reading").
+    /// The ink for each role on this paper ("the best colour for clear reading").
     /// Designed in OKLCH and measured with the WCAG 2.2 formula: body text is the paper's own hue,
     /// almost black (9 to 13:1); secondary text 7:1 (AAA); hints, headings and the meaning colours
     /// (worth a look, fixed, explains) 6:1; "worth knowing" marks 3.3:1, lighter on purpose so a ring's

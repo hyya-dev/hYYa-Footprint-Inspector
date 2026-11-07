@@ -4,12 +4,12 @@
 
 import SwiftUI
 
-/// The paper a section is written on (owner, 2026-11-05: every section is a detective's sticky
+/// The paper a section is written on (every section is a detective's sticky
 /// note). Yellow before a check; then the colour of what it found.
 enum Paper: CaseIterable, Sendable {
     case yellow, pink, green, blue, purple, gray
 
-    /// The Mac Stickies colours (owner, 2026-11-05). Every ink used on them is measured to reach
+    /// The Mac Stickies colours. Every ink used on them is measured to reach
     /// WCAG 2.2 AA, 4.5:1 for text and 3:1 for marks, on all six (see Color(dark:paper:)).
     var colour: Color {
         switch self {
@@ -23,8 +23,8 @@ enum Paper: CaseIterable, Sendable {
     }
 
     /// The paper for a role: purple for "worth a look", green for fixes, blue for what a clue tells
-    /// an app, gray for background and for "only Apple can fix". Owner, 2026-11-06: no pink ("too ugly"),
-    /// and as little yellow as possible ("too strong").
+    /// an app, gray for background and for "only Apple can fix". No pink,
+    /// and as little yellow as possible .
     static func `for`(_ tone: Tone) -> Paper {
         switch tone {
         case .alert: .purple
@@ -48,7 +48,7 @@ enum Paper: CaseIterable, Sendable {
 struct StickyNote: ViewModifier {
     let paper: Paper
     let seed: String
-    /// How it's fixed to the page. One rule (owner, 2026-11-06, "standardise"): a note that holds a
+    /// How it's fixed to the page. One rule : a note that holds a
     /// list of rows is taped across the top; a single note is pinned.
     let fixing: NoteFixing
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -129,7 +129,7 @@ extension View {
 /// How a note is held on the page.
 enum NoteFixing: Sendable { case pin, tape }
 
-/// How a note has aged. Each note gets one, from its seed. No coffee ring (owner, 2026-11-06: it read as dirt).
+/// How a note has aged. Each note gets one, from its seed. No coffee ring (it read as dirt).
 enum Wear: CaseIterable { case torn, cutCorner, curl, dogEar, aged }
 
 /// The paper's outline: a ragged bottom edge, a snipped corner or a rolled corner; otherwise square.

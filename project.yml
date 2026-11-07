@@ -1,7 +1,7 @@
 name: hYYaFootprintInspector
 options:
   bundleIdPrefix: com.hyya
-  # iOS 26 floor: owner's decision 2026-10-17. Same floor and reasoning (real Liquid Glass APIs)
+  # iOS 26 floor: decided 2026-10-17. Same floor and reasoning (real Liquid Glass APIs)
   # as hYYa Encrypted Notes; see that project's project.yml.
   deploymentTarget:
     iOS: "26.0"

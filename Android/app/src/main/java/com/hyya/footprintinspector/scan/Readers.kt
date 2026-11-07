@@ -271,7 +271,7 @@ object SampleData {
         "Phone", "Photos", "Play Store", "Settings", "hYYa Digital Footprint Check")
 }
 
-/** A restart within a week counts as done (owner, 2026-10-28). Elapsed time includes deep sleep. */
+/** A restart within a week counts as done. Elapsed time includes deep sleep. */
 object RecentRestart {
     const val WINDOW_MS = 7L * 24 * 3600 * 1000
     const val NOTE = "Restarted within the last week, so this changes again soon. Nothing to do."

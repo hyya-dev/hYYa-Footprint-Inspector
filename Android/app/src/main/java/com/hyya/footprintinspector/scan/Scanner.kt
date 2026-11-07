@@ -64,7 +64,7 @@ class Scanner(app: Application) : AndroidViewModel(app) {
 
     /**
      * Sensitive apps: how many answered the last check. Only the count is kept, never which apps,
-     * so the score is still there after a restart (owner, 2026-10-28). Clear history removes it.
+     * so the score is still there after a restart. Clear history removes it.
      */
     var sensitiveFound by mutableStateOf(if (keep && prefs.contains(SENSITIVE)) prefs.getInt(SENSITIVE, 0) else null)
         private set

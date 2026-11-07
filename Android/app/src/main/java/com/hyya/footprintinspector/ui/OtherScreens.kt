@@ -383,8 +383,15 @@ fun SettingsScreen(scanner: Scanner, nav: Nav) {
             RowCard(Icons.Outlined.PanTool, "Privacy Policy", onClick = { openUrl(context, Links.PRIVACY) }) { OutIcon() }
             RowCard(Icons.Outlined.Security, "Report a Security Issue", showDivider = false, onClick = { openUrl(context, Links.SECURITY) }) { OutIcon() }
         }
+        // Not in the F-Droid edition (see FDROID in build.gradle.kts).
+        if (!com.hyya.footprintinspector.BuildConfig.FDROID) MoreFromHyya(context)
+    }
+}
+
+/** The hYYa website, laid out like the rating card at the top. */
+@Composable
+private fun ColumnScope.MoreFromHyya(context: android.content.Context) {
         SectionTitle("More from hYYa")
-        // The hYYa website, laid out like the rating card at the top.
         ToneCard(Tone.CONTEXT, "hYYa ✨", onClick = { openUrl(context, Links.HYYA) }, paper = Paper.BLUE) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(R.drawable.promo_hyya_dev), null,
@@ -395,7 +402,6 @@ fun SettingsScreen(scanner: Scanner, nav: Nav) {
             }
             CardPill("Visit hyya.com")
         }
-    }
 }
 
 /** The white pill inside a tappable card: it looks like the primary button, but the card is the button. */
@@ -424,5 +430,5 @@ private fun PromoRow(image: Int, title: String, tagline: String, divider: Boolea
     }
 }
 
-/** Restarted within the last week (owner, 2026-10-28). */
+/** Restarted within the last week. */
 fun restartedRecently() = com.hyya.footprintinspector.scan.RecentRestart.isRecent(android.os.SystemClock.elapsedRealtime())

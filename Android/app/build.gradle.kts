@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 import java.util.Properties
 
 plugins {
@@ -24,9 +28,12 @@ android {
 
     defaultConfig {
         applicationId = "com.hyya.footprintinspector"
+        // `-Pfdroid=true` builds the F-Droid edition: it leaves out the Settings card that points to
+        // other hYYa apps, so the build carries no promotion of non-free apps. Play builds are unchanged.
+        buildConfigField("boolean", "FDROID", (project.findProperty("fdroid")?.toString() == "true").toString())
         minSdk = 33
         targetSdk = 36
-        // versionName is the marketing version (owner: 1.0.0 on every store); versionCode is the
+        // versionName is the marketing version (1.0.0 on every store); versionCode is the
         // build number and may be bumped freely, but Play refuses a code it already holds.
         versionCode = 24
         versionName = "1.0.6"

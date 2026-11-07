@@ -143,9 +143,9 @@ def sticky_note(canvas, cx, cy, label, value, angle, colour, wear, pin):
 
 
 def header(out):
-    """Theatrical (owner, 2026-11-05): a dark stage, one spotlight on the detective and the glowing
-    digital footprint at his feet, six things an app can learn on a detective's sticky notes. No curtains
-    (owner). No headline. Everything that matters
+    """Theatrical: a dark stage, one spotlight on the detective and the glowing
+    digital footprint at his feet, six things an app can learn on a detective's sticky notes. No curtains.
+    No headline. Everything that matters
     sits in the area both crops keep: iPhone shows the full height but only the middle ~84% of the
     width, with buttons over the top corners; iPad shows the full width but loses ~15% top and
     bottom, with the tab bar over the top centre. Safe: x 0.10-0.90, y 0.30-0.85."""
@@ -163,11 +163,11 @@ def header(out):
         a = int(170 * min(1, t / 0.35) * (1 - max(0, t - 0.55) / 0.45))
         fd.line((0, y, w, y), fill=(36, 27, 19, a))
     c.alpha_composite(floor.filter(ImageFilter.GaussianBlur(12)))
-    # A pool of light on the boards where he stands (no beam from above: owner).
+    # A pool of light on the boards where he stands (no beam from above).
     pool = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     ImageDraw.Draw(pool).ellipse((w * 0.31, floor_y - h * 0.07, w * 0.69, floor_y + h * 0.08), fill=(255, 226, 180, 120))
     c.alpha_composite(pool.filter(ImageFilter.GaussianBlur(70)))
-    # The detective, centre stage: the owner's dark artwork (store/creative/mascot-night-red.jpg), its
+    # The detective, centre stage: the dark artwork (store/creative/mascot-night-red.jpg), its
     # near-black ground feathered into the stage so only he and his glowing footprint show.
     art = Image.open(ROOT / "store/creative/mascot-night-red.jpg").convert("RGB")
     size = int(h * 0.86)
@@ -189,7 +189,7 @@ def header(out):
     c = Image.composite(c, black, vig)
     # Six things an app can learn, on a detective's aged sticky notes either side of him.
     spots = [(0.27, 0.40, -4), (0.225, 0.575, 3), (0.28, 0.745, -2), (0.73, 0.40, 3), (0.775, 0.575, -3), (0.72, 0.745, 2)]
-    # Each note its own colour, wear and fixing (owner, 2026-11-05): no two alike.
+    # Each note its own colour, wear and fixing: no two alike.
     notes = [((240, 214, 110), "curl", (178, 34, 34)),     # yellow, rolled corner, red pin
              ((236, 170, 170), "cut", (40, 90, 170)),      # pink, snipped corner, blue pin
              ((170, 214, 170), "coffee", (40, 130, 70)),   # mint, coffee ring, green pin

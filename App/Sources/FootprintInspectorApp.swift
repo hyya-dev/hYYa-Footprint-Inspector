@@ -66,7 +66,7 @@ struct FootprintInspectorApp: App {
 
 /// Where the person was, kept so coming back lands on the same page. The fix keys name unfixed
 /// findings, so Clear history removes all of it. Only a short trip away counts as coming back
-/// (owner, 2026-11-04): after a hard close the app opens on Score. iOS gives no signal for a
+///: after a hard close the app opens on Score. iOS gives no signal for a
 /// hard close, so the place is kept for ten minutes after the app left the screen, and never
 /// across a new build.
 enum SavedPlace {
@@ -107,7 +107,7 @@ struct RootView: View {
     /// With `-autoScan` and no start tab, runs open on Footprint, where the scan shows.
     @State private var tab: AppTab = LaunchOptions.value(after: "-startTab").flatMap(AppTab.init(launchName:)) ?? (LaunchOptions.autoScan ? .footprint : .home)
     /// The page, saved on this device: iOS often quits a background app while the
-    /// person changes a setting, and coming back must land on the same page (owner, 2026-10-28).
+    /// person changes a setting, and coming back must land on the same page.
     @AppStorage("nav.tab") private var savedTab = ""
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
@@ -173,7 +173,7 @@ struct RootView: View {
         .task { if LaunchOptions.has("-sampleData") { check.recordSensitive(found: 0) } }
         .task { if LaunchOptions.has("-openSettings") { openSettings() } }
         #else
-        // Our own navbar (owner, 2026-10-29: build 21's six-button bar, Settings included): it
+        // Our own navbar (build 21's six-button bar, Settings included): it
         // follows the Duo's own placement and sits along the bottom or left edge elsewhere.
         NavBarRoot(tab: Binding(get: { tab }, set: { go($0) })) { page($0) }
         .environment(\.goToTab, go)

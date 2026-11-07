@@ -74,6 +74,6 @@ open class ScoreWidget : AppWidgetProvider() {
 
 /**
  * The same widget offered at medium size in the widget picker (4 x 2), as iOS lists small and medium
- * separately; Android otherwise shows only the default size there (owner, 2026-11-06).
+ * separately; Android otherwise shows only the default size there.
  */
 class ScoreWidgetMedium : ScoreWidget()

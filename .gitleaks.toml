@@ -1,0 +1,8 @@
+# gitleaks configuration. App/Resources/AppNames.json is a map of App Store bundle IDs to app names
+# from Apple's public charts; some app names look like generic API keys to the scanner.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Public app-name lookup data"
+paths = ['''App/Resources/AppNames\.json''']

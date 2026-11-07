@@ -30,7 +30,7 @@ struct IdentitySource: SignalSource {
                 "Every company gets its own. Gmail, Google Maps and YouTube, for example, all share Google's code, and see only that one.",
                 "This app can't read any other company's code, and they can't read this one.",
             // Not in the score: nothing the person does changes what this app can see here, and the
-            // score only counts what a scan can see change (owner, 2026-10-28).
+            // score only counts what a scan can see change.
             ], severityOverride: .low,
                note: "Shown here is hYYa's own code, which hYYa never collects. The risk is other companies: each reads its own code to link what you do across all its apps."))
         }

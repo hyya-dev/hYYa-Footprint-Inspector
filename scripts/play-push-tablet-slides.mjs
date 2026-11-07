@@ -6,7 +6,7 @@
 // every Play language: no bundle, no track, no listing text. Slides stay English.
 //
 // The default run rehearses the whole edit and does NOT commit. 🚨 --apply SENDS THE CHANGES FOR
-// GOOGLE'S REVIEW, so it needs the owner's explicit consent.
+// GOOGLE'S REVIEW, so it needs explicit human approval.
 //
 //   PLAY_SERVICE_ACCOUNT_JSON=… node scripts/play-push-tablet-slides.mjs [--apply]
 import { readdirSync } from "node:fs";

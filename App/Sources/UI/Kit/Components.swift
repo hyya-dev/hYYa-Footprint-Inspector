@@ -125,7 +125,7 @@ extension HeroCard where Trailing == EmptyView {
 
 // MARK: - Panels and rows
 
-/// A group of rows written on one sticky note (owner, 2026-11-05).
+/// A group of rows written on one sticky note.
 struct Panel<Content: View>: View {
     var paper: Paper = .gray
     var seed: String

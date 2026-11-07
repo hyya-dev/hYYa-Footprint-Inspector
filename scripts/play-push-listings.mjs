@@ -10,7 +10,7 @@
 //
 // The default run rehearses the whole edit and does NOT commit. 🚨 --apply SENDS THE CHANGES FOR
 // GOOGLE'S REVIEW: once the app has a live release, Play refuses changesNotSentForReview ("Changes
-// are sent for review automatically", 2026-10-21). So --apply needs the owner's explicit consent.
+// are sent for review automatically", 2026-10-21). So --apply needs explicit human approval.
 //
 //   PLAY_SERVICE_ACCOUNT_JSON=… node scripts/play-push-listings.mjs [--apply]
 
@@ -42,7 +42,7 @@ const gallery = {
   icon: [`${ROOT}store/slides/play-icon-512.png`],
   featureGraphic: [`${ROOT}store/slides/play-feature-1024x500.png`],
   phoneScreenshots: slides,
-  // Tablets (owner, 2026-11-05): one portrait set serves both 7-inch and 10-inch screens.
+  // Tablets: one portrait set serves both 7-inch and 10-inch screens.
   sevenInchScreenshots: tablets,
   tenInchScreenshots: tablets,
 };

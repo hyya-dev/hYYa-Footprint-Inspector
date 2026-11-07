@@ -91,7 +91,7 @@ class Nav {
         /**
          * The open screens, kept by Android with the activity: it often stops the app in the
          * background while the person changes a setting, and coming back must land on the same
-         * screen (owner, 2026-10-28).
+         * screen.
          */
         val Saver: androidx.compose.runtime.saveable.Saver<Nav, ArrayList<String>> = androidx.compose.runtime.saveable.Saver(
             save = { nav -> ArrayList(nav.stack.map { encode(it) }) },
@@ -144,7 +144,7 @@ fun App(startTab: Tab = Tab.HOME, autoScan: Boolean = false, openFinding: String
     val goTo: (Tab) -> Unit = { t -> tab = t; nav.stack.clear() }
 
     // The navbar: Google's standard bar along the bottom upright and rail down the left edge
-    // sideways, all six pages with one-word names, Settings included (owner, 2026-10-29).
+    // sideways, all six pages with one-word names, Settings included.
     val config = androidx.compose.ui.platform.LocalConfiguration.current
     val rail = config.screenWidthDp > config.screenHeightDp
     val shortRail = config.screenHeightDp < 480
@@ -153,8 +153,8 @@ fun App(startTab: Tab = Tab.HOME, autoScan: Boolean = false, openFinding: String
     Scaffold(
         containerColor = Color.Black,
         bottomBar = {
-            // Google's standard navigation bar: Score, the four checks and Settings (owner,
-            // 2026-10-29: Settings stays in the bar).
+            // Google's standard navigation bar: Score, the four checks and Settings
+            // (Settings stays in the bar).
             if (!rail) NavigationBar(containerColor = Brand.surface) {
                 Tab.bar.forEach { t ->
                     NavigationBarItem(

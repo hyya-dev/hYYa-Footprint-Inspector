@@ -5,7 +5,7 @@
 //
 // Pushes the en-US Play listing, graphics and the release bundle to the CLOSED TESTING track
 // ("alpha") as a DRAFT release, in one edit. 🚨 A draft is not sent for review: sending a release
-// for Google's review needs the owner's explicit consent and is done in Play Console.
+// for Google's review needs explicit human approval and is done in Play Console.
 //
 //   PLAY_SERVICE_ACCOUNT_JSON=… node scripts/play-publish.mjs [--no-bundle] [--dry-run]
 

@@ -32,13 +32,13 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 
-/** The Mac Stickies colours (owner, 2026-11-05); every ink on them is measured to WCAG 2.2 AA. */
+/** The Mac Stickies colours; every ink on them is measured to WCAG 2.2 AA. */
 enum class Paper(val colour: Color) {
     YELLOW(Color(0xFFFBEB61)), PINK(Color(0xFFF3B6B3)), GREEN(Color(0xFFA2FC90)),
     BLUE(Color(0xFFA1EEFD)), PURPLE(Color(0xFFA1B5F8)), GRAY(Color(0xFFDADADB));
 
     companion object {
-        /** Green when well protected, blue in the middle, purple when heavy; gray before any check (owner, 2026-11-06: no pink, little yellow). */
+        /** Green when well protected, blue in the middle, purple when heavy; gray before any check (no pink, little yellow). */
         fun forScore(score: Int?) = when {
             score == null -> GRAY
             score >= 75 -> GREEN
@@ -56,7 +56,7 @@ enum class InkRole { TEXT, MUTED, SUBTLE, ACCENT, CONCERN, FIX, EDGE, AMBER, RUL
 val LocalPaper = androidx.compose.runtime.staticCompositionLocalOf<Paper?> { null }
 
 /**
- * The ink for each role on this paper (owner, 2026-11-06: "the best colour for clear reading"), the same
+ * The ink for each role on this paper ("the best colour for clear reading"), the same
  * table as iOS Ink.swift: body text in the paper's own hue, almost black (9 to 13:1); secondary 7:1 (AAA);
  * hints, headings and meaning colours 6:1; "worth knowing" marks 3.3:1, lighter so ring segments differ
  * in lightness as well as hue. Gray paper takes a warm charcoal.
@@ -73,10 +73,10 @@ fun Paper.ink(role: InkRole): Color = Color(when (role) {
         InkRole.RULE -> when (this) { Paper.YELLOW -> 0xFFA19F82; Paper.PINK -> 0xFF9B7B79; Paper.GREEN -> 0xFF8EA28A; Paper.BLUE -> 0xFF7C9FA6; Paper.PURPLE -> 0xFF707891; Paper.GRAY -> 0xFF99928C }
 })
 
-/** How a note is held on the page: a note that holds a list of rows is taped across the top, a single note is pinned (owner, 2026-11-06). */
+/** How a note is held on the page: a note that holds a list of rows is taped across the top, a single note is pinned. */
 enum class Fixing { PIN, TAPE }
 
-/** How a note has aged. No coffee ring (owner, 2026-11-06: it read as dirt). */
+/** How a note has aged. No coffee ring (it read as dirt). */
 private enum class Wear { TORN, CUT_CORNER, CURL, DOG_EAR, AGED }
 
 /**

@@ -12,7 +12,7 @@ struct HyyaSuggestion: Sendable {
     let url: URL
 }
 
-/// Which hYYa app goes with which finding. **Deliberately empty**: the owner decides each pairing
+/// Which hYYa app goes with which finding. **Deliberately empty**: each pairing is decided case by case
 /// case by case, when the time comes. Add an entry here and the suggestion appears on
 /// that finding's detail page, below the free fix. Bring back the Settings switch
 /// ("Suggest hYYa apps in fixes", key `settingKey`) with the first entry; it was removed while the

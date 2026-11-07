@@ -4,13 +4,13 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 // Prepares a whole Play update in ONE edit and leaves it unsent: the release bundle on the closed
-// production track (owner, 2026-11-06: every release goes to production; `--internal` sends it to
-// internal testing instead, for checking a build on the owner's S25 first), the listing text in every language (GooglePlayConsole/localized/), and the
+// production track (every release goes to production; `--internal` sends it to
+// internal testing instead, for checking a build on a real device first), the listing text in every language (GooglePlayConsole/localized/), and the
 // slides in every language. Prints the edit id.
 //
 // 🚨 Once the app has a live release, committing an edit sends it for Google's review. So this
-// script never commits on its own: `--send <edit id>` commits a prepared edit, and only on the
-// owner's explicit consent. An unsent edit is simply discarded by Play after a while.
+// script never commits on its own: `--send <edit id>` commits a prepared edit, and only with
+// explicit human approval. An unsent edit is simply discarded by Play after a while.
 //
 //   PLAY_SERVICE_ACCOUNT_JSON=… node scripts/play-prepare-update.mjs
 //   PLAY_SERVICE_ACCOUNT_JSON=… node scripts/play-prepare-update.mjs --send <edit id>
@@ -64,7 +64,7 @@ const gallery = {
   icon: [`${ROOT}store/slides/play-icon-512.png`],
   featureGraphic: [`${ROOT}store/slides/play-feature-1024x500.png`],
   phoneScreenshots: slides,
-  // Tablets (owner, 2026-11-05): one portrait set serves both 7-inch and 10-inch screens.
+  // Tablets: one portrait set serves both 7-inch and 10-inch screens.
   sevenInchScreenshots: tablets,
   tenInchScreenshots: tablets,
 };
@@ -87,7 +87,7 @@ if (held) console.log(`• reusing uploaded versionCode ${versionCode} (same bun
 const TRACK = process.argv.includes("--internal") ? "internal" : "production";
 await call(token, `${E}/tracks/${TRACK}`, { method: "PUT", body: { track: TRACK, releases: [{
   name: `${versionName} (${b.versionCode})`, versionCodes: [String(b.versionCode)], status: "completed",
-  // Each language's own note: the feature line above the fixed sentence (owner's rule).
+  // Each language's own note: the feature line above the fixed sentence.
   releaseNotes: listings.filter((l) => l.releaseNotes).map((l) => ({ language: l.language, text: l.releaseNotes })),
 }] } });
 console.log(`• ${TRACK}: versionCode ${b.versionCode}`);
@@ -104,4 +104,4 @@ console.log(`• slides (${slides.length}) in every language, read back in order
 
 await api(token, `${E}:validate`, { method: "POST" });
 console.log(`\nPrepared and validated, NOT sent. Edit id: ${edit.id}`);
-console.log(`To send for review (owner's consent only): node scripts/play-prepare-update.mjs --send ${edit.id}`);
+console.log(`To send for review (explicit approval only): node scripts/play-prepare-update.mjs --send ${edit.id}`);

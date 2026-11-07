@@ -101,7 +101,7 @@ private struct ScoreBands: View {
 struct FixWizard: View {
     /// The fixes when the walk-through opened. They're kept by id, with the step reached, so the
     /// walk-through carries on where it was after the person changes a setting, even if iOS quit
-    /// the app meanwhile, and a fix that took effect doesn't shift the steps (owner, 2026-10-28).
+    /// the app meanwhile, and a fix that took effect doesn't shift the steps.
     let opening: [Finding]
     @AppStorage("fix.ids") private var savedIDs = ""
     @AppStorage("fix.index") private var index = 0

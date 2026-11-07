@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
-// Read-only check of the editable App Store version before the owner submits it: the build, the
+// Read-only check of the editable App Store version before it is submitted: the build, the
 // release setting, every language's text against the repo, What's New, screenshots, reviewer
 // notes and links. GETs only; it changes and submits nothing.
 //

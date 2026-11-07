@@ -9,7 +9,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Owner's test, 2026-10-28: a restart within the last week counts as done. */
+/** Regression test: a restart within the last week counts as done. */
 class RecentRestartTest {
     @Test fun aRestartWithinAWeekCounts() {
         val day = 24L * 3600 * 1000

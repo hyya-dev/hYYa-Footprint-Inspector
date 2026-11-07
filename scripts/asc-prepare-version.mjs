@@ -4,8 +4,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 // Creates the next App Store version (or reuses the editable one), sets it to release
-// automatically after approval (owner's standing choice), and attaches a processed build.
-// 🚨 It never submits anything for review: that needs the owner's explicit consent.
+// automatically after approval, and attaches a processed build.
+// 🚨 It never submits anything for review: that needs explicit human approval.
 //
 //   ASC_ISSUER_ID=… ASC_KEY_ID=… ASC_PRIVATE_KEY_PATH=… PLATFORM=IOS \
 //     node scripts/asc-prepare-version.mjs <version> <build number>

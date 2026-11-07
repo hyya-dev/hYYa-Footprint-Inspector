@@ -1,6 +1,9 @@
 #!/bin/zsh
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 # Archives a Release build and uploads it to App Store Connect (TestFlight).
-# 🚨 Uploading is NOT a review submission. Submitting needs the owner's explicit consent.
+# 🚨 Uploading is NOT a review submission. Submitting needs explicit human approval.
 # Usage: ASC_KEY_ID=… ASC_ISSUER_ID=… ASC_PRIVATE_KEY_PATH=… scripts/testflight-upload.sh
 set -euo pipefail
 cd "${0:A:h}/.."

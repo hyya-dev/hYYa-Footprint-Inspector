@@ -6,7 +6,7 @@
 import SwiftUI
 
 /// The app's own navbar: all six pages, Settings included, each with an icon and a one-word name
-/// (owner, 2026-10-28). It goes where the iPhone Duo puts its own:
+///. It goes where the iPhone Duo puts its own:
 /// - beside the system's status strip, when the system keeps a strip down the right edge only
 ///   (a Duo folded upright, or open sideways), in the strip's column below the clock;
 /// - in that right strip, gathered at the bottom but lifted just clear of the camera, when the screen
@@ -26,7 +26,7 @@ struct NavBarRoot<PageContent: View>: View {
 
     static func place(size: CGSize, insets: EdgeInsets) -> Place {
         // Folded sideways the camera sits at one end of the strip: top left one way round,
-        // bottom right the other (owner's Duo, 2026-10-29: Settings went under it).
+        // bottom right the other (on a real Duo: Settings went under it).
         if insets.trailing > 0 && insets.leading == 0 { return size.width > size.height ? .rightAboveCamera : .right }
         if size.width > size.height { return insets.leading > 0 && insets.trailing == 0 ? .leftBelowCamera : .left }
         return .bottom
@@ -71,7 +71,7 @@ struct NavBarRoot<PageContent: View>: View {
                 }
             case .rightAboveCamera:
                 // In the status strip's column, the buttons gathered at the bottom and lifted just
-                // above the camera, the same small gap as below it on the other side (owner, 2026-10-29).
+                // above the camera, the same small gap as below it on the other side.
                 HStack(spacing: 0) {
                     current
                     divider

@@ -9,7 +9,7 @@
 Layout (Quiet Noir): black ground with a soft sand glow; the mascot and the full name
 "hYYa Digital Footprint Check" at the top; a benefit headline with one sand phrase; three highlight
 chips; and the real app screen in a device frame that runs off the bottom edge. The mascot
-appears once, in the header lockup (owner: repeating it is overkill). Copy comes from
+appears once, in the header lockup (repeating it is overkill). Copy comes from
 store/slides.json.
 """
 import json, re, sys
@@ -22,10 +22,20 @@ SAND = (210, 174, 136)
 SAND_DEEP = (143, 117, 96)
 INK = (245, 245, 247)
 MUTED = (161, 161, 168)
-MASCOT = ROOT / "store/creative/mascot-night.png"  # the night render, faded into the dark slide (owner, 2026-11-06)
+MASCOT = ROOT / "store/creative/mascot-night.png"  # the night render, faded into the dark slide
+
+
+# Apple's SF Pro is licensed only for mock-ups of software for Apple platforms, so the Google Play
+# sets use Inter (SIL Open Font Licence 1.1), the copy bundled with Android Studio's runtime. Inter
+# there has no Bold, so SemiBold stands in for it.
+INTER_DIR = Path("/Applications/Android Studio.app/Contents/jbr/Contents/Home/lib/fonts")
+INTER = {"Bold": "Inter-SemiBold.otf", "Semibold": "Inter-SemiBold.otf", "Regular": "Inter-Regular.otf"}
+OPEN_FONT = False   # set by main() for the Google Play sets
 
 
 def font(size, weight="Bold"):
+    if OPEN_FONT:
+        return ImageFont.truetype(str(INTER_DIR / INTER.get(weight, "Inter-Regular.otf")), size)
     f = ImageFont.truetype(FONT, size)
     f.set_variation_by_name(weight)
     return f
@@ -149,7 +159,10 @@ def main():
     raw_dir, out_dir = Path(sys.argv[1]), Path(sys.argv[2])
     w, h = int(sys.argv[3]), int(sys.argv[4])
     out_dir.mkdir(parents=True, exist_ok=True)
-    spec = json.loads(Path(sys.argv[5]).read_text() if len(sys.argv) > 5 else (ROOT / "store/slides.json").read_text())
+    spec_path = Path(sys.argv[5]) if len(sys.argv) > 5 else ROOT / "store/slides.json"
+    spec = json.loads(spec_path.read_text())
+    global OPEN_FONT
+    OPEN_FONT = "android" in spec_path.name   # Google Play sets: an open font, never SF Pro
     mascot = Image.open(MASCOT).convert("RGBA")
     for i, s in enumerate(spec["slides"], 1):
         img = make_slide(s, raw_dir, w, h, mascot)

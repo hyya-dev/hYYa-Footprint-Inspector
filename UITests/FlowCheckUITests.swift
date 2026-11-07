@@ -71,7 +71,7 @@ final class FlowCheckUITests: XCTestCase {
     }
 
     /// Upright the navbar runs along the bottom with all six pages fully on screen, and the
-    /// Score page has no Settings button at its top (owner, 2026-10-28).
+    /// Score page has no Settings button at its top.
     func testNavbarUpright() {
         app.launch()
         let bar = app.otherElements["navbar"].firstMatch
@@ -159,8 +159,8 @@ final class FlowCheckUITests: XCTestCase {
         XCUIDevice.shared.orientation = .landscapeLeft
         XCTAssertTrue(app.buttons["Scan again"].waitForExistence(timeout: 25), "scan didn't finish")
         shot("sideways-footprint")
-        // Sideways the navbar runs down one edge, all six pages on screen: the left (owner,
-        // 2026-10-28), or the Duo's status strip, which can be on the right.
+        // Sideways the navbar runs down one edge, all six pages on screen: the left,
+        // or the Duo's status strip, which can be on the right.
         let rail = app.otherElements["navbar"].firstMatch
         let width = app.windows.firstMatch.frame.width
         XCTAssertTrue(rail.waitForExistence(timeout: 5) && (rail.frame.maxX < width / 2 || rail.frame.minX > width / 2), "navbar isn't on an edge sideways")

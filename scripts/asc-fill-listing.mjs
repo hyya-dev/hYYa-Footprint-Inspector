@@ -4,8 +4,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 // Pushes store/listing-en-US.json and store/review-notes.txt to App Store Connect for the
-// editable iOS version. 🚨 It never submits anything for review: submitting needs the owner's
-// explicit consent.
+// editable iOS version. 🚨 It never submits anything for review: submitting needs explicit human
+// approval.
 //
 //   ASC_ISSUER_ID=… ASC_KEY_ID=… ASC_PRIVATE_KEY_PATH=… node scripts/asc-fill-listing.mjs [--dry-run]
 //
